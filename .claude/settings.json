@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(git init *)",
-      "Bash(git branch *)"
+      "Bash(git branch *)",
+      "Bash(python -c \"import docx; print\\('OK'\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c ' *)"
     ]
   }
 }
