@@ -1,47 +1,48 @@
 {
-    "permissions": {
-        "allow": [
-            "Bash(cmake *)",
-            "Bash(cmake --build *)",
-            "Bash(cmake --install *)",
-            "Bash(cmake --preset *)",
-            "Bash(cmake * 2>&1 *)",
-            "Bash(cmake * | *)",
-            "Bash(ctest *)",
-            "Bash(ctest * 2>&1 *)",
-            "Bash(ctest * | *)",
-            "Bash(git *)",
-            "Bash(grep *)",
-            "Bash(find *)",
-            "Bash(python *)",
-            "Bash(pip install *)",
-            "Bash(ls *)",
-            "Read(*)",
-            "Write(vault/**)",
-            "Edit(vault/**)"
-        ]
-    },
-    "env": {
-        "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "11500"
-    },
-    "autoCompact": true,
-    "readOnlyCommands": [
-        "ls",
-        "cat",
-        "head",
-        "tail",
-        "grep",
-        "find",
-        "echo"
-    ],
-    "context": {
-        "exclude": [
-            "build/",
-            "build-vscode/",
-            "out/",
-            ".vs/",
-            "vault/GDM/.obsidian/",
-            "example_files/"
-        ]
-    }
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "11500"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(cmake *)",
+      "Bash(cmake --build *)",
+      "Bash(cmake --install *)",
+      "Bash(cmake --preset *)",
+      "Bash(cmake * 2>&1 *)",
+      "Bash(cmake * | *)",
+      "Bash(ctest *)",
+      "Bash(ctest * 2>&1 *)",
+      "Bash(ctest * | *)",
+      "Bash(git *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(ls *)",
+      "Read(*)",
+      "Write(vault/**)",
+      "Edit(vault/**)",
+      "PowerShell(Get-ChildItem *)"
+    ]
+  },
+  "autoCompact": true,
+  "readOnlyCommands": [
+    "ls",
+    "cat",
+    "head",
+    "tail",
+    "grep",
+    "find",
+    "echo"
+  ],
+  "context": {
+    "exclude": [
+      "build/",
+      "build-vscode/",
+      "out/",
+      ".vs/",
+      "vault/GDM/.obsidian/",
+      "example_files/"
+    ]
+  }
 }
