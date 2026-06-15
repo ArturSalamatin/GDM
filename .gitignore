@@ -3,6 +3,8 @@ legacy/
 report/
 legacy
 report
+example_files
+
 
 # Archives
 *.zip
@@ -62,3 +64,7 @@ dist/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Include vault/ with all contents (override global patterns)
+!vault/
+!vault/**
