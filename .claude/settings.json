@@ -22,7 +22,8 @@
       "Read(*)",
       "Write(vault/**)",
       "Edit(vault/**)",
-      "PowerShell(Get-ChildItem *)"
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-ChildItem -Recurse -File \"d:\\\\Lessons\\\\Grants\\\\2027\\\\GDM\\\\legacy\\\\_saved_from_PCNAC_old\" | Select-Object @{N='Path';E={$_.FullName.Substring\\(\"d:\\\\Lessons\\\\Grants\\\\2027\\\\GDM\\\\legacy\\\\_saved_from_PCNAC_old\\\\\".Length\\)}} | Format-Table -AutoSize)"
     ]
   },
   "autoCompact": true,
