@@ -1,0 +1,64 @@
+# Project-specific exclusions
+legacy/
+report/
+legacy
+report
+
+# Archives
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+
+# MS Office
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+
+# PDF / articles
+*.pdf
+
+# Build artifacts
+build/
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.lib
+*.pdb
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+*.whl
+
+# IDE / editor
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
