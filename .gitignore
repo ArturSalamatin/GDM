@@ -5,6 +5,9 @@ legacy
 report
 NewProject
 example_files
+AMGSolver
+x64
+MatLab
 
 
 # Archives
@@ -25,6 +28,7 @@ example_files
 
 # PDF / articles
 *.pdf
+*.mp4
 
 # Build artifacts
 build/
