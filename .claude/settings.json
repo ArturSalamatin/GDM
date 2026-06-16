@@ -23,6 +23,7 @@
       "Write(vault/**)",
       "Edit(vault/**)",
       "PowerShell(Get-ChildItem *)",
+      "PowerShell(*)",
       "PowerShell(Get-ChildItem -Recurse *)",
       "PowerShell(Get-ChildItem -Recurse -File *)"
     ]
