@@ -1,0 +1,1860 @@
+#include "BinaryFileHandler.h"
+
+
+//#define SHOWVOLUME
+
+BinaryFileRead::MERResult BinaryFileRead::GetMERData(const char* MER) {
+	auto file = Read(MER);
+
+	double out_oil = 0;
+	double out_water = 0;
+	double out_upl_water = 0;
+
+	int out_time = 0;
+	int collection_time = 0;
+	int last_upload_time = 0;
+	int out_last_worked_time = 0;
+	int out_last_collect_time = 0;
+
+
+	double out_last_debit = 0;
+	double out_last_watercut = 0;
+	double out_last_upld_water = 0;
+	double out_last_water = 0;
+	double out_last_oil = 0;
+#ifdef WRITE_WATERCUT_AT_TIME
+	std::vector<std::tuple<int, double, double, double, int>> date_oil_watercut;
+#endif
+	int time = 0;
+
+	if (file.size() > 0)
+	{
+		std::string sign(&file[0], 16);
+		if (sign == "KPFUBOIL    HOLE") //У НЕФТИ 9 ИНДЕКС, ВОДЫ 10, У ВРЕМЕНИ 6, У ВРЕМЕНИ СБОРА 7, 20 - У ЗАКАЧИВАЕМОЙ ВОДЫ
+		{
+			//получаем колво элементов
+			int header_Lenght = 0;
+			memcpy_s(&header_Lenght, 4, &file[16], 4);
+			int line_size = header_Lenght / 5;
+			std::string types(&file[20], line_size);
+			//получаем размеры
+			std::vector<int> sizes;
+
+			int line_bytes_size = 0;
+			int size_up_to_9 = 0;
+			int size_up_to_6 = 0;
+
+			for (int i = 0; i < line_size; i++)
+			{
+				int size = 0;
+				memcpy_s(&size, 4, &file[20l + line_size + i * 4], 4); //+line_size т.к. мы считали только тексовый зщаголовок
+				sizes.push_back(size); //сохраняем размеры
+				line_bytes_size += size;
+				if (i < 9)
+					size_up_to_9 += size;
+				if (i < 6)
+					size_up_to_6 += size;
+			}
+			//парсим строки
+
+			for (long i = 20 + header_Lenght; i < file.size(); i += line_bytes_size)
+			{
+				double last_oil = 0;
+				double last_water = 0;
+				double last_worked_time = 0;
+				double last_upldwater = 0;
+				double last_colltime = 0;
+
+				uint8_t* o_buffer = new uint8_t[sizes[9]];
+				uint8_t* w_buffer = new uint8_t[sizes[10]];
+				uint8_t* upd_buffer = new uint8_t[sizes[20]];
+
+				uint8_t* t_buffer = new uint8_t[sizes[6]];
+				uint8_t* t_collect_buffer = new uint8_t[sizes[7]];
+
+				uint8_t* tm_buffer = new uint8_t[sizes[0]];
+
+
+
+				memcpy_s(t_buffer, sizes[6], &file[i + size_up_to_6], sizes[6]); //время работы
+				memcpy_s(t_collect_buffer, sizes[7], &file[i + size_up_to_6 + sizes[6]], sizes[7]); //время сбора
+
+				memcpy_s(o_buffer, sizes[9], &file[i + size_up_to_9], sizes[9]); //нефть
+				memcpy_s(w_buffer, sizes[10], &file[i + size_up_to_9 + sizes[9]], sizes[10]); //вода
+				memcpy_s(upd_buffer, sizes[20], &file[i + line_bytes_size - sizes[20]], sizes[20]); //вода
+
+				memcpy_s(tm_buffer, sizes[0], &file[i], sizes[0]); //дата
+				//нефть
+				if (types[9] == 'F')
+				{
+					float foil = 0;
+					memcpy_s(&foil, sizes[9], o_buffer, sizes[9]);
+					out_oil += foil; //суммируем добычу
+					last_oil = foil;
+				}
+				if (types[9] == 'D')
+				{
+					double foil = 0;
+					memcpy_s(&foil, sizes[9], o_buffer, sizes[9]);
+					out_oil += foil; //суммируем добычу
+					last_oil = foil;
+				}
+				//вода
+				if (types[10] == 'F')
+				{
+					float fwtr = 0;
+					memcpy_s(&fwtr, sizes[10], w_buffer, sizes[10]);
+					out_water += fwtr; //суммируем добычу воды
+					last_water = fwtr;
+
+
+				}
+				if (types[10] == 'D')
+				{
+					double fwtr = 0;
+					memcpy_s(&fwtr, sizes[10], w_buffer, sizes[10]);
+					out_water += fwtr; //суммируем добычу воды
+					last_water = fwtr;
+				}
+				//закаченная вода
+				if (types[20] == 'F')
+				{
+					float foil = 0;
+					memcpy_s(&foil, sizes[20], upd_buffer, sizes[20]);
+					out_upl_water += foil; //суммируем добычу
+					last_upldwater = foil;
+				}
+				if (types[20] == 'D')
+				{
+					double foil = 0;
+					memcpy_s(&foil, sizes[20], upd_buffer, sizes[20]);
+					out_upl_water += foil; //суммируем добычу
+					last_upldwater = foil;
+				}
+				//время работы
+				if (types[6] == 'I') //время работы
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[6], t_buffer, sizes[6]);
+					out_time += ftm;
+					last_worked_time = ftm;
+				}
+				//время сбора
+				if (types[7] == 'I') //время сбора
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[7], t_collect_buffer, sizes[7]);
+					collection_time += ftm;
+					last_colltime = ftm;
+				}
+				//дата
+				if (types[0] == 'A')
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[0], tm_buffer, sizes[0]);
+#ifdef WRITE_WATERCUT_AT_TIME
+					int wwat_time = ftm;
+					double wwat_oil_at_time = last_oil;
+					double wwat_watercut = 0;
+					if (last_oil != 0 && last_water != 0)
+						wwat_watercut = last_water / (double)(last_water + last_oil) * 100;
+					else {
+						if (last_water == 0 && last_oil != 0)
+							wwat_watercut = 0;
+						if(last_water != 0 && last_oil == 0)
+							wwat_watercut = 100;
+						if (last_water == 0 && last_oil == 0)
+							wwat_watercut = 0;
+					}
+					date_oil_watercut.push_back(std::make_tuple( wwat_time , wwat_oil_at_time, wwat_watercut, last_water, last_worked_time));
+#endif
+					if (ftm > time) //эксель хранит кол-во дней прошедших с 1900 года. Большое число репрезентует самую последнюю дату
+					{
+						time = ftm;
+						if (last_worked_time != 0)
+							out_last_debit = last_oil / last_worked_time; //запоминаем текущий дебет
+						else
+							out_last_debit = 0;
+						if (last_water + last_oil != 0) //запоминаем текущую обводненность
+							out_last_watercut = last_water / (last_water + last_oil);
+						else
+							out_last_watercut = 0;
+						//запоминаем последную закаченную воду
+						out_last_upld_water = last_upldwater;
+						out_last_worked_time = last_worked_time;
+						out_last_collect_time = last_colltime;
+						out_last_water = last_water;
+						out_last_oil = last_oil;
+					}
+				}
+
+
+
+				delete[]o_buffer;
+				delete[]w_buffer;
+				delete[]t_buffer;
+				delete[]tm_buffer;
+				delete[]t_collect_buffer;
+			}
+
+		}
+		MERResult out;
+
+		out.Oil = out_oil;
+		out.Water = out_water;
+		out.WaterUpload = out_upl_water;
+		out.CurrentOil = out_last_oil;
+		out.CurrentWater = out_last_water;
+		out.CurrentWaterUpload = out_last_upld_water;
+
+		out.WorkedTime = out_time;
+		out.CollectTime = collection_time;
+		out.CurrentWorkedTime = out_last_worked_time;
+		out.CurrentCollectTime = out_last_collect_time;
+
+		out.CurrentDebit = out_last_debit;
+		out.CurrentWaterCut = out_last_watercut;
+		//сохраняем обводненности и времена для них	
+#ifdef WRITE_WATERCUT_AT_TIME
+		out.TimeOilWaterCut = date_oil_watercut;
+#endif
+		return out;
+	}
+	return MERResult();
+}
+#ifdef ONLY_UP_TO_2000
+BinaryFileRead::MERResult BinaryFileRead::GetMERData(const char* MER, int lasttime) {
+	auto file = Read(MER);
+
+	double out_oil = 0;
+	double out_water = 0;
+	double out_upl_water = 0;
+
+	int out_time = 0;
+	int collection_time = 0;
+	int last_upload_time = 0;
+	int out_last_worked_time = 0;
+	int out_last_collect_time = 0;
+
+
+	double out_last_debit = 0;
+	double out_last_watercut = 0;
+	double out_last_upld_water = 0;
+	double out_last_water = 0;
+	double out_last_oil = 0;
+
+	double deb_2_goda = 0;
+	double obv_2_goda = 0;
+	int deb_2_count = 0;
+	int obv_2_count = 0;
+
+
+	int time = 0;
+#ifdef WRITE_WATERCUT_AT_TIME
+	std::vector<int> watercut_time;
+	std::vector<double> watercut;
+#endif
+	if (file.size() > 0)
+	{
+		std::string sign(&file[0], 16);
+		MERResult out;
+		if (sign == "KPFUBOIL    HOLE") //У НЕФТИ 9 ИНДЕКС, ВОДЫ 10, У ВРЕМЕНИ 6, У ВРЕМЕНИ СБОРА 7, 20 - У ЗАКАЧИВАЕМОЙ ВОДЫ
+		{
+			//получаем колво элементов
+			int header_Lenght = 0;
+			memcpy_s(&header_Lenght, 4, &file[16], 4);
+			int line_size = header_Lenght / 5;
+			std::string types(&file[20], line_size);
+			//получаем размеры
+			std::vector<int> sizes;
+
+			int line_bytes_size = 0;
+			int size_up_to_9 = 0;
+			int size_up_to_6 = 0;
+
+			for (int i = 0; i < line_size; i++)
+			{
+				int size = 0;
+				memcpy_s(&size, 4, &file[20l + line_size + i * 4], 4); //+line_size т.к. мы считали только тексовый зщаголовок
+				sizes.push_back(size); //сохраняем размеры
+				line_bytes_size += size;
+				if (i < 9)
+					size_up_to_9 += size;
+				if (i < 6)
+					size_up_to_6 += size;
+			}
+			//парсим строки
+
+			for (long i = 20 + header_Lenght; i < file.size(); i += line_bytes_size)
+			{
+				double last_oil = 0;
+				double last_water = 0;
+				double last_worked_time = 0;
+				double last_upldwater = 0;
+				double last_colltime = 0;
+
+				uint8_t* o_buffer = new uint8_t[sizes[9]];
+				uint8_t* w_buffer = new uint8_t[sizes[10]];
+				uint8_t* upd_buffer = new uint8_t[sizes[20]];
+
+				uint8_t* t_buffer = new uint8_t[sizes[6]];
+				uint8_t* t_collect_buffer = new uint8_t[sizes[7]];
+
+				uint8_t* tm_buffer = new uint8_t[sizes[0]];
+
+
+
+				memcpy_s(t_buffer, sizes[6], &file[i + size_up_to_6], sizes[6]); //время работы
+				memcpy_s(t_collect_buffer, sizes[7], &file[i + size_up_to_6 + sizes[6]], sizes[7]); //время сбора
+
+				memcpy_s(o_buffer, sizes[9], &file[i + size_up_to_9], sizes[9]); //нефть
+				memcpy_s(w_buffer, sizes[10], &file[i + size_up_to_9 + sizes[9]], sizes[10]); //вода
+				memcpy_s(upd_buffer, sizes[20], &file[i + line_bytes_size - sizes[20]], sizes[20]); //вода
+
+				memcpy_s(tm_buffer, sizes[0], &file[i], sizes[0]); //дата
+				//дата
+				int crrnt_time = 0;
+				if (types[0] == 'A')
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[0], tm_buffer, sizes[0]);
+					crrnt_time = ftm;
+				}
+
+				//нефть
+				if (types[9] == 'F')
+				{
+					float foil = 0;
+					memcpy_s(&foil, sizes[9], o_buffer, sizes[9]);
+					out_oil += foil; //суммируем добычу
+					last_oil = foil;
+				}
+				if (types[9] == 'D')
+				{
+					double foil = 0;
+					memcpy_s(&foil, sizes[9], o_buffer, sizes[9]);
+					out_oil += foil; //суммируем добычу
+					last_oil = foil;
+				}
+				//вода
+				if (types[10] == 'F')
+				{
+					float fwtr = 0;
+					memcpy_s(&fwtr, sizes[10], w_buffer, sizes[10]);
+					out_water += fwtr; //суммируем добычу воды
+					last_water = fwtr;
+				}
+				if (types[10] == 'D')
+				{
+					double fwtr = 0;
+					memcpy_s(&fwtr, sizes[10], w_buffer, sizes[10]);
+					out_water += fwtr; //суммируем добычу воды
+					last_water = fwtr;
+				}
+				//закаченная вода
+				if (types[20] == 'F')
+				{
+					float foil = 0;
+					memcpy_s(&foil, sizes[20], upd_buffer, sizes[20]);
+					out_upl_water += foil; //суммируем добычу
+					last_upldwater = foil;
+				}
+				if (types[20] == 'D')
+				{
+					double foil = 0;
+					memcpy_s(&foil, sizes[20], upd_buffer, sizes[20]);
+					out_upl_water += foil; //суммируем добычу
+					last_upldwater = foil;
+				}
+				//время работы
+				if (types[6] == 'I') //время работы
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[6], t_buffer, sizes[6]);
+					out_time += ftm;
+					last_worked_time = ftm;
+				}
+				//время сбора
+				if (types[7] == 'I') //время сбора
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[7], t_collect_buffer, sizes[7]);
+					collection_time += ftm;
+					last_colltime = ftm;
+				}
+				//дата
+				if (types[0] == 'A')
+				{
+					int ftm = 0;
+					memcpy_s(&ftm, sizes[0], tm_buffer, sizes[0]);
+#ifdef WRITE_WATERCUT_AT_TIME
+					watercut_time.push_back(ftm);
+					if (last_oil != 0 && last_water != 0)
+						watercut.push_back(last_water / (double)(last_water + last_oil) * 100);
+					else
+						watercut.push_back(0);
+#endif
+					if (ftm > time) //эксель хранит кол-во дней прошедших с 1900 года. Большое число репрезентует самую последнюю дату
+					{
+						time = ftm;
+						if (last_worked_time != 0)
+							out_last_debit = last_oil / last_worked_time; //запоминаем текущий дебет
+						else
+							out_last_debit = 0;
+						if (last_water + last_oil != 0) //запоминаем текущую обводненность
+							out_last_watercut = last_water / (last_water + last_oil);
+						else
+							out_last_watercut = 0;
+						//запоминаем последную закаченную воду
+						out_last_upld_water = last_upldwater;
+						out_last_worked_time = last_worked_time;
+						out_last_collect_time = last_colltime;
+						out_last_water = last_water;
+						out_last_oil = last_oil;
+					}
+				}
+
+				if (crrnt_time <= lasttime) //собираем данные только по скважинам для которых есть отчет раньше этой даты
+				{
+					out.cntr_after_set_date++;
+				}
+				else { //собираем дебет и обв за 2 года
+					if (crrnt_time >= lasttime && crrnt_time <= lasttime + 365 * 20) //+2 года от lastdate
+					{
+						if (last_worked_time != 0)
+						{
+							deb_2_goda += last_oil / (double)last_worked_time * 24;
+							deb_2_count++;
+						}
+						if (last_oil + last_water != 0)
+						{
+							obv_2_goda += last_water / (double)(last_oil + last_water);
+							obv_2_count++;
+						}
+					}
+				}
+
+				delete[]o_buffer;
+				delete[]w_buffer;
+				delete[]t_buffer;
+				delete[]tm_buffer;
+				delete[]t_collect_buffer;
+			}
+
+		}
+
+
+		out.Oil = out_oil;
+		out.Water = out_water;
+		out.WaterUpload = out_upl_water;
+		out.CurrentOil = out_last_oil;
+		out.CurrentWater = out_last_water;
+		out.CurrentWaterUpload = out_last_upld_water;
+
+		out.WorkedTime = out_time;
+		out.CollectTime = collection_time;
+		out.CurrentWorkedTime = out_last_worked_time;
+		out.CurrentCollectTime = out_last_collect_time;
+
+		out.CurrentDebit = out_last_debit;
+		out.CurrentWaterCut = out_last_watercut;
+		if (deb_2_count != 0)
+			out.debet_za_2_goda = deb_2_goda / (double)deb_2_count;
+		if (obv_2_count != 0)
+			out.obvodnennost_za_2_goda = obv_2_goda / (double)obv_2_count;
+
+#ifdef WRITE_WATERCUT_AT_TIME
+		//сохраняем обводненности и времена для них		
+		out.watercut_list = watercut;
+		out.watercut_time_list = watercut_time;
+#endif
+		return out;
+	}
+	return MERResult();
+}
+#endif
+std::vector < std::vector<float>>  BinaryFileRead::ReadStock(
+	const char* coord, //обязательный путь
+	const char* poro, //обязательный
+	const char* soil, //или soil или so
+	const char* actnum, //необязательно 
+	const char* so, //или soil или so
+	const char* vol, //обязательно
+	float* xstart,
+	float* ystart,
+	float* dx,
+	float* dy,
+	std::vector<std::vector<std::vector<float>>>* plrs,
+	std::vector<float>* b_sat,
+	float* average,
+	float* b_average,
+	float density,
+	float xshift,
+	float yshift)
+{
+	//auto file = Read(coord);
+	auto filesize = GetFileSize(std::string(coord));
+	if (filesize > 0)
+	{
+		BinaryFileRead filereader;
+		filereader.OpenFile(coord);
+		std::string sign(filereader.Read(0, 16), 16);
+		if (sign == "KPFUBOIL    GRID") //проверяем 
+		{
+			std::vector<std::vector<std::vector<float>>> pillars; //напрявляющие
+			//получаем размеры
+			int xc = 0;
+			int yc = 0;
+			int zc = 0;
+			memcpy_s(&xc, 4, filereader.Read(20, 4), 4);
+			memcpy_s(&yc, 4, filereader.Read(24, 4), 4);
+			memcpy_s(&zc, 4, filereader.Read(28, 4), 4);
+			for (int i = 32; i < filesize; i += 24)
+			{
+				float x = 0;
+				float y = 0;
+				float z = 0;
+
+				float x1 = 0;
+				float y1 = 0;
+				float z1 = 0;
+				//Первая напрявляющая меньшая
+				memcpy_s(&x, 4, filereader.Read(i, 4), 4);
+				memcpy_s(&y, 4, filereader.Read(i + 4, 4), 4);
+				memcpy_s(&z, 4, filereader.Read(i + 8, 4), 4);
+				//Сторая направлющая большая
+				memcpy_s(&x1, 4, filereader.Read(i + 12, 4), 4);
+				memcpy_s(&y1, 4, filereader.Read(i + 16, 4), 4);
+				memcpy_s(&z1, 4, filereader.Read(i + 20, 4), 4);
+				//Сохраняем направляющую
+				pillars.push_back(std::vector < std::vector<float>>
+				{
+					std::vector<float> {x + xshift, y + yshift, z},
+						std::vector<float> {x1 + xshift, y1 + yshift, z1} });
+
+			}
+
+			*xstart = pillars[0][0][0];
+			*ystart = pillars[0][0][1];
+			*dx = pillars[1][0][0] - pillars[0][0][0];
+			*dy = pillars[(int)xc + (int)1][0][1] - pillars[xc][0][1];
+			*plrs = pillars;
+
+			filereader.~BinaryFileRead();
+			//Читаем файлы
+			//auto pporo = Read(poro);//считываем пористость
+			//auto voll = Read(vol);//считываем обьем
+			//проверка необязательных полей
+			//std::vector<char> ssoil;
+			//std::vector<char> sso;
+			//std::vector<char> actnumm;
+			auto poro_size = GetFileSize(poro);
+			auto voll_size = GetFileSize(vol);
+			long long soil_size = 0;
+#ifdef USE_SO
+			long long sso_size = 0;
+#endif
+			long long actnum_size = 0;
+			if (*soil != '0x0') //проверка на терминальную строку
+				soil_size = GetFileSize(soil);//считываем нач насыщенность
+#ifdef USE_SO
+			if (*so != '0x0') //проверка на терминальную строку
+				sso_size = GetFileSize(so);//считываем текущая насыщенность
+#endif
+			if (*actnum != '0x0') //проверка на терминальную строку
+				actnum_size = GetFileSize(actnum);//считываем включенные ячейки
+
+			if (poro_size > 0 && voll_size > 0 && soil_size > 0)
+			{
+				BinaryFileRead PoroReader;
+				PoroReader.OpenFile(poro);
+
+				BinaryFileRead VolReader;
+				VolReader.OpenFile(vol);
+
+				BinaryFileRead SoilReader;
+				if (soil_size > 0)
+					SoilReader.OpenFile(soil);
+#ifdef USE_SO
+				BinaryFileRead SoReader;
+				if (sso_size > 0)
+					SoReader.OpenFile(so);
+#endif
+				BinaryFileRead ActnumReader;
+				if (actnum_size > 0)
+					ActnumReader.OpenFile(actnum);
+
+				std::string sign1(PoroReader.Read(0, 16), 16);
+				std::string sign5(VolReader.Read(0, 16), 16);
+				//устанавливаем необязательные подписи
+				std::string sign2; //soil
+				if (soil_size > 0)
+					sign2 = std::string(SoilReader.Read(0, 16), 16);
+				std::string sign3; //actnum
+				if (actnum_size > 0)
+					sign3 = std::string(ActnumReader.Read(0, 16), 16);
+
+				if (sign1 == "KPFUBOIL    GRID" && sign5 == "KPFUBOIL    GRID"
+					&& sign2 == "KPFUBOIL    GRID") //проверяем 
+				{
+					//Получаем запасы
+					int pindex = 0;
+					std::vector<std::vector<float>> zap;
+					std::vector<float> StartZap;
+					float avg = 0;
+					float avg_b = 0;
+					for (long k = 0; k < zc; k++)
+					{
+						for (long j = 0; j < yc; j++)
+						{
+							if (zap.begin() + j == zap.end()) //добавляем ячейки  только при необходимости
+								zap.push_back(std::vector<  float>());
+							for (int i = 0; i < xc; i++)
+							{
+								if (zap[j].begin() + i == zap[j].end())//добавляем ячейки  только при необходимости
+									zap[j].push_back(0);
+								if (StartZap.begin() + (long)j * xc + (long)i == StartZap.end())
+									StartZap.push_back(0);
+								float actnum_val = 1;
+								if (actnum_size > 0 && sign3 == "KPFUBOIL    GRID") //если актнум есть и правильный, то чекаем его
+									memcpy_s(&actnum_val, 4, ActnumReader.Read(32 + pindex, 4), 4);
+								if (abs(actnum_val - 1.0) < 1e-1) //проверка на включенность ячейки
+								{
+
+									float SaturationBegin = 0;
+									float SaturationCurrent = 0;
+									float Porosition = 0;
+									float Volume = 0;
+
+									memcpy_s(&Porosition, 4, PoroReader.Read((long)32 + pindex, 4), 4);
+									memcpy_s(&Volume, 4, VolReader.Read((long)32 + pindex, 4), 4);
+
+									if (soil_size > 0)
+										memcpy_s(&SaturationBegin, 4, SoilReader.Read((long)32 + pindex, 4), 4);
+#ifdef USE_SO
+									if (sso_size > 0)
+										memcpy_s(&SaturationCurrent, 4, SoReader.Read((long)32 + pindex, 4), 4);
+#endif
+									zap[j][i] += Porosition * SaturationCurrent * density * Volume;
+									StartZap[j * xc + (long)i] += Porosition * SaturationBegin * density * Volume;
+								}
+								pindex += 4;
+							}
+						}
+					}
+					*average = avg / (xc * yc);
+					*b_average = avg_b / (xc * yc);
+					*b_sat = StartZap;
+					PoroReader.~BinaryFileRead();
+					VolReader.~BinaryFileRead();
+					SoilReader.~BinaryFileRead();
+					/*SoReader.~BinaryFileRead();*/
+					ActnumReader.~BinaryFileRead();
+					return zap;
+				}
+				std::cout << "Невозможно расчитать запасы\nФайл PORO или VOLUME или SOIL/SO поврежден\n";
+				return std::vector < std::vector<float>>();
+			}
+			std::cout << "Невозможно расчитать запасы\nФайл PORO или VOLUME или SOIL/SO недоступен для чтения\n";
+			return std::vector < std::vector<float>>();
+		}
+		std::cout << "Невозможно расчитать запасы\nФайл COORD поврежден\n";
+		return std::vector < std::vector<float>>();
+	}
+	std::cout << "Невозможно расчитать запасы\nФайл COORD недоступен для чтения\n";
+	return std::vector < std::vector<float>>();
+}
+
+std::map<std::string, std::string> BinaryFileRead::ReadGRDECLModels(const char* path, double* xshift, double* yshifth)
+{
+	auto file = Read(path); //читаем файл
+	std::map<std::string, std::string> out;
+	if (file.size() > 0)
+	{
+		std::string sign(&file[0], 16);
+		if (sign == "KPFUBOIL  GRDECL") //проверяем сигнатуру
+		{
+			//загружаем смешение по x
+			memcpy_s(xshift, 8, &file[32], 8);
+			memcpy_s(yshifth, 8, &file[40], 8);
+			//загружаем guid
+			std::vector<char> Buffer;
+			std::vector<std::string> sBuffer;
+			for (int i = 48; i < file.size(); i++)
+			{
+				if (file[i] != '|')
+				{
+					Buffer.push_back(file[i]); //все символы собираем в один массив
+				}
+				else {
+					sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //на разделителе парсим строку
+					Buffer.clear();
+					if (sBuffer.size() == 2) //если строка собралась, то добавляем её в выходной массив
+					{
+						out.insert({ sBuffer[0], sBuffer[1] });
+
+						sBuffer.clear();
+					}
+				}
+			}
+			sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //для последней строки
+			out.insert({ sBuffer[0], sBuffer[1] });
+			return out;
+		}
+	}
+	return out;
+}
+
+
+std::map<std::string, std::string> BinaryFileRead::ReadGRDECLModels(const char* path, double* xshift, double* yshifth, int* nx, int* ny, int* nz)
+{
+	auto file = Read(path); //читаем файл
+	std::map<std::string, std::string> out;
+	if (file.size() > 0)
+	{
+		std::string sign(&file[0], 16);
+		if (sign == "KPFUBOIL  GRDECL") //проверяем сигнатуру
+		{
+			//загружаем смешение и кол-ва
+			memcpy_s(nx, 4, &file[20], 4);
+			memcpy_s(ny, 4, &file[24], 4);
+			memcpy_s(nz, 4, &file[28], 4);
+			memcpy_s(xshift, 8, &file[32], 8);
+			memcpy_s(yshifth, 8, &file[40], 8);
+			//загружаем guid
+			std::vector<char> Buffer;
+			std::vector<std::string> sBuffer;
+			for (int i = 48; i < file.size(); i++)
+			{
+				if (file[i] != '|')
+				{
+					Buffer.push_back(file[i]); //все символы собираем в один массив
+				}
+				else {
+					sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //на разделителе парсим строку
+					Buffer.clear();
+					if (sBuffer.size() == 2) //если строка собралась, то добавляем её в выходной массив
+					{
+						out.insert({ sBuffer[0], sBuffer[1] });
+
+						sBuffer.clear();
+					}
+				}
+			}
+			sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //для последней строки
+			out.insert({ sBuffer[0], sBuffer[1] });
+			return out;
+		}
+	}
+	return out;
+}
+
+
+
+std::vector < std::vector<std::string> > BinaryFileRead::ReadHoles(const char* path)
+{
+	auto file = Read(path); //читаем файл
+	//проверяем сигнатуру
+	if (file.size() > 0)
+	{
+		char* sign = new char[17]; //17 т.к. 17 байт будет \0 концевым чаром
+		sign[16] = '\0';
+		memcpy_s(sign, 16, &file[0], 16);
+		std::string sg(sign);
+		if (sg == "KPFUBOIL   HOLES")
+		{
+			std::vector < std::vector<std::string> > out;
+			std::vector<std::string> outt;
+			std::vector<char> WellId;
+			for (auto i = file.begin() + 20; i < file.end(); i++)
+			{
+				if (*i != '|') //собираем все между разделителем |
+				{
+					WellId.push_back(*i);
+				}
+				else {
+					WellId.push_back('\0');
+					std::string str(&WellId[0]);
+					outt.push_back(str);
+					WellId.clear();
+					if (outt.size() == 2) //данные хранятся парами, если размер = 2, то пара собрана
+					{
+						out.push_back(outt);
+						outt.clear();
+					}
+				}
+			}
+			//последняя строка не имеет разделителя, все что осталось должно быть последним id
+			WellId.push_back('\0');
+			std::string str(&WellId[0]);
+			outt.push_back(str);
+			out.push_back(outt);
+			return out;
+		}
+	}
+	return std::vector < std::vector<std::string> >();
+}
+
+std::vector<double> BinaryFileRead::ParseWellCoordinates(const char* path)
+{
+	auto file = Read(path); //считываем WellIntersection
+	if (file.size() > 0) //проверка на неоткрытый файл
+	{
+		char* sign = new char[17]; //17 т.к. 17 байт будет \0 концевым чаром
+		sign[16] = '\0';
+		memcpy_s(sign, 16, &file[0], 16);
+		std::string sg(sign);
+		if (sg == "KPFUBOIL    HOLE")//Проверяем сигнатуру
+		{
+			std::vector<Value> out;
+			int header_lenght = 0;
+			memcpy_s(&header_lenght, 4, &file[16], 4);
+			int line_size = header_lenght / 5; //получаем кол-во элементов в одной строке
+			std::string hdrs(&file[20], line_size); //получаем заголовок
+			int line_weight = 0; //размер всей строки с данными
+			std::vector<int> sizes;
+			for (int i = 0; i < line_size; i++) //перебираем заголовок, собираем полный размер всей строки с данными
+			{
+				int element_size = 0;
+				memcpy_s(&element_size, 4, &file[20 + line_size + i * 4], 4);
+				line_weight += element_size;
+				sizes.push_back(element_size);
+			}
+			//перебираем массив
+			for (auto i = 20 + header_lenght; i < file.size(); i += line_weight)
+			{
+				int k = 0;
+				while (k < line_size)
+				{
+					Value val;
+					switch (*(hdrs.c_str() + k))//разбираем строку по буквам и парсим в соответсвие
+					{
+					case 'F': //float
+					{
+						float res = 0;
+						memcpy_s(&res, sizes[k], &file[i], sizes[k]);
+						val.val = res;
+						i += sizes[k]; //двигаем каретку дальше
+						break;
+					}
+					case 'D': //double
+					{
+						memcpy_s(&val.val, sizes[k], &file[i], sizes[k]);
+						i += sizes[k]; //двигаем каретку дальше
+						break;
+					}
+					case 'I': //int
+					{
+						int res = 0;
+						memcpy_s(&res, sizes[k], &file[i], sizes[k]);
+						val.val = res;
+						i += sizes[k]; //двигаем каретку дальше
+						break;
+					}
+					case 'A': //time int
+					{
+						int res = 0;
+						memcpy_s(&res, sizes[k], &file[i], sizes[k]);
+						val.val = res;
+						i += sizes[k]; //двигаем каретку дальше
+						break;
+					}
+					case 'C': //???
+					{
+						std::string ot(&file[i], sizes[k]);
+						val.sValue = ot;
+						i += sizes[k]; //двигаем каретку дальше
+						break;
+					}
+					}
+					out.push_back(val);
+					k++;
+				}
+			}
+			std::vector<double> toOut;
+			toOut.push_back(out[1].val); //сохраняем x и y
+			toOut.push_back(out[2].val);
+			return toOut;
+		}
+	}
+	return std::vector<double>();
+}
+
+std::vector<char> BinaryFileRead::Read(const char* path)
+{
+	std::ifstream input(path, std::ios::binary);
+	if (input.is_open())
+	{
+		std::vector<char> bytes(
+			(std::istreambuf_iterator<char>(input)),
+			(std::istreambuf_iterator<char>()));
+		input.close();
+		return bytes;
+	}
+	else {
+		return std::vector<char>();
+	}
+}
+
+int compare(const void* X, const void* Y)
+{
+	std::vector<double>* x = (std::vector<double>*)X;
+	std::vector<double>* y = (std::vector<double>*)Y;
+	if (abs(x->at(0) - y->at(0)) < 1e-1)
+		return 0;
+	if (x->at(0) > y->at(0))
+		return 1;
+	if (x->at(0) < y->at(0))
+		return -1;
+}
+int compareY(const void* X, const void* Y)
+{
+	std::vector<double>* x = (std::vector<double>*)X;
+	std::vector<double>* y = (std::vector<double>*)Y;
+	if (abs(x->at(1) - y->at(1)) < 1e-1)
+		return 0;
+	if (x->at(1) > y->at(1))
+		return 1;
+	if (x->at(1) < y->at(1))
+		return -1;
+}
+
+
+std::string BinaryFileRead::GetWellsGuidFromProject(const char* path)
+{
+	char str[127];
+	int itr = 0;
+	while (itr < 127)
+	{
+		GetPrivateProfileStringA("Elements", std::to_string(itr + 1).c_str(), "", str, (DWORD)127, path); //ищем элемент Wells
+		std::string names(str);
+		if (names == "Wells")
+		{
+			break;
+		}
+		itr++;
+	}
+	std::string names(str);
+	if (names != "") //проверка на пустую строку
+	{
+		char str1[127];
+		GetPrivateProfileStringA("Guids", std::to_string(itr + 1).c_str(), "", str1, (DWORD)127, path); //Находим соответсвующий guid
+		return std::string(str1);
+	}
+	return "";
+}
+
+std::string BinaryFileRead::GetGridcellGuidFromProject(const char* path)
+{
+	char str[127];
+	int itr = 0;
+	while (itr < 127)
+	{
+		GetPrivateProfileStringA("Elements", std::to_string(itr + 1).c_str(), "", str, (DWORD)127, path); //ищем элемент Wells
+		std::string names(str);
+		if (names == "Grdecl")
+		{
+			break;
+		}
+		itr++;
+	}
+	std::string names(str);
+	if (names != "") //проверка на пустую строку
+	{
+		char str1[127];
+		GetPrivateProfileStringA("Guids", std::to_string(itr + 1).c_str(), "", str1, (DWORD)127, path); //Находим соответсвующий guid
+		return std::string(str1); //Возвращаем guid папки с Model.bin
+	}
+	return "";
+}
+
+std::string BinaryFileRead::GetMapsGuidFromProject(const char* path)
+{
+	char str[127];
+	int itr = 0;
+	while (itr < 127)
+	{
+		GetPrivateProfileStringA("Elements", std::to_string(itr + 1).c_str(), "", str, (DWORD)127, path); //ищем элемент Maps
+		std::string names(str);
+		if (names == "Maps")
+		{
+			break;
+		}
+		itr++;
+	}
+	std::string names(str);
+	if (names != "") //проверка на пустую строку
+	{
+		char str1[127];
+		GetPrivateProfileStringA("Guids", std::to_string(itr + 1).c_str(), "", str1, (DWORD)127, path); //Находим соответсвующий guid
+		return std::string(str1); //Возвращаем guid папки Maps
+	}
+	return "";
+}
+
+std::vector<std::vector<double>> BinaryFileRead::ReadZoneFromProject(const char* path)
+{
+	bool isEnd = false;
+	int itr = 0;
+	std::vector<std::vector<double>> toOut;
+	while (itr < 127)
+	{
+		char str[127];
+		char str1[127];
+		std::string xi("X" + std::to_string(itr));
+		std::string yi("Y" + std::to_string(itr));
+		GetPrivateProfileStringA("Zone", xi.c_str(), "", str, (DWORD)127, path); //читаем х
+		GetPrivateProfileStringA("Zone", yi.c_str(), "", str1, (DWORD)127, path); //читаем у
+		std::string res(str);
+		std::string res1(str1);
+		itr++;
+		if (res == "" || res1 == "")
+			continue;
+		std::string::size_type sz;
+		std::string::size_type sz1;
+		try {
+			double x = std::stod(ReplaceDecimalSeparator(res), &sz);
+			double y = std::stod(ReplaceDecimalSeparator(res1), &sz1);
+			toOut.push_back(std::vector<double>{x, y});
+		}
+		catch (const char* msg)
+		{
+
+		}
+	}
+	if (toOut.size() > 2)
+	{
+		qsort(&toOut[0], toOut.size(), sizeof(toOut[0]), compareY); //сортируем по возрастанию игрека
+		//double xmiddle_point = (toOut[toOut.size() - 1][0]- toOut[0][0])/2 + toOut[0][0]; //вычитаем средние точки
+		double ymiddle_point = (toOut[toOut.size() - 1][1] - toOut[0][1]) / 2 + toOut[0][1];
+		std::vector<std::vector<double>> sorted_bottom; // нижня часть кольца
+		std::vector<std::vector<double>> sorted_top; // нижня часть кольца
+		for (auto v : toOut)
+		{
+			if (v[1] < ymiddle_point)
+				sorted_bottom.push_back(v);
+			else
+				sorted_top.push_back(v);
+		}
+		qsort(&sorted_bottom[0], sorted_bottom.size(), sizeof(sorted_bottom[0]), compare); //опять сортируем
+		qsort(&sorted_top[0], sorted_top.size(), sizeof(sorted_top[0]), compare);
+		std::reverse(sorted_top.begin(), sorted_top.end()); //верхний реверсим
+		std::vector<std::vector<double>> ott;
+		for (auto v : sorted_bottom)
+			ott.push_back(v);//нижнии добавляем по возрастанию
+		for (auto v : sorted_top)
+			ott.push_back(v);//верхний добавляем по убыванию
+		ott.push_back(ott[0]); //замыкаем нулевым вектором
+		return ott;
+		//int center = 0;
+		////сортируем по возрастанию x
+		//std::vector<std::vector<double>> start;
+		//std::vector<std::vector<double>> start1;
+		//for (int i = 0; i < toOut.size(); i += 2)
+		//	start.push_back(toOut[i]); //копируем сначала четные
+		//for (int i = toOut.size() - 1; i > 0; i -= 2)
+		//	start.push_back(toOut[i]); //копируем нечетные в обратном порядке
+		//toOut = start;
+	}
+	return toOut;
+
+}
+
+bool BinaryFileRead::dirExists(const std::string dirName_in)
+{
+	DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
+	if (ftyp == INVALID_FILE_ATTRIBUTES)
+		return false;  //something is wrong with your path!
+
+	if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+		return true;   // this is a directory!
+
+	return false;    // this is not a directory!
+}
+
+__int64 BinaryFileRead::GetFileSize(std::string path)
+{
+	wchar_t* wpath = new wchar_t[path.size() + 1]; //+1 для нуль-терминатора
+	size_t transfert_char;
+	auto res = mbstowcs_s(&transfert_char, wpath, path.size() + 1, path.c_str(), path.size());
+	//wpath[path.size()] = '\0';
+	HANDLE hFile = CreateFile(wpath, GENERIC_READ,
+		FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		std::cout << "Файл " + path + " недоступен для чтения\n";
+		return -1;
+	}
+	LARGE_INTEGER size;
+	GetFileSizeEx(hFile, &size);
+	CloseHandle(hFile);
+	delete[]wpath;
+	return size.QuadPart;
+}
+
+std::vector<char> BinaryFileRead::Read(const char* paths, long long pos, long long len)
+{
+	std::string path(paths);
+	auto size = GetFileSize(path); //получаем размер файла
+	if (size != -1)
+	{
+		if (pos + len - 1 > size) //проверка на размер
+			return std::vector<char>();
+		std::ifstream file(path, std::ios::binary);
+		std::vector<char> buffer(len);
+		if (file.is_open())
+		{
+			file.seekg(pos); //устанавливает каретка 
+			file.read(&buffer[0], len); //читаем
+			file.close();
+			return buffer;
+		}
+		else
+			return std::vector<char>();
+	}
+	else {
+		throw std::exception("Файл не найден");
+	}
+}
+
+void BinaryFileRead::OpenFile(const char* path)
+{
+	file_size = GetFileSize(std::string(path));
+	if (file_size != -1)
+	{
+		file_path = std::string(path);
+		if (file_size > READ_FILE_BUFFER_SIZE) //проверяем размер файла, если он больше 10 мб то грузим по частям
+			segment_heap_size = READ_FILE_BUFFER_SIZE;
+		else
+			segment_heap_size = file_size; //иначе весь
+		//нулевая позиция
+		current_position = 0;
+		file_buffer = std::vector<char>(segment_heap_size);
+		//заполняем буфер
+		std::ifstream file(path, std::ios::binary);
+		if (file.is_open())
+		{
+			file.read(&file_buffer[0], segment_heap_size);
+			file.close();
+		}
+	}
+	else {
+		throw std::exception("Файл не найден");
+	}
+}
+
+
+char* BinaryFileRead::Read(long long pos, long long len)
+{
+	if (pos + len <= current_position + segment_heap_size
+		&& pos >= current_position) //если запрашиваемый сегмент уже считан то просто его возвращаем
+	{
+		return &file_buffer[pos - current_position];
+	}
+	else { //читаем сегмент
+		std::ifstream file(file_path, std::ios::binary);
+		if (file.is_open())
+		{
+			auto cp = file.tellg();
+			file.seekg(cp + pos);//двигаем на нужную позицию
+			current_position = pos;
+			if (file_size > current_position + READ_FILE_BUFFER_SIZE - 1)
+			{
+				file.read(&file_buffer[0], READ_FILE_BUFFER_SIZE); //читаем полный блок
+				segment_heap_size = READ_FILE_BUFFER_SIZE;
+			}
+			else
+			{
+				file.read(&file_buffer[0], file_size - current_position); //читаем остаток
+				segment_heap_size = file_size - current_position;
+			}
+			file.close(); //хватит
+		}
+		return &file_buffer[0];
+	}
+}
+
+BinaryFileRead::~BinaryFileRead()
+{
+	file_buffer.~vector(); //вызываем деструктор
+	file_path.~basic_string();
+}
+
+void BinaryFileRead::ReadIrapGridCell(
+	std::string path,
+	double& dx,
+	double& dy,
+	double& xmax,
+	double& xmin,
+	double& ymax,
+	double& ymin,
+	int& nx,
+	int& ny,
+	std::mutex* syncro,
+	std::atomic<int>* syncro_counter,
+	std::vector<float>& out)
+{
+	BinaryFileRead filereader;
+	filereader.OpenFile(path.c_str());
+	long long size = filereader.file_size;
+	std::vector<char> line_buffer;
+	int line_counter = 0;
+	for (long long i = 0; i < size; i++)
+	{
+		if (*filereader.Read(i, 1) != '\n') //все что между \n считываем
+			line_buffer.push_back(*filereader.Read(i, 1));
+		else {
+			//i++;
+			auto line = ParseLine(line_buffer, 0x20);
+			line_buffer.clear();
+			if (!line_counter) //записываев nydxdy
+			{
+				dx = std::stod(ReplaceDecimalSeparator(line[2]));
+				dy = std::stod(ReplaceDecimalSeparator(line[3]));
+				ny = std::stoi(line[1]);
+				line_counter++;
+				continue;
+			}
+			if (line_counter == 1) //записываев dxdy
+			{
+				xmin = std::stod(ReplaceDecimalSeparator(line[0]));
+				xmax = std::stod(ReplaceDecimalSeparator(line[1]));
+				ymin = std::stod(ReplaceDecimalSeparator(line[2]));
+				ymax = std::stod(ReplaceDecimalSeparator(line[3]));
+				line_counter++;
+				continue;
+			}
+			if (line_counter == 2) //записываев dxdy
+			{
+				nx = std::stoi(line[0]);
+				line_counter++;
+				continue;
+			}
+			for (int j = 0; j < line.size(); j++)
+			{
+				if (line[j] == "9999900.000000")
+				{
+					out.push_back(0);
+				}
+				else { //парсим значения
+					out.push_back(std::stof(ReplaceDecimalSeparator(line[j]))); //меняем точку на запятую
+				}
+			}
+			line.~vector();
+			line_counter++;
+		}
+	}
+	filereader.~BinaryFileRead();
+	std::lock_guard<std::mutex> lock(*syncro);
+	(*syncro_counter)++;
+}
+
+std::vector<std::string> BinaryFileRead::ParseLine(std::vector<char> CharToParse, char delimeter)
+{
+	std::vector<std::vector<char>> buffer(1);
+	int bi = 0;
+	for (int i = 0; i < CharToParse.size(); i++)
+	{
+		if (CharToParse[i] != delimeter) //если не разделитель сохраняем
+		{
+			buffer[bi].push_back(CharToParse[i]);
+		}
+		else { //если разделитель создаем новое окошко
+			bi++;
+			buffer.push_back(std::vector<char>());
+		}
+	}
+	std::vector<std::string> out;
+	for (int i = 0; i < buffer.size(); i++)
+	{
+		out.push_back(std::string(buffer[i].begin(), buffer[i].end()));
+	}
+	buffer.~vector();
+	return out;
+
+}
+
+std::vector<std::string> ParseLineFast(char* CharToParse, int lenght, char delimeter)
+{
+	std::vector<std::string> out;
+	int last_pos = 0;
+	for (int i = 0; i < lenght; i++)
+	{
+		if (*(CharToParse + i) == delimeter || i == lenght - 1) //если не разделитель сохраняем
+		{
+			out.push_back(std::string(CharToParse + last_pos, i - last_pos));
+			last_pos = i + 1;
+		}
+	}
+	
+	return out;
+
+}
+
+std::string BinaryFileRead::ReplaceDecimalSeparator(std::string toReplace)
+{
+	auto pos = toReplace.find('.');
+	if (pos != std::string::npos)
+	{
+		return toReplace.replace(pos, 1, ",");
+	}
+	else
+		return toReplace;
+}
+
+std::map<std::string, std::vector<float>> BinaryFileRead::ParseIrapGridByLayer(
+	std::string path_d0,
+	std::string path_d1a,
+	std::string path_d1b1,
+	std::string path_d1b2,
+	std::string path_d1b3,
+	std::string path_v,
+	std::string path_g1,
+	std::string path_g2_3,
+	std::string path_gd,
+	BinaryFileRead::IrapGridMapInfo& info)
+{
+
+	std::vector<float> out_d0;
+	std::vector<float> out_d1a;
+	std::vector<float> out_d1b1;
+	std::vector<float> out_d1b2;
+	std::vector<float> out_d1b3;
+	std::vector<float> out_d1v;
+	std::vector<float> out_d1g1;
+	std::vector<float> out_d1g23;
+	std::vector<float> out_d1d;
+
+	std::vector<double> data(6 * 9);
+	std::vector<int> countes(2 * 9);
+
+	std::mutex sync;
+	std::atomic<int> sync_count = 0;
+
+	std::thread d0t(ReadIrapGridCell,
+		path_d0,
+		std::ref(data[0]),
+		std::ref(data[1]),
+		std::ref(data[2]),
+		std::ref(data[3]),
+		std::ref(data[4]),
+		std::ref(data[5]),
+		std::ref(countes[0]),
+		std::ref(countes[1]),
+		&sync,
+		&sync_count,
+		std::ref(out_d0));
+
+	std::thread dat(ReadIrapGridCell,
+		path_d1a,
+		std::ref(data[6]),
+		std::ref(data[7]),
+		std::ref(data[8]),
+		std::ref(data[9]),
+		std::ref(data[10]),
+		std::ref(data[11]),
+		std::ref(countes[2]),
+		std::ref(countes[3]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1a));
+
+	std::thread db1t(ReadIrapGridCell,
+		path_d1b1,
+		std::ref(data[12]),
+		std::ref(data[13]),
+		std::ref(data[14]),
+		std::ref(data[15]),
+		std::ref(data[16]),
+		std::ref(data[17]),
+		std::ref(countes[4]),
+		std::ref(countes[5]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1b1));
+
+	std::thread db2t(ReadIrapGridCell,
+		path_d1b2,
+		std::ref(data[18]),
+		std::ref(data[19]),
+		std::ref(data[20]),
+		std::ref(data[21]),
+		std::ref(data[22]),
+		std::ref(data[23]),
+		std::ref(countes[6]),
+		std::ref(countes[7]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1b2));
+
+	std::thread db3t(ReadIrapGridCell,
+		path_d1b3,
+		std::ref(data[24]),
+		std::ref(data[25]),
+		std::ref(data[26]),
+		std::ref(data[27]),
+		std::ref(data[28]),
+		std::ref(data[29]),
+		std::ref(countes[8]),
+		std::ref(countes[9]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1b3));
+
+	std::thread dvt(ReadIrapGridCell,
+		path_v,
+		std::ref(data[30]),
+		std::ref(data[31]),
+		std::ref(data[32]),
+		std::ref(data[33]),
+		std::ref(data[34]),
+		std::ref(data[35]),
+		std::ref(countes[10]),
+		std::ref(countes[11]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1v));
+
+	std::thread dg1t(ReadIrapGridCell,
+		path_g1,
+		std::ref(data[36]),
+		std::ref(data[37]),
+		std::ref(data[38]),
+		std::ref(data[39]),
+		std::ref(data[40]),
+		std::ref(data[41]),
+		std::ref(countes[12]),
+		std::ref(countes[13]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1g1));
+
+	std::thread dg23t(ReadIrapGridCell,
+		path_g2_3,
+		std::ref(data[42]),
+		std::ref(data[43]),
+		std::ref(data[44]),
+		std::ref(data[45]),
+		std::ref(data[46]),
+		std::ref(data[47]),
+		std::ref(countes[14]),
+		std::ref(countes[15]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1g23));
+
+	std::thread ddt(ReadIrapGridCell,
+		path_gd,
+		std::ref(data[48]),
+		std::ref(data[49]),
+		std::ref(data[50]),
+		std::ref(data[51]),
+		std::ref(data[52]),
+		std::ref(data[53]),
+		std::ref(countes[16]),
+		std::ref(countes[17]),
+		&sync,
+		&sync_count,
+		std::ref(out_d1d));
+
+	d0t.detach();
+	dat.detach();
+	db1t.detach();
+	db2t.detach();
+	db3t.detach();
+	dvt.detach();
+	dg1t.detach();
+	dg23t.detach();
+	ddt.detach();
+
+	while (sync_count < 9);
+	//суммируем по пластам
+	std::map<std::string, std::vector<float>> out;
+	out.insert({ "Д0", std::vector<float>() });
+	out.insert({ "а", std::vector<float>() });
+	out.insert({ "б", std::vector<float>() });
+	out.insert({ "вгд", std::vector<float>() });
+	for (int i = 0; i < out_d0.size(); i++)
+	{
+		out["Д0"].push_back(out_d0[i]);
+		out["а"].push_back(out_d1a[i]);
+		out["б"].push_back(out_d1b1[i] + out_d1b2[i] + out_d1b3[i]);
+		out["вгд"].push_back(out_d1v[i] + out_d1g1[i] + out_d1g23[i] + out_d1d[i]);
+	}
+	IrapGridMapInfo out_info;
+	out_info.dx = data[0];
+	out_info.dy = data[1];
+	out_info.xmax = data[2];
+	out_info.xmin = data[3];
+	out_info.ymax = data[4];
+	out_info.ymin = data[5];
+	out_info.XCellCount = countes[0];
+	out_info.YCellCount = countes[1];
+	//выводим инфо по карте
+	info = out_info;
+	return out;
+}
+
+std::vector<std::tuple<double, double, double>> BinaryFileRead::ParseArtemFile(std::string path)
+{
+	std::vector<std::tuple<double, double, double>> out;
+	BinaryFileRead file;
+	file.OpenFile(path.c_str());
+	long long size = file.file_size;
+	std::vector<char> line_buffer;
+	for (long long i = 0; i < size; i++)
+	{
+		auto chr = *file.Read(i, 1);
+		if (chr != '\n')
+		{
+			line_buffer.push_back(chr);
+		}
+		else {
+			auto line = BinaryFileRead::ParseLine(line_buffer, 0x20);
+			line_buffer.clear();
+			out.push_back(std::make_tuple(std::stod(ReplaceDecimalSeparator(line[0])), std::stod(ReplaceDecimalSeparator(line[1])), std::stod(ReplaceDecimalSeparator(line[2]))));
+		}
+	}
+	return out;
+}
+
+std::vector<std::vector<std::string>> BinaryFileRead::ParseCsv(std::string path)
+{
+	/*std::vector<std::vector<std::string>> out;
+	BinaryFileRead bfw;
+	bfw.OpenFile(path.c_str());
+	long long size = bfw.file_size;
+	std::vector<char> line_buffer;
+	for (int i = 0; i < size; i++)
+	{
+		char cchar = *bfw.Read(i , 1);
+		if (cchar != '\n')
+		{
+			line_buffer.push_back(cchar);
+		}
+		else {
+			out.push_back(ParseLine(line_buffer, ';'));
+			line_buffer.clear();
+		}
+	}*/
+	return ParseSeparatedData(path, ';');
+}
+
+std::vector<std::vector<std::string>> BinaryFileRead::ParseSeparatedData(std::string path, char separator)
+{
+	std::vector<std::vector<std::string>> out;
+	BinaryFileRead bfw;
+	bfw.OpenFile(path.c_str());
+	long long size = bfw.file_size;
+	std::vector<char> line_buffer;
+	for (int i = 0; i < size; i++)
+	{
+		char cchar = *bfw.Read(i, 1);
+		char cchar_next = *bfw.Read(i + 1, 1);
+		if (cchar != '\r' && cchar_next != '\n')
+		{
+			line_buffer.push_back(cchar);
+		}
+		else {
+			out.push_back(ParseLine(line_buffer, separator));
+			line_buffer.clear();
+			i++;
+		}
+	}
+	//последнюю строку добавляем
+	out.push_back(ParseLine(line_buffer, separator));
+	line_buffer.clear();
+	return out;
+}
+
+std::vector<std::vector<std::string>> BinaryFileRead::ParseCsvMP(std::string path)
+{
+	std::vector<std::vector<std::string>> out;
+	BinaryFileRead bfw;
+	bfw.OpenFile(path.c_str());
+	long long size = bfw.file_size;
+	
+	long long last_pos = 0;
+	int line_counter = 0;
+
+	for (int i = 0; i < size; i++)
+	{
+		if (*bfw.Read(i, 1) == '\n' || i == size - 1)
+		{
+			out.push_back(ParseLineFast(bfw.Read(last_pos, line_counter), line_counter, ';'));
+			line_counter = 0;
+			last_pos = i + 1;
+		}
+		else
+			line_counter++;
+		
+	}
+	return out;
+}
+
+BinaryFileWrite::BinaryFileWrite(std::string path, std::string sign, std::string mapsini)
+{
+	Path = path;
+	Sign = sign;
+	MapsIniPath = mapsini;
+	if (!std::filesystem::exists(mapsini))
+		std::cout << "Файл Maps.ini не существует\nБудет создан автоматически";
+}
+
+BinaryFileWrite::~BinaryFileWrite()
+{
+	Maps.~vector();
+	MapsBuffer.~vector();
+	Path.~basic_string();
+	Sign.~basic_string();
+}
+
+std::string BinaryFileWrite::GetProjectDirectory(std::string project_path)
+{
+	//вычисляем путь папки с проектом
+	std::string prpath = project_path;
+	std::reverse(prpath.begin(), prpath.end()); //реверсим путь
+	int size = prpath.find("\\"); //находим первое вхождение обратного слеша
+	prpath.erase(0, size); //удаляем все до него
+	std::reverse(prpath.begin(), prpath.end()); //реверсим путь обратно
+	return prpath;
+}
+
+void BinaryFileWrite::WriteMaps()
+{
+	int cntr = 0;
+	for (auto m : Maps)
+	{
+		auto guidpath = m.MapsFileName;
+		std::string path = Path + guidpath;
+		std::ofstream mwrite(path, std::ofstream::binary | std::ofstream::app);
+		if (mwrite.is_open())
+		{
+			char* ptr = &MapsBuffer[cntr][0];
+			mwrite.write(ptr, MapsBuffer[cntr].size()); //записываем весь буффер
+			mwrite.close();
+		}
+		cntr++;
+	}
+}
+
+std::string BinaryFileWrite::ToString(GUID* guid) {
+	char guid_string[37]; // 32 hex chars + 4 hyphens + null terminator
+	snprintf(
+		guid_string, sizeof(guid_string),
+		"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+		guid->Data1, guid->Data2, guid->Data3,
+		guid->Data4[0], guid->Data4[1], guid->Data4[2],
+		guid->Data4[3], guid->Data4[4], guid->Data4[5],
+		guid->Data4[6], guid->Data4[7]);
+	return guid_string;
+}
+
+int BinaryFileWrite::CreateMap(
+	std::string MapName,
+	std::string ShortMapName,
+	std::string MapUnit,
+	std::string geometryFile,
+	std::string pointsFile,
+	int dimension)
+{
+	auto name_hash = std::hash<std::string>{}(MapName); //считаем хэш для названия
+	//создаем буффер
+	MapsBuffer.push_back(std::vector<char>());
+	//ищем id
+	int usId = Maps.size() + 1; //если значений нет вообще, то берем 1
+	MapInfo m;
+	//проверяем наличие ключа
+	while (true)
+	{
+		char returnedString[MAX_PROFILE_SIZE];
+		if (GetPrivateProfileStringA("Maps", std::to_string(usId).c_str(), "\0", &returnedString[0], MAX_PROFILE_SIZE, MapsIniPath.c_str()))
+		{
+			std::string filename(&returnedString[0]); //запоминаем имя файла
+			if (GetPrivateProfileStringA(std::to_string(usId).c_str(), "Hash", "\0", &returnedString[filename.size()], MAX_PROFILE_SIZE, MapsIniPath.c_str()))
+			{
+				std::string HashMap(&returnedString[filename.size()]);
+				if (HashMap == std::to_string(name_hash))//если под этим id эта же карта то просто пишем в нее
+				{
+					m.MapsFileName = filename;
+					m.MapsFileId = (uint8_t)usId;
+					//сохраняем имя которое уже есть в ini
+					if (GetPrivateProfileStringA(std::to_string(usId).c_str(), "Name", "\0", &returnedString[filename.size() + HashMap.size()], MAX_PROFILE_SIZE, MapsIniPath.c_str()))
+					{
+						m.MapsName = std::string(&returnedString[filename.size() + HashMap.size()]);
+					}
+					break;
+				}
+				else {
+					usId++; //если нет, то двигаемся
+				}
+			}
+			else {
+				usId++; //если нет, то секция повреждена, двигаемся
+			}
+		}
+		else { //если свободен, то выходим
+			break;
+		}
+		//delete[] returnedString;
+	}
+	//генерирует гуид для карты
+	GUID map_guid;
+	CoCreateGuid(&map_guid);
+	if (m.MapsFileName.empty())
+	{
+		m.MapsFileName = ToString(&map_guid);
+		m.MapsFileId = usId;
+	}
+	//получаем дату
+	/*time_t seconds = time(NULL);
+	tm* timeinfo = new tm;
+	localtime_s(timeinfo, &seconds);*/
+	if (m.MapsName.empty())
+		m.MapsName = MapName;
+	m.hash = name_hash;
+	m.MapsUnit = MapUnit;
+	m.MapsShortName = ShortMapName;
+	m.MDimension = dimension;
+	m.GeometryFile = geometryFile;
+	m.PointsFile = pointsFile;
+	Maps.push_back(m); //сохраняем
+	//delete timeinfo;
+	return Maps.size() - 1;
+}
+
+
+
+void BinaryFileWrite::CreateMaps(std::string type)
+{
+	if (type == "csv")
+	{
+		//Записываем заголовок
+		std::ofstream header(Path + "Stocks.csv");
+		if (header.is_open())
+		{
+			for (auto m : Maps)
+			{
+				std::string guid = m.MapsFileName;
+				header << guid << ";" << m.MapsName << ";" << m.MapsUnit;
+				//Создаем файлы карт
+				std::ofstream mps(Path + guid, std::ios::binary);
+				if (mps.is_open())
+				{
+					mps.write(Sign.c_str(), sizeof(char) * Sign.size());
+				}
+				mps.close();
+			}
+			header.close();
+		}
+	}
+	if (type == "ini")
+	{
+		int itr_usId = 0;
+		for (int mc = 0; mc < Maps.size(); mc++)
+		{
+			int usId = Maps[mc].MapsFileId;
+			//записываем guid
+			if (WritePrivateProfileStringA("Maps", std::to_string(usId).c_str(), Maps[mc].MapsFileName.c_str(), MapsIniPath.c_str()))
+			{
+				std::string ftype = "Type=Unstructured";
+				std::string name = "Name=" + Maps[mc].MapsName;
+				std::string unit = "Units=" + Maps[mc].MapsUnit;
+				std::string dims = "MapDimension=" + std::to_string(Maps[mc].MDimension);
+				std::string gmFile = "GeometryFile=" + Maps[mc].GeometryFile;
+				std::string pntFile = "PointsFile=" + Maps[mc].PointsFile;
+				std::string shrtFile = "ShortName=" + Maps[mc].MapsShortName;
+				std::string hashFile = "Hash=" + std::to_string(Maps[mc].hash);
+				//пакуем
+				std::vector<char> write;
+				write.insert(write.end(), ftype.begin(), ftype.end());
+				write.push_back('\0');
+				write.insert(write.end(), name.begin(), name.end());
+				write.push_back('\0');
+				write.insert(write.end(), unit.begin(), unit.end());
+				write.push_back('\0');
+				write.insert(write.end(), dims.begin(), dims.end());
+				write.push_back('\0');
+				write.insert(write.end(), gmFile.begin(), gmFile.end());
+				write.push_back('\0');
+				write.insert(write.end(), pntFile.begin(), pntFile.end());
+				write.push_back('\0');
+				write.insert(write.end(), shrtFile.begin(), shrtFile.end());
+				write.push_back('\0');
+				write.insert(write.end(), hashFile.begin(), hashFile.end());
+				write.push_back(0);
+				write.push_back(0);
+				if (!WritePrivateProfileSectionA(std::to_string(usId).c_str(), &write[0], MapsIniPath.c_str()))
+				{
+					std::cout << "Невозможно записать карту " + Maps[mc].MapsName + "\nПожалуйста, перезапустите программу с правами администратора";
+				}
+
+				//Создаем карты
+
+				std::string guid = Maps[mc].MapsFileName;
+				//Создаем файлы карт
+				std::ofstream mps(Path + guid, std::ios::binary);
+				if (mps.is_open())
+				{
+					mps.write(Sign.c_str(), sizeof(char) * Sign.size());
+				}
+				mps.close();
+
+			}
+		}
+	}
+}
+
+BinaryFileRead::MERResult& BinaryFileRead::MERResult::operator+(const MERResult& y)
+{
+
+	this->CollectTime += y.CollectTime;
+	this->CurrentCollectTime += y.CurrentCollectTime;
+	this->CurrentDebit += y.CurrentDebit;
+	this->CurrentOil += y.CurrentOil;
+	this->CurrentWater += y.CurrentWater;
+	this->CurrentWaterCut = (this->CurrentWaterCut + y.CurrentWaterCut) / 2.0;
+	this->CurrentWaterUpload += y.CurrentWaterUpload;
+	this->CurrentWorkedTime += y.CurrentWorkedTime;
+	this->Oil += y.Oil;
+	this->Water += y.Water;
+	this->WaterUpload += y.WaterUpload;
+	this->WorkedTime += y.WorkedTime;
+#ifdef WRITE_WATERCUT_AT_TIME
+	std::copy(y.TimeOilWaterCut.begin(), y.TimeOilWaterCut.end(), std::back_inserter(this->TimeOilWaterCut));
+	std::sort(this->TimeOilWaterCut.begin(), this->TimeOilWaterCut.end(), []( //сортируем по дате
+		const std::tuple<int, double, double, double, int>& X,
+		const std::tuple<int, double, double, double, int>& Y) {
+			return std::get<0>(X) < std::get<0>(Y);
+		});
+#endif
+	return *this;
+
+}
+
+BinaryFileRead::MERResult& BinaryFileRead::MERResult::operator+=(const MERResult& y)
+{
+
+	this->CollectTime += y.CollectTime;
+	this->CurrentCollectTime += y.CurrentCollectTime;
+	this->CurrentDebit += y.CurrentDebit;
+	this->CurrentOil += y.CurrentOil;
+	this->CurrentWater += y.CurrentWater;
+	this->CurrentWaterCut = (this->CurrentWaterCut + y.CurrentWaterCut) / 2.0;
+	this->CurrentWaterUpload += y.CurrentWaterUpload;
+	this->CurrentWorkedTime += y.CurrentWorkedTime;
+	this->Oil += y.Oil;
+	this->Water += y.Water;
+	this->WaterUpload += y.WaterUpload;
+	this->WorkedTime += y.WorkedTime;
+#ifdef WRITE_WATERCUT_AT_TIME
+	std::copy(y.TimeOilWaterCut.begin(), y.TimeOilWaterCut.end(), std::back_inserter(this->TimeOilWaterCut));
+	std::sort(this->TimeOilWaterCut.begin(), this->TimeOilWaterCut.end(), []( //сортируем по дате
+		const std::tuple<int, double, double, double, int>& X, 
+		const std::tuple<int, double, double, double, int>& Y) {
+			return std::get<0>(X) < std::get<0>(Y);
+		});
+#endif
+	return *this;
+}

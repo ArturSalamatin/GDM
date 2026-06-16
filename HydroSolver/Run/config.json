@@ -1,0 +1,67 @@
+{
+  "model": {
+    "path": "d:\\Lessons\\Contributions\\2020\\Sudakov\\Project_3(218)\\Project3\\Альметьевская площадь (Целиком)",
+    "project_name": "Project.bop",
+    "layer_aggregation": [
+      [ "Д0", "Д кынов." ],
+      [ "Д1А" ],
+      [ "Д1Б1", "Д1Б2", "Д1Б3" ],
+      [ "Д1В", "Д1Г1", "Д1Г2+3", "Д1Д" ]
+    ]
+  },
+  "temporal_parameters": {
+    "saturation_field_date": "01.12.2019",
+    "anomaly_date_start": "01.01.2020",
+    "anomaly_date_end": "30.08.2021",
+    "number_of_snapshots": 20
+  },
+  "phase_properties": [
+    {
+      "density": 800,
+      "viscosity": 4.3,
+      "compressibility": 0.001,
+      "residual": 0,
+      "reference_pressure_for_compressibility": 1
+    },
+    {
+      "density": 1000,
+      "viscosity": 2,
+      "compressibility": 0.0001,
+      "residual": 0,
+      "reference_pressure_for_compressibility": 1
+    }
+  ],
+  "common_properties": {
+    "freeFall_acceleration": 9.81,
+    "external_bundary_pressure": 167,
+    "min_cell_thickness": 0.1,
+    "min_cell_porosity": 0.01,
+    "min_cell_permeability": 1
+  },
+
+  "scheme_parameters": {
+    "AMG_AbsTol": 1800,
+    "AMG_RelTol": 0.3,
+    "required_Newton_Tolerance": 0.001,
+    "newton_max_iteration_count": 20,
+    "initial_time_step": 15
+  },
+
+  "anomaly": {
+    "anomaly_detection_interval": 14
+  },
+
+  "trajectories": {
+    "start_signal_rollback_time": 5,
+    "end_signal_rollback_time": 10,
+    "start_distance": 15,
+    "velocity_multiplier": 80
+  },
+
+  "save_files": {
+    "water_saturation": "water_saturation.txt",
+    "oil_saturation": "oil_saturation.txt",
+    "pressure": "pressure.txt",
+    "overall_oil_balance": "overall_oil_balance.txt",
+  }
+}

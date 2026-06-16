@@ -1,0 +1,2 @@
+# Well 273804 data:
+time, d debit, kg/d Length, m length0, m proper_state oil_v, m^3 water_v, m^3 oil_m, kg water_m, kg pump_water, t idle_time, h type is_work 
