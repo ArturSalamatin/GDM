@@ -1,67 +1,27 @@
 #pragma once
-#include <geos/geom.h>
+#include <memory>
+
 namespace GeosShell {
-	class GeosPoint {
-	public:
-		GeosPoint() {}
 
-		GeosPoint(const GeosPoint& p) {
-			factory = p.factory;
-			point = p.point->clone().release();
-		}
-		GeosPoint& operator=(const GeosPoint& p) {
-			this->factory = p.factory;
-			this->point = p.point->clone().release();
-			return *this;
-		}
-		GeosPoint& operator=(GeosPoint&& p) noexcept
-		{
-			p.SetUndestructable();
-			this->factory = p.factory;
-			this->point = p.point;
-			return *this;
-		}
+class SimplePoint {
+	double x_, y_;
+public:
+	SimplePoint() : x_(0), y_(0) {}
+	SimplePoint(double x, double y) : x_(x), y_(y) {}
+	double getX() const { return x_; }
+	double getY() const { return y_; }
+};
 
-		GeosPoint(GeosPoint&& p) noexcept
-		{
-			p.SetUndestructable();
-			factory = p.factory;
-			point = p.point;
-		}
-		
-		GeosPoint(geos::geom::GeometryFactory* _factory, geos::geom::Point* p)
-		{
-			factory = _factory;
-			point = p;
-			//std::cout << "call 2 GeosPoint() " << point << "\r\n" << std::flush;
-		}
+class GeosPoint {
+public:
+	GeosPoint() : pt_(std::make_shared<SimplePoint>()) {}
+	GeosPoint(double x, double y) : pt_(std::make_shared<SimplePoint>(x, y)) {}
 
-		geos::geom::Point* get() {
-			return point;
-		}
+	const std::shared_ptr<SimplePoint>& get() const { return pt_; }
+	std::shared_ptr<SimplePoint>& get() { return pt_; }
 
-		geos::geom::Point* get() const {
-			return point;
-		}
+private:
+	std::shared_ptr<SimplePoint> pt_;
+};
 
-		~GeosPoint() {
-			if (Destructable)
-			{
-				factory->destroyGeometry(point);
-				//std::cout << "call destructor on " << point << "\r\n" << std::flush;
-			}
-		}
-
-
-	private:
-		geos::geom::GeometryFactory* factory = nullptr;
-		geos::geom::Point* point = nullptr;
-
-		bool Destructable = true;
-		
-		void SetUndestructable() 
-		{
-			Destructable = false;
-		}
-	};
-}
+} // GeosShell

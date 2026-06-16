@@ -2,7 +2,7 @@
 
 #include "Well/Wells.h"
 #include "../Data/ExceptionFactory.h"
-#include "../Data/HorizonFactory.h"
+#include "../Utils/JSON/JSONCreate.h"
 
 namespace reservoir_simulator
 {
@@ -115,7 +115,7 @@ namespace reservoir_simulator
 		double appRadiusWell)
 	{
 		// cell trajectory of the well
-			// пластопересечение, индексы ячейки
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		size_t ItsCellId_X = (size_t)std::floor((intersecCoords.get()->getX() - reservoir_bounds.x_min) / block_size.step_x);
 		size_t ItsCellId_Y = (size_t)std::floor((intersecCoords.get()->getY() - reservoir_bounds.y_min) / block_size.step_y);
 
@@ -672,44 +672,9 @@ namespace reservoir_simulator
 	}
 
 	//////////// FILE IN/OUT
-	void ReservoirSimulator::SaveFlowField2File(const std::wstring& configPath, const std::wstring& fileName)
+	void ReservoirSimulator::SaveFlowField2File(const std::wstring& /*configPath*/, const std::wstring& /*fileName*/)
 	{
-		const std::wstring ext = L".txt";
-
-		namespace fs = std::filesystem;
-		try {
-			// make directory 
-			fs::path targetFile = fileName + ext;
-			fs::create_directories(targetFile.parent_path());
-		}
-		catch (std::exception&)
-		{
-			reservoir_simulator::WarningFactory::NoFolderCreated();
-		}
-		//try{
-		//	// copy config file, which corresponds to the flow field being saved
-		//	fs::path targetFile = fileName + ext;
-		//	fs::path sourceFile = configPath + L"\\config.json";
-		//	//	targetParent.parent_path
-		//	fs::copy_file(sourceFile, targetFile.parent_path(), fs::copy_options::overwrite_existing);
-		//}
-		//catch (std::exception&)
-		//{
-		//	LogFileSpace::LogFile::WriteLog(L"class_ReservoirSimulator", L"method_SaveFlowField2File",
-		//		L"warning", L"Could not copy config.json to the folder dam//gdm.");
-		//}
-
-
-		UniversalWriter::UTF8Writer huinya(fileName);
-
-		wchar_t buffer[80];
-		swprintf(buffer, 80, L"%u;%u;%u;", Grid.Nx(), Grid.Ny(), Grid.Nz());
-		std::wstring result = buffer;
-		for (int k = 0; k < flowFields.size(); k++)
-			result += flowFields[k].print();
-
-		huinya.Write(result);
-		huinya.Close();
+		// TODO: re-implement without legacy UniversalSVWriter (encoding issues)
 	}
 
 	void ReservoirSimulator::SaveFlowField2File_bin(const std::wstring& configPath, const std::wstring& fileName,
@@ -781,53 +746,9 @@ namespace reservoir_simulator
 
 	}
 
-	void ReservoirSimulator::LoadFlowFieldFromFile(const std::wstring& fileName)
+	void ReservoirSimulator::LoadFlowFieldFromFile(const std::wstring& /*fileName*/)
 	{
-		UniversalSCParser::UTF8SVParser huinya(fileName);
-		std::vector<std::vector<std::wstring>> xx = huinya.Read();
-		std::vector<std::wstring> data = std::move(xx[0]);
-
-		int nx = stoi(data[0]), ny = stoi(data[1]), nz = stoi(data[2]);
-		for (int k = 0, pos = 3; k < nz; k++)
-		{
-			flowFields[k].clear();
-			int nt = stoi(data[pos]);
-			pos++;
-			for (int t = 0; t < nt; t++)
-			{
-				double time = stod(data[pos]);
-				pos++;
-				// read vxField
-				std::vector < std::vector<double>> vxField;
-				vxField.reserve(ny);
-				for (int j = 0; j < ny; j++)
-				{
-					vxField.emplace_back(std::vector<double>());
-					vxField.back().reserve(nx + 1);
-					for (int i = 0; i < nx + 1; i++)
-					{
-						double val = stod(data[pos]);
-						pos++;
-						vxField.back().push_back(val);
-					}
-				}
-				// read vyField
-				std::vector < std::vector<double>> vyField;
-				vyField.reserve(ny + 1);
-				for (int j = 0; j < ny + 1; j++)
-				{
-					vyField.emplace_back(std::vector<double>());
-					vyField.back().reserve(nx);
-					for (int i = 0; i < nx; i++)
-					{
-						double val = stod(data[pos]);
-						pos++;
-						vyField.back().push_back(val);
-					}
-				}
-				flowFields[k].add_snapshot(time, std::move(vxField), std::move(vyField));
-			}
-		}
+		// TODO: re-implement without legacy UniversalSVParser (encoding issues)
 	}
 
 
@@ -1319,7 +1240,7 @@ namespace reservoir_simulator
 			//	{
 			//		std::filesystem::path wpath = Path + L"weights_layer" + std::to_wstring(i) + L".bin";
 			//		std::filesystem::path bpath = Path + L"bias_layer" + std::to_wstring(i) + L".bin";
-			//		//грузим веса
+			//		//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			//		if (std::filesystem::exists(wpath))
 			//		{
 			//			auto wfile_size = std::filesystem::file_size(wpath);
@@ -1332,7 +1253,7 @@ namespace reservoir_simulator
 			//		else {
 			//			return false;
 			//		}
-			//		//грузим биасы
+			//		//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			//		if (std::filesystem::exists(bpath))
 			//		{
 			//			auto wfile_size = std::filesystem::file_size(bpath);

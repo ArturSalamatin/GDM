@@ -9,34 +9,64 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# MSVC-specific settings
 if(MSVC)
     add_compile_options(
-        /W4             # Warning level 4
-        /permissive-    # Strict standards conformance
-        /utf-8          # Source and execution charset UTF-8
-        /EHsc           # Standard exception handling
+        /W3
+        /utf-8
+        /EHsc
+        /bigobj
     )
-
-    # AddressSanitizer in Debug
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_CONFIGURATION_TYPES)
-        add_compile_options($<$<CONFIG:Debug>:/fsanitize=address>)
-    endif()
 endif()
 
-# Project directories
-set(GDM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-set(GDM_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+set(HYDRO ${CMAKE_SOURCE_DIR}/HydroSolver)
 
-# Header-only for now — no sources to compile yet
-# Uncomment when source files appear:
-#
-# file(GLOB_RECURSE GDM_SOURCES ${GDM_SOURCE_DIR}/*.cpp)
-# file(GLOB_RECURSE GDM_HEADERS ${GDM_INCLUDE_DIR}/*.hpp)
-#
-# add_library(gdm_core ${GDM_SOURCES} ${GDM_HEADERS})
-# target_include_directories(gdm_core PUBLIC ${GDM_INCLUDE_DIR})
+set(GDM_SOURCES
+    src/main.cpp
+    ${HYDRO}/stdafx.cpp
 
-# Tests (uncomment when test framework is added)
-# enable_testing()
-# add_subdirectory(tests)
+    # Reservoir
+    ${HYDRO}/Reservoir/ReservoirSimulator.cpp
+    ${HYDRO}/Reservoir/NumericalParameters.cpp
+
+    # Grid / Cells
+    ${HYDRO}/Solver/Grids/OilField.cpp
+    ${HYDRO}/Solver/Grids/Cells/AbstractCells.cpp
+    ${HYDRO}/Solver/Grids/Cells/TwoPhaseFlowCell.cpp
+
+    # Math / Linear algebra
+    ${HYDRO}/Solver/Math/LinearProblem.cpp
+    ${HYDRO}/Solver/Math/MatrixCSR.cpp
+    ${HYDRO}/Solver/Math/SparsityPattern.cpp
+    ${HYDRO}/Solver/Math/MathRoutines.cpp
+
+    # Wells
+    ${HYDRO}/Reservoir/Well/SomeWell.cpp
+    ${HYDRO}/Reservoir/Well/Wells.cpp
+    ${HYDRO}/Reservoir/Well/WellJobs.cpp
+    ${HYDRO}/Reservoir/Well/SetOfPoints.cpp
+    ${HYDRO}/Reservoir/Well/WellTrajectory.cpp
+
+    # Flow field (needed by ReservoirSimulator)
+    ${HYDRO}/Anomaly/FlowField/SomeFlowField.cpp
+    ${HYDRO}/Anomaly/FlowField/FlowField.cpp
+    ${HYDRO}/Anomaly/FlowField/Point.cpp
+
+    # Descriptors
+    ${HYDRO}/Descriptors/Descriptors.cpp
+    ${HYDRO}/Descriptors/MER_Descriptor.cpp
+
+    # Helpers
+    ${HYDRO}/Helpers/LogFile.cpp
+
+)
+
+add_executable(gdm ${GDM_SOURCES})
+
+target_include_directories(gdm PRIVATE
+    ${HYDRO}
+    ${HYDRO}/AMGSolver/amgcl
+)
+
+target_compile_definitions(gdm PRIVATE
+    AMGCL_NO_BOOST
+)

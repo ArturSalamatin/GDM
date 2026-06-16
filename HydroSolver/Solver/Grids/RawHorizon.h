@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+#include <fstream>
+#include <cstdio>
 #include "GridDescriptors.h"
 #include "PropertyDescriptor.h"
 //#include "Descriptors.h"

@@ -5,7 +5,7 @@
 
 #include "../Solver/Grids/OilField.h"
 #include "../Solver/Math/LinearProblem.h"
-#include "../Data/HorizonFactory.h"
+#include "../Solver/Grids/DevelopedHorizon.h"
 
 #include "../Anomaly/FlowField/FlowField.h"
 

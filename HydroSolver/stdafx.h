@@ -28,8 +28,5 @@
 #include <utility>
 #include <cstdlib>
 
-#include <pqxx/pqxx>
-
-
 #define DEBUG_SALAMATIN
 #define PRINT_DATA_SALAMATIN

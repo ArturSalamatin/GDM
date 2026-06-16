@@ -25,6 +25,11 @@ namespace reservoir_simulator
 	class GridBounds
 	{
 	public:
+		GridBounds() noexcept :
+			x_min{0}, y_min{0}, x_max{0}, y_max{0},
+			x_length{0}, y_length{0}
+		{}
+
 		GridBounds(double x_min, double y_min, double x_max, double y_max) noexcept :
 			x_min{ x_min }, y_min{ y_min }, x_max{ x_max }, y_max{ y_max },
 			x_length{ std::abs(x_max - x_min) },
