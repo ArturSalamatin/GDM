@@ -25,7 +25,14 @@
       "PowerShell(Get-ChildItem *)",
       "PowerShell(*)",
       "PowerShell(Get-ChildItem -Recurse *)",
-      "PowerShell(Get-ChildItem -Recurse -File *)"
+      "PowerShell(Get-ChildItem -Recurse -File *)",
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "PowerShell(*)"      
     ]
   },
   "autoCompact": true,
