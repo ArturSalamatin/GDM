@@ -9,6 +9,12 @@
 
 namespace simulation_cases {
 
+struct WellInfo {
+    std::string name;
+    std::string type; // "injector" or "producer"
+    double x, y;
+};
+
 struct SimulationCase {
     virtual ~SimulationCase() = default;
 
@@ -20,6 +26,12 @@ struct SimulationCase {
     virtual void add_wells(reservoir_simulator::ReservoirSimulator& sim,
                            const reservoir_simulator::DevelopedHorizon& h) const = 0;
     virtual std::string name() const = 0;
+
+    virtual size_t nx() const = 0;
+    virtual size_t ny() const = 0;
+    virtual double lx() const = 0;
+    virtual double ly() const = 0;
+    virtual std::vector<WellInfo> wells_info() const = 0;
 };
 
 } // namespace simulation_cases

@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "simulation_cases/SingleInjectorCase.h"
+#include "simulation_cases/TwoWellCase.h"
 
 #include <fstream>
 #include <iomanip>
@@ -28,24 +29,25 @@ void write_snapshot_csv(const std::string& path,
 }
 
 void write_metadata_json(const std::string& dir,
-                         const simulation_cases::SingleInjectorCase& sc,
+                         const simulation_cases::SimulationCase& sc,
                          const std::vector<double>& times)
 {
     std::ofstream ofs(dir + "/metadata.json");
     ofs << "{\n";
     ofs << "  \"case\": \"" << sc.name() << "\",\n";
-    ofs << "  \"Nx\": " << sc.Nx << ", \"Ny\": " << sc.Ny << ",\n";
-    ofs << "  \"Lx\": " << sc.Lx << ", \"Ly\": " << sc.Ly << ",\n";
-    ofs << "  \"hz\": " << sc.hz << ",\n";
-    ofs << "  \"perm_mD\": " << sc.perm_mD << ", \"poro\": " << sc.poro << ",\n";
-    ofs << "  \"P_init_atm\": " << sc.P_init_atm << ",\n";
-    ofs << "  \"oil_saturation_init\": " << sc.oil_saturation << ",\n";
-    double hx = sc.Lx / sc.Nx, hy = sc.Ly / sc.Ny;
-    double cx = (sc.Nx / 2 + 0.5) * hx;
-    double cy = (sc.Ny / 2 + 0.5) * hy;
-    ofs << "  \"well_x\": " << cx << ", \"well_y\": " << cy << ",\n";
-    ofs << "  \"well_type\": \"injector\",\n";
-    ofs << "  \"Q_inj_vol_m3_day\": " << sc.Q_inj_vol << ",\n";
+    ofs << "  \"Nx\": " << sc.nx() << ", \"Ny\": " << sc.ny() << ",\n";
+    ofs << "  \"Lx\": " << sc.lx() << ", \"Ly\": " << sc.ly() << ",\n";
+    auto wells = sc.wells_info();
+    ofs << "  \"wells\": [\n";
+    for (size_t i = 0; i < wells.size(); ++i) {
+        ofs << "    {\"name\": \"" << wells[i].name
+            << "\", \"type\": \"" << wells[i].type
+            << "\", \"x\": " << wells[i].x
+            << ", \"y\": " << wells[i].y << "}";
+        if (i + 1 < wells.size()) ofs << ",";
+        ofs << "\n";
+    }
+    ofs << "  ],\n";
     ofs << "  \"save_times\": [";
     for (size_t k = 0; k < times.size(); ++k) {
         if (k > 0) ofs << ", ";
@@ -63,8 +65,8 @@ struct RunResult {
     std::vector<double> P;
 };
 
-RunResult run_single_injector(const simulation_cases::SingleInjectorCase& sc,
-                              bool export_snapshots)
+RunResult run_case(const simulation_cases::SimulationCase& sc,
+                   bool export_snapshots)
 {
     auto horizon = sc.make_horizon();
     auto numPrm = sc.make_num_params();
@@ -87,7 +89,7 @@ RunResult run_single_injector(const simulation_cases::SingleInjectorCase& sc,
 
         auto Sw0 = sim.GetWaterSaturationField();
         auto P0 = sim.GetPressureField();
-        write_snapshot_csv(out_dir + "/snapshot_000.csv", sc.Nx, sc.Ny, Sw0, P0);
+        write_snapshot_csv(out_dir + "/snapshot_000.csv", sc.nx(), sc.ny(), Sw0, P0);
 
         balance_log.open(out_dir + "/mass_balance.csv");
         balance_log << "t,oil_mass,water_mass,"
@@ -114,7 +116,7 @@ RunResult run_single_injector(const simulation_cases::SingleInjectorCase& sc,
             char snap_name[64];
             std::snprintf(snap_name, sizeof(snap_name),
                           "/snapshot_%03zu.csv", step);
-            write_snapshot_csv(out_dir + snap_name, sc.Nx, sc.Ny, Sw, P);
+            write_snapshot_csv(out_dir + snap_name, sc.nx(), sc.ny(), Sw, P);
         }
 
         for (size_t i = 0; i < Sw.size(); ++i) {
@@ -167,7 +169,7 @@ TEST_CASE("Visual verification: single injector with mass balance",
           "[visual][single-injector][mass-balance]")
 {
     simulation_cases::SingleInjectorCase sc;
-    auto result = run_single_injector(sc, true);
+    auto result = run_case(sc, true);
 
     CHECK(result.max_oil_balance_rel < 1e-3);
     CHECK(result.max_water_balance_rel < 1e-3);
@@ -199,7 +201,7 @@ TEST_CASE("Grid convergence: single injector",
         INFO("Grid " << N << "x" << N);
 
         simulation_cases::SingleInjectorCase sc(N, N);
-        auto result = run_single_injector(sc, true);
+        auto result = run_case(sc, true);
 
         CHECK(result.max_oil_balance_rel < 1e-3);
         CHECK(result.max_water_balance_rel < 1e-3);
@@ -241,4 +243,21 @@ TEST_CASE("Grid convergence: single injector",
     double dM_fine   = std::abs(levels[2].oil_mass - levels[1].oil_mass);
     INFO("dM_oil: coarse=" << dM_coarse << " fine=" << dM_fine);
     CHECK(dM_fine < dM_coarse);
+}
+
+
+TEST_CASE("Two-well: INJ + PROD with mass balance",
+          "[visual][two-well][mass-balance]")
+{
+    simulation_cases::TwoWellCase sc;
+    auto result = run_case(sc, true);
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
+
+    for (size_t i = 0; i < result.Sw.size(); ++i) {
+        CHECK(result.Sw[i] >= 0.0);
+        CHECK(result.Sw[i] <= 1.0);
+        CHECK(result.P[i] > 0.0);
+    }
 }

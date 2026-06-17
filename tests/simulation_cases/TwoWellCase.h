@@ -5,7 +5,7 @@
 
 namespace simulation_cases {
 
-class SingleInjectorCase : public SimulationCase {
+class TwoWellCase : public SimulationCase {
 public:
     size_t Nx, Ny;
     static constexpr size_t Nz = 1;
@@ -13,10 +13,11 @@ public:
     static constexpr double perm_mD = 100.0, poro = 0.2;
     static constexpr double P_init_atm = 200.0;
     static constexpr double oil_saturation = 0.8;
+    static constexpr double rho_oil = 800.0;
     static constexpr double rho_water = 1000.0;
-    static constexpr double Q_inj_vol = 50.0; // m3/day
+    static constexpr double Q_vol = 50.0; // m3/day
 
-    explicit SingleInjectorCase(size_t nx = 21, size_t ny = 21)
+    explicit TwoWellCase(size_t nx = 63, size_t ny = 63)
         : Nx(nx), Ny(ny) {}
 
     reservoir_simulator::DevelopedHorizon make_horizon() const override {
@@ -32,11 +33,11 @@ public:
         return P_init_atm * 101325.0;
     }
 
-    double initial_tau() const override { return 5.0; }
+    double initial_tau() const override { return 1.0; }
 
     std::vector<double> save_times() const override {
         std::vector<double> times;
-        for (double t = 0.0; t <= 200.0; t += 10.0)
+        for (double t = 0.0; t <= 730.0; t += 5.0)
             times.push_back(t);
         return times;
     }
@@ -44,15 +45,24 @@ public:
     void add_wells(reservoir_simulator::ReservoirSimulator& sim,
                    const reservoir_simulator::DevelopedHorizon& h) const override {
         double hx = Lx / Nx, hy = Ly / Ny;
-        double cx = (Nx / 2 + 0.5) * hx;
-        double cy = (Ny / 2 + 0.5) * hy;
+
+        double inj_x = (Nx / 4 + 0.5) * hx;
+        double inj_y = (Ny / 2 + 0.5) * hy;
+
+        double prod_x = (3 * Nx / 4 + 0.5) * hx;
+        double prod_y = (Ny / 2 + 0.5) * hy;
+
         test_helpers::add_simple_well(sim, h,
-            L"INJ", cx, cy,
-            0.0, -Q_inj_vol * rho_water);
+            L"INJ", inj_x, inj_y,
+            0.0, -Q_vol * rho_water);
+
+        test_helpers::add_simple_well(sim, h,
+            L"PROD", prod_x, prod_y,
+            Q_vol * rho_oil, 0.0);
     }
 
     std::string name() const override {
-        return "single_injector_" + std::to_string(Nx) + "x" + std::to_string(Ny);
+        return "two_well_" + std::to_string(Nx) + "x" + std::to_string(Ny);
     }
 
     size_t nx() const override { return Nx; }
@@ -62,9 +72,12 @@ public:
 
     std::vector<WellInfo> wells_info() const override {
         double hx = Lx / Nx, hy = Ly / Ny;
-        double cx = (Nx / 2 + 0.5) * hx;
-        double cy = (Ny / 2 + 0.5) * hy;
-        return {{"INJ", "injector", cx, cy}};
+        double inj_x = (Nx / 4 + 0.5) * hx;
+        double inj_y = (Ny / 2 + 0.5) * hy;
+        double prod_x = (3 * Nx / 4 + 0.5) * hx;
+        double prod_y = (Ny / 2 + 0.5) * hy;
+        return {{"INJ", "injector", inj_x, inj_y},
+                {"PROD", "producer", prod_x, prod_y}};
     }
 };
 

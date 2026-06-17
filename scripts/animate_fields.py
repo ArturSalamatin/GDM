@@ -81,10 +81,17 @@ def animate_fields(results_dir, output=None, fps=4, dpi=120):
     ax_p.set_ylabel("y, м")
     fig.colorbar(im_p, ax=ax_p, shrink=0.8)
 
-    if "well_x" in meta and "well_y" in meta:
+    if "wells" in meta:
+        for w in meta["wells"]:
+            marker = "v" if w["type"] == "injector" else "^"
+            color = "b" if w["type"] == "injector" else "r"
+            for ax in (ax_sw, ax_p):
+                ax.plot(w["x"], w["y"], marker,
+                        color=color, markersize=10, markeredgecolor="k", zorder=5)
+    elif "well_x" in meta and "well_y" in meta:
         for ax in (ax_sw, ax_p):
-            ax.plot(meta["well_x"], meta["well_y"], "r^",
-                    markersize=8, markeredgecolor="k", zorder=5)
+            ax.plot(meta["well_x"], meta["well_y"], "v",
+                    color="b", markersize=10, markeredgecolor="k", zorder=5)
 
     fig.tight_layout(rect=[0, 0, 1, 0.95])
 
