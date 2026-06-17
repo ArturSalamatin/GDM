@@ -81,6 +81,7 @@ add_executable(gdm_tests
     tests/test_buckley_leverett.cpp
     tests/test_components.cpp
     tests/test_five_spot.cpp
+    tests/test_visual_verification.cpp
 )
 target_sources(gdm_tests PRIVATE ${GDM_CORE_SOURCES})
 target_link_libraries(gdm_tests PRIVATE Catch2::Catch2WithMain)
