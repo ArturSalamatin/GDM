@@ -9,7 +9,6 @@
 
 #include "../../Helpers/Defines.h"
 #include "../../Utils/Defines.h"
-#include <geos/geom.h>
 
 namespace reservoir_simulator
 {
@@ -157,9 +156,9 @@ namespace reservoir_simulator
 				return reservoir_simulator::phasePortrait::Contour(result.first, result.second);
 			}
 
-			std::vector<geos::geom::Coordinate> Contour_geos() const
+			std::vector<Coordinate> Contour_geos() const
 			{
-				std::vector<geos::geom::Coordinate> result{};
+				std::vector<Coordinate> result{};
 				for (int i = 0; i < trajectoryEnsemble.size(); i++)
 					result.emplace_back(trajectoryEnsemble[i].back().x(), trajectoryEnsemble[i].back().y());
 				result.emplace_back(trajectoryEnsemble[0].back().x(), trajectoryEnsemble[0].back().y());
@@ -226,7 +225,7 @@ namespace reservoir_simulator
 
 			geos_polygon create_geos_polygon()
 			{
-				std::vector<geos::geom::Coordinate> result;
+				std::vector<Coordinate> result;
 				for (int i = 0; i < trajectoryEnsemble.size(); i++)
 					result.emplace_back(trajectoryEnsemble[i].back().x(), trajectoryEnsemble[i].back().y());
 				result.emplace_back(trajectoryEnsemble[0].back().x(), trajectoryEnsemble[0].back().y());
