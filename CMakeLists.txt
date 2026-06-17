@@ -80,6 +80,7 @@ add_executable(gdm_tests
     tests/test_mass_balance.cpp
     tests/test_buckley_leverett.cpp
     tests/test_components.cpp
+    tests/test_five_spot.cpp
 )
 target_sources(gdm_tests PRIVATE ${GDM_CORE_SOURCES})
 target_link_libraries(gdm_tests PRIVATE Catch2::Catch2WithMain)
@@ -89,4 +90,6 @@ target_compile_definitions(gdm_tests PRIVATE AMGCL_NO_BOOST)
 include(CTest)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
-catch_discover_tests(gdm_tests)
+catch_discover_tests(gdm_tests
+    PROPERTIES TIMEOUT 120
+)
