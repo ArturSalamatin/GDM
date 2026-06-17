@@ -77,6 +77,7 @@ target_compile_definitions(gdm PRIVATE AMGCL_NO_BOOST)
 add_executable(gdm_tests
     tests/test_smoke.cpp
     tests/test_stationary_pressure.cpp
+    tests/test_mass_balance.cpp
 )
 target_sources(gdm_tests PRIVATE ${GDM_CORE_SOURCES})
 target_link_libraries(gdm_tests PRIVATE Catch2::Catch2WithMain)
