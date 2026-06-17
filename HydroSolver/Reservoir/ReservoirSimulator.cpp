@@ -66,6 +66,10 @@ namespace reservoir_simulator
 		accumDebet = 0.0;
 		accumOilOutFlux = 0.0;
 		accumOil = 0.0;
+		curWater = WaterTotal();
+		accumWaterDebet = 0.0;
+		accumWaterOutFlux = 0.0;
+		accumWater = 0.0;
 		curTime = 0.0;
 
 		auto appRadiusWell{ 0.2 * horizon.block_size.step_x };
@@ -203,7 +207,8 @@ namespace reservoir_simulator
 
 	std::vector<double> ReservoirSimulator::GetOverallBalance() const
 	{
-		return std::vector<double>{curTime, accumOil, accumOilOutFlux, accumDebet};
+		return std::vector<double>{curTime, accumOil, accumOilOutFlux, accumDebet,
+			accumWater, accumWaterOutFlux, accumWaterDebet};
 	}
 
 	void ReservoirSimulator::PrintReservoirState(std::ios_base::openmode mode) const
@@ -668,6 +673,14 @@ namespace reservoir_simulator
 
 		accumOilOutFlux += OilContourFlux() * loc_tau;
 		accumDebet -= OilDebitTotal() * loc_tau;
+
+		prevWater = curWater;
+		curWater = WaterTotal();
+		accumWater += curWater - prevWater;
+
+		accumWaterOutFlux += WaterContourFlux() * loc_tau;
+		accumWaterDebet -= WaterDebitTotal() * loc_tau;
+
 		curTime += loc_tau;
 	}
 
@@ -1204,6 +1217,71 @@ namespace reservoir_simulator
 					}
 				}
 			}
+		return result;
+	}
+
+	double ReservoirSimulator::WaterContourFlux() const
+	{
+		double result = 0.0;
+		size_t nx = Grid.Nx(), ny = Grid.Ny(), nz = Grid.Nz();
+		if (nx > 1)
+			for (int j = 0; j < ny; j++)
+			{
+				for (size_t i = 0; i < nx; i += nx - 1)
+				{
+					for (size_t k = 0; k < nz; k++)
+					{
+						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						if (l < 0) continue;
+
+						const TwoPhaseFlowCell& cell = Grid[l];
+						const double hx = cell.StepX(), hy = cell.StepY(), hz = cell.StepZ();
+						double refPressure = RefPressure;
+						double faceArea = hy * hz / (hx / 2);
+						double dp = cell.P() - refPressure;
+						double p_grad = faceArea * dp;
+						double f_water;
+						double cur_mobility = cell.MobilityOverall();
+
+						if (dp > 0.0)
+							f_water = cell.F_Water() * cell.DensityWater();
+						else
+							f_water = 1.0 * cell.DensityWater(refPressure);
+
+						result += cur_mobility * f_water * p_grad;
+					}
+				}
+			}
+
+		if (ny > 1)
+			for (size_t i = 0; i < nx; i++)
+			{
+				for (size_t j = 0; j < ny; j += ny - 1)
+				{
+					for (size_t k = 0; k < nz; k++)
+					{
+						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						if (l < 0) continue;
+
+						const TwoPhaseFlowCell& cell = Grid[l];
+						const double hx = cell.StepX(), hy = cell.StepY(), hz = cell.StepZ();
+						double refPressure = RefPressure;
+						double faceArea = hx * hz / (hy / 2);
+						double dp = cell.P() - refPressure;
+						double p_grad = faceArea * dp;
+						double f_water;
+						double cur_mobility = cell.MobilityOverall();
+
+						if (dp > 0.0)
+							f_water = cell.F_Water() * cell.DensityWater();
+						else
+							f_water = 1.0 * cell.DensityWater(refPressure);
+
+						result += cur_mobility * f_water * p_grad;
+					}
+				}
+			}
+
 		return result;
 	}
 
