@@ -87,3 +87,9 @@ Desktop.ini
 !vault/
 !vault/**
 
+test_connections.txt
+test_diagValues.txt
+test_Matrix.txt
+test_SparsityPattern_DiagBlocks.txt
+test_SparsityPattern_OffDiagBlocks.txt
+test_SparsityPattern.txt
