@@ -18,10 +18,19 @@ if(MSVC)
     )
 endif()
 
+# --- Catch2 ---
+include(FetchContent)
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        v3.8.0
+)
+FetchContent_MakeAvailable(Catch2)
+
 set(HYDRO ${CMAKE_SOURCE_DIR}/HydroSolver)
 
-set(GDM_SOURCES
-    src/main.cpp
+# Ядро солвера — все .cpp кроме main()
+set(GDM_CORE_SOURCES
     ${HYDRO}/stdafx.cpp
 
     # Reservoir
@@ -57,16 +66,23 @@ set(GDM_SOURCES
 
     # Helpers
     ${HYDRO}/Helpers/LogFile.cpp
-
 )
 
-add_executable(gdm ${GDM_SOURCES})
+# --- Основной executable ---
+add_executable(gdm src/main.cpp ${GDM_CORE_SOURCES})
+target_include_directories(gdm PRIVATE ${HYDRO} ${HYDRO}/AMGSolver/amgcl)
+target_compile_definitions(gdm PRIVATE AMGCL_NO_BOOST)
 
-target_include_directories(gdm PRIVATE
-    ${HYDRO}
-    ${HYDRO}/AMGSolver/amgcl
+# --- Тесты (Catch2) ---
+add_executable(gdm_tests
+    tests/test_smoke.cpp
 )
+target_sources(gdm_tests PRIVATE ${GDM_CORE_SOURCES})
+target_link_libraries(gdm_tests PRIVATE Catch2::Catch2WithMain)
+target_include_directories(gdm_tests PRIVATE ${HYDRO} ${HYDRO}/AMGSolver/amgcl)
+target_compile_definitions(gdm_tests PRIVATE AMGCL_NO_BOOST)
 
-target_compile_definitions(gdm PRIVATE
-    AMGCL_NO_BOOST
-)
+include(CTest)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
+catch_discover_tests(gdm_tests)
