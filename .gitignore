@@ -93,3 +93,9 @@ test_Matrix.txt
 test_SparsityPattern_DiagBlocks.txt
 test_SparsityPattern_OffDiagBlocks.txt
 test_SparsityPattern.txt
+WellTestData/P1/well_MER_debit.txt
+WellTestData/P2/well_MER_debit.txt
+WellTestData/P3/well_MER_debit.txt
+WellTestData/P4/well_MER_debit.txt
+WellTestData/PROD/well_MER_debit.txt
+test_MER_PRODinside_well.txt

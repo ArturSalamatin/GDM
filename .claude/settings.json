@@ -4,35 +4,13 @@
   },
   "permissions": {
     "allow": [
-      "Bash(cmake *)",
-      "Bash(cmake --build *)",
-      "Bash(cmake --install *)",
-      "Bash(cmake --preset *)",
-      "Bash(cmake * 2>&1 *)",
-      "Bash(cmake * | *)",
-      "Bash(ctest *)",
-      "Bash(ctest * 2>&1 *)",
-      "Bash(ctest * | *)",
-      "Bash(git *)",
-      "Bash(grep *)",
-      "Bash(find *)",
-      "Bash(python *)",
-      "Bash(pip install *)",
-      "Bash(ls *)",
-      "Read(*)",
-      "Write(vault/**)",
-      "Edit(vault/**)",
-      "PowerShell(Get-ChildItem *)",
-      "PowerShell(*)",
-      "PowerShell(Get-ChildItem -Recurse *)",
-      "PowerShell(Get-ChildItem -Recurse -File *)",
       "Bash(*)",
+      "PowerShell(*)",
       "Read(*)",
       "Write(*)",
       "Edit(*)",
       "Glob(*)",
-      "Grep(*)",
-      "PowerShell(*)"      
+      "Grep(*)"
     ]
   },
   "autoCompact": true,
@@ -52,7 +30,9 @@
       "out/",
       ".vs/",
       "vault/GDM/.obsidian/",
-      "example_files/"
+      "example_files/",
+      "HydroSolver/AMGSolver/amgcl/",
+      "vault/GDM/sessions/"
     ]
   }
 }
