@@ -54,13 +54,18 @@ void write_metadata_json(const std::string& dir,
     ofs << "]\n}\n";
 }
 
-} // namespace
+struct RunResult {
+    double oil_mass;
+    double water_mass;
+    double max_oil_balance_rel;
+    double max_water_balance_rel;
+    std::vector<double> Sw;
+    std::vector<double> P;
+};
 
-
-TEST_CASE("Visual verification: single injector with mass balance",
-          "[visual][single-injector][mass-balance]")
+RunResult run_single_injector(const simulation_cases::SingleInjectorCase& sc,
+                              bool export_snapshots)
 {
-    simulation_cases::SingleInjectorCase sc;
     auto horizon = sc.make_horizon();
     auto numPrm = sc.make_num_params();
 
@@ -73,101 +78,167 @@ TEST_CASE("Visual verification: single injector with mass balance",
     sc.add_wells(sim, horizon);
 
     const auto times = sc.save_times();
-    const std::string out_dir = "results/" + sc.name();
-    fs::create_directories(out_dir);
+    std::string out_dir;
+    std::ofstream balance_log;
 
-    // --- Initial state (t=0) ---
-    auto Sw = sim.GetWaterSaturationField();
-    auto P = sim.GetPressureField();
+    if (export_snapshots) {
+        out_dir = "results/" + sc.name();
+        fs::create_directories(out_dir);
+
+        auto Sw0 = sim.GetWaterSaturationField();
+        auto P0 = sim.GetPressureField();
+        write_snapshot_csv(out_dir + "/snapshot_000.csv", sc.Nx, sc.Ny, Sw0, P0);
+
+        balance_log.open(out_dir + "/mass_balance.csv");
+        balance_log << "t,oil_mass,water_mass,"
+                       "accumOil,accumOilOutFlux,accumOilDebet,oil_residual,"
+                       "accumWater,accumWaterOutFlux,accumWaterDebet,water_residual\n";
+        balance_log << std::setprecision(10)
+                    << 0.0 << ","
+                    << sim.OilTotal() << "," << sim.WaterTotal() << ","
+                    << 0.0 << "," << 0.0 << "," << 0.0 << "," << 0.0 << ","
+                    << 0.0 << "," << 0.0 << "," << 0.0 << "," << 0.0 << "\n";
+    }
+
     double oil_mass_0 = sim.OilTotal();
     double water_mass_0 = sim.WaterTotal();
+    double max_oil_rel = 0.0, max_water_rel = 0.0;
 
-    write_snapshot_csv(out_dir + "/snapshot_000.csv", sc.Nx, sc.Ny, Sw, P);
-
-    // Mass balance log
-    std::ofstream balance_log(out_dir + "/mass_balance.csv");
-    balance_log << "t,oil_mass,water_mass,"
-                   "accumOil,accumOilOutFlux,accumOilDebet,oil_residual,"
-                   "accumWater,accumWaterOutFlux,accumWaterDebet,water_residual\n";
-    balance_log << std::setprecision(10)
-                << 0.0 << ","
-                << oil_mass_0 << "," << water_mass_0 << ","
-                << 0.0 << "," << 0.0 << "," << 0.0 << "," << 0.0 << ","
-                << 0.0 << "," << 0.0 << "," << 0.0 << "," << 0.0 << "\n";
-
-    INFO("Initial: oil_mass=" << oil_mass_0 << " water_mass=" << water_mass_0);
-
-    // Relative tolerance for mass balance residual
-    const double balance_tol = 1e-3;
-
-    // --- Step-by-step solve ---
     for (size_t step = 1; step < times.size(); ++step) {
-        double t_prev = times[step - 1];
-        double t_next = times[step];
+        sim.Solve({times[step - 1], times[step]});
 
-        sim.Solve({t_prev, t_next});
+        auto Sw = sim.GetWaterSaturationField();
+        auto P = sim.GetPressureField();
 
-        // Extract fields
-        Sw = sim.GetWaterSaturationField();
-        P = sim.GetPressureField();
+        if (export_snapshots) {
+            char snap_name[64];
+            std::snprintf(snap_name, sizeof(snap_name),
+                          "/snapshot_%03zu.csv", step);
+            write_snapshot_csv(out_dir + snap_name, sc.Nx, sc.Ny, Sw, P);
+        }
 
-        // Write snapshot
-        char snap_name[64];
-        std::snprintf(snap_name, sizeof(snap_name),
-                      "/snapshot_%03zu.csv", step);
-        write_snapshot_csv(out_dir + snap_name, sc.Nx, sc.Ny, Sw, P);
-
-        // Physical constraints
         for (size_t i = 0; i < Sw.size(); ++i) {
             REQUIRE(Sw[i] >= 0.0);
             REQUIRE(Sw[i] <= 1.0);
             REQUIRE(P[i] > 0.0);
         }
 
-        // Mass balance from kernel accumulators
-        // GetOverallBalance: {curTime, accumOil, accumOilOutFlux, accumDebet,
-        //                     accumWater, accumWaterOutFlux, accumWaterDebet}
         auto bal = sim.GetOverallBalance();
-        double accumOil         = bal[1];
-        double accumOilOutFlux  = bal[2];
-        double accumOilDebet    = bal[3];
-        double accumWater       = bal[4];
-        double accumWaterOutFlux = bal[5];
-        double accumWaterDebet  = bal[6];
+        double oil_residual   = bal[1] + bal[2] - bal[3];
+        double water_residual = bal[4] + bal[5] - bal[6];
 
-        // Balance: ΔM + outflux - debet_accum = 0
-        // accumDebet = -∫(Debit*dt), debit > 0 = production, < 0 = injection
-        double oil_residual   = accumOil + accumOilOutFlux - accumOilDebet;
-        double water_residual = accumWater + accumWaterOutFlux - accumWaterDebet;
-
-        // Normalize by initial mass to get relative error
         double oil_rel  = (oil_mass_0 > 0)
             ? std::abs(oil_residual) / oil_mass_0 : std::abs(oil_residual);
         double water_rel = (water_mass_0 > 0)
             ? std::abs(water_residual) / water_mass_0 : std::abs(water_residual);
 
-        INFO("t=" << t_next
-             << " oil_res=" << oil_residual << " (rel=" << oil_rel << ")"
-             << " water_res=" << water_residual << " (rel=" << water_rel << ")");
+        max_oil_rel = std::max(max_oil_rel, oil_rel);
+        max_water_rel = std::max(max_water_rel, water_rel);
 
-        CHECK(oil_rel < balance_tol);
-        CHECK(water_rel < balance_tol);
-
-        // Water mass must increase (injection with no production)
-        double water_mass = sim.WaterTotal();
-        double oil_mass = sim.OilTotal();
-        CHECK(water_mass > water_mass_0);
-
-        // Log
-        balance_log << std::setprecision(10)
-                    << t_next << ","
-                    << oil_mass << "," << water_mass << ","
-                    << accumOil << "," << accumOilOutFlux << ","
-                    << accumOilDebet << "," << oil_residual << ","
-                    << accumWater << "," << accumWaterOutFlux << ","
-                    << accumWaterDebet << "," << water_residual << "\n";
+        if (export_snapshots) {
+            double oil_mass = sim.OilTotal();
+            double water_mass = sim.WaterTotal();
+            balance_log << std::setprecision(10)
+                        << times[step] << ","
+                        << oil_mass << "," << water_mass << ","
+                        << bal[1] << "," << bal[2] << ","
+                        << bal[3] << "," << oil_residual << ","
+                        << bal[4] << "," << bal[5] << ","
+                        << bal[6] << "," << water_residual << "\n";
+        }
     }
 
-    balance_log.close();
-    write_metadata_json(out_dir, sc, times);
+    if (export_snapshots) {
+        balance_log.close();
+        write_metadata_json(out_dir, sc, times);
+    }
+
+    return {
+        sim.OilTotal(), sim.WaterTotal(),
+        max_oil_rel, max_water_rel,
+        sim.GetWaterSaturationField(), sim.GetPressureField()
+    };
+}
+
+} // namespace
+
+
+TEST_CASE("Visual verification: single injector with mass balance",
+          "[visual][single-injector][mass-balance]")
+{
+    simulation_cases::SingleInjectorCase sc;
+    auto result = run_single_injector(sc, true);
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
+    CHECK(result.water_mass > sc.poro * sc.Lx * sc.Ly * sc.hz * sc.rho_water
+                              * (1.0 - sc.oil_saturation));
+}
+
+
+TEST_CASE("Grid convergence: single injector",
+          "[convergence][single-injector]")
+{
+    struct GridLevel {
+        size_t N;
+        double Sw_probe;
+        double P_probe_atm;
+        double oil_mass;
+    };
+
+    constexpr size_t grids[] = {11, 21, 41};
+    std::vector<GridLevel> levels;
+
+    std::string out_dir = "results/convergence";
+    fs::create_directories(out_dir);
+    std::ofstream log(out_dir + "/convergence.csv");
+    log << "N,hx,oil_mass,water_mass,Sw_probe,P_probe_atm,"
+           "max_oil_balance_rel,max_water_balance_rel\n";
+
+    for (size_t N : grids) {
+        INFO("Grid " << N << "x" << N);
+
+        simulation_cases::SingleInjectorCase sc(N, N);
+        auto result = run_single_injector(sc, true);
+
+        CHECK(result.max_oil_balance_rel < 1e-3);
+        CHECK(result.max_water_balance_rel < 1e-3);
+
+        // Probe at 3/4 distance from center to boundary (away from well singularity)
+        size_t probe = (N / 2) * N + (3 * N / 4);
+        double Sw_p = result.Sw[probe];
+        double P_p = result.P[probe] / 101325.0;
+
+        levels.push_back({N, Sw_p, P_p, result.oil_mass});
+
+        double hx = sc.Lx / N;
+        log << std::setprecision(10)
+            << N << "," << hx << ","
+            << result.oil_mass << "," << result.water_mass << ","
+            << Sw_p << "," << P_p << ","
+            << result.max_oil_balance_rel << ","
+            << result.max_water_balance_rel << "\n";
+
+        INFO("  Sw_probe=" << Sw_p << " P_probe=" << P_p << " atm");
+    }
+
+    log.close();
+
+    REQUIRE(levels.size() == 3);
+
+    // Convergence: differences between successive grids should decrease
+    double dSw_coarse = std::abs(levels[1].Sw_probe - levels[0].Sw_probe);
+    double dSw_fine   = std::abs(levels[2].Sw_probe - levels[1].Sw_probe);
+    INFO("dSw: coarse=" << dSw_coarse << " fine=" << dSw_fine);
+    CHECK(dSw_fine < dSw_coarse);
+
+    double dP_coarse = std::abs(levels[1].P_probe_atm - levels[0].P_probe_atm);
+    double dP_fine   = std::abs(levels[2].P_probe_atm - levels[1].P_probe_atm);
+    INFO("dP: coarse=" << dP_coarse << " fine=" << dP_fine);
+    CHECK(dP_fine < dP_coarse);
+
+    double dM_coarse = std::abs(levels[1].oil_mass - levels[0].oil_mass);
+    double dM_fine   = std::abs(levels[2].oil_mass - levels[1].oil_mass);
+    INFO("dM_oil: coarse=" << dM_coarse << " fine=" << dM_fine);
+    CHECK(dM_fine < dM_coarse);
 }
