@@ -5,7 +5,7 @@
 
 #include "../Solver/Grids/OilField.h"
 #include "../Solver/Math/LinearProblem.h"
-#include "../Data/HorizonFactory.h"
+#include "../Solver/Grids/DevelopedHorizon.h"
 
 #include "../Anomaly/FlowField/FlowField.h"
 
@@ -54,6 +54,7 @@ namespace reservoir_simulator
 		void PrintWellCoords() const;
 
 		double prevOil, curOil, accumOil, accumOilOutFlux, accumDebet;
+		double prevWater, curWater, accumWater, accumWaterOutFlux, accumWaterDebet;
 		double curTime;
 
 		std::vector<phasePortrait::SomeFlowField> flowFields;
@@ -392,6 +393,7 @@ namespace reservoir_simulator
 		double OilDebitTotal() const;
 		double WaterDebitTotal() const;
 		double OilContourFlux() const;
+		double WaterContourFlux() const;
 
 		std::tuple<std::vector<std::vector<std::vector<double>>>, std::vector<std::vector<std::vector<double>>>,
 			std::vector<std::vector<std::vector<double>>>, std::vector<std::vector<std::vector<double>>>>
