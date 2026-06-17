@@ -9,6 +9,15 @@ AMGSolver
 x64
 MatLab
 Support
+test_connections.txt
+test_diagValues.txt
+test_Matrix.txt
+test_MER_INJ.txt
+test_MER_INJinside_well.txt
+test_SparsityPattern_DiagBlocks.txt
+test_SparsityPattern_OffDiagBlocks.txt
+test_SparsityPattern.txt
+WellTestData/INJ/well_MER_debit.txt
 
 
 # Archives
@@ -74,3 +83,4 @@ Desktop.ini
 # Include vault/ with all contents (override global patterns)
 !vault/
 !vault/**
+
