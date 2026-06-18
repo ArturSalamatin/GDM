@@ -247,7 +247,7 @@ TEST_CASE("Grid convergence: single injector",
 
 
 TEST_CASE("Two-well: INJ + PROD with mass balance",
-          "[.slow][visual][two-well][mass-balance]")
+          "[slow][visual][two-well][mass-balance]")
 {
     simulation_cases::TwoWellCase sc;
     auto result = run_case(sc, true);
