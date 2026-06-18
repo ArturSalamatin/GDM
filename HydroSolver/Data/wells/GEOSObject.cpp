@@ -21,16 +21,12 @@ GeosShell::GeosPoint GeometryHandler::GEOSObjectHandler::CreatePoint(std::pair<f
 
 	std::lock_guard<std::mutex> lock(CreateLock);
 
-	auto ptr = global_factory->createPoint(geos::geom::Coordinate({ coord.first, coord.second }));
-
-
-	auto _ptr = GeosShell::GeosPoint(global_factory.get(), ptr);
-	return _ptr;
+	return GeosShell::GeosPoint(coord.first, coord.second);
 }
 
 geos::geom::Polygon::Ptr GeometryHandler::GEOSObjectHandler::CreatePolygon(std::list<std::pair<float, float>>& shell)
 {
-	//создаем набор координат
+	//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	auto cas = std::make_unique<geos::geom::CoordinateArraySequence>();
 	for (const auto& coord : shell)
 	{
@@ -41,7 +37,7 @@ geos::geom::Polygon::Ptr GeometryHandler::GEOSObjectHandler::CreatePolygon(std::
 
 	auto lr = global_factory->createLinearRing(std::move(cas));
 	//GeometryContainer.push_back(lr);
-	//createPolygon забирает на себя управление переданными аргументами => переданные аргументы удалять не надо
+	//createPolygon пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ => пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
 	auto poly = global_factory->createPolygon(std::move(lr));
 	return poly;
 }
@@ -50,14 +46,14 @@ std::shared_ptr<std::map<std::wstring, geos::geom::Geometry::Ptr>> GeometryHandl
 	const std::map<std::wstring, GeosShell::GeosPoint>& Wells,
 	const Geometry* WorkCountour)
 {
-	//задаем точки сетки Вороного
+	//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	geos::geom::CoordinateArraySequence cas;
 	for (const auto& well : Wells)
 	{
 		cas.add(geos::geom::Coordinate{ (well.second.get())->getX(), (well.second.get())->getY() });
 		//std::cout << well.second->getX() << "\t" << well.second->getY() << "\r\n" << std::flush;
 	}
-	//строим диаграмму
+	//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	std::lock_guard<std::mutex> lock(CreateLock);
 	geos::triangulate::VoronoiDiagramBuilder vdb;
 	vdb.setTolerance(5);
@@ -82,33 +78,34 @@ std::shared_ptr<std::map<std::wstring, geos::geom::Geometry::Ptr>> GeometryHandl
 	{
 		f.get();
 	}
-	//пересортируем массив
+	//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	auto out = std::make_shared<std::map<std::wstring, geos::geom::Geometry::Ptr>>();
 	for (const auto& well : Wells)
 	{
-		const geos::geom::Point* well_p = well.second.get();
+		auto well_p = global_factory->createPoint(
+			geos::geom::Coordinate(well.second.get()->getX(), well.second.get()->getY()));
 		for (auto& ncell : ptrs)
 		{
 			//auto ncell = wcell->buffer(0);
 			//auto _nsmooth = SmoothPolygon(std::move(_ncell));
 			//auto ncell = CreatePolygon(_nsmooth);
 			//global_factory->destroyGeometry(wcell);
-			//находим нужную ячейку
+			//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			if (ncell != nullptr && ncell->contains(well_p))
 			{
-				//проверяем лежит ли она в рабочей зоне
+				//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 				/*if (WorkCountour != nullptr)
-				{*/ //если зоны нет, то вычисляем пересечение
+				{*/ //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				if (WorkCountour->contains(ncell.get()))
 				{
 					//if (ObjectCountour != nullptr)
 					//{
-					//	//если ячека лежит, то просто сохраняем
+					//	//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					//	if (ObjectCountour->contains(ncell.get()))
 					//	{
 					out->insert(std::make_pair(well.first, std::move(ncell)));
 
-					//	}//если ячейка пересекается, то сохраняем пересечение
+					//	}//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					//	else if (ObjectCountour->intersects(ncell.get()))
 					//	{
 					//		auto intersection = ncell->intersection(ObjectCountour);
@@ -125,12 +122,12 @@ std::shared_ptr<std::map<std::wstring, geos::geom::Geometry::Ptr>> GeometryHandl
 					auto _cell = WorkCountour->intersection(ncell.get());
 					//if (ObjectCountour != nullptr)
 					//{
-					//	//если ячека лежит, то просто сохраняем
+					//	//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					//	if (ObjectCountour->contains(_cell.get()))
 					//	{
 					out->insert(std::make_pair(well.first, std::move(_cell)));
 
-					//	}//если ячейка пересекается, то сохраняем пересечение
+					//	}//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 					//	else if (ObjectCountour->intersects(_cell.get()))
 					//	{
 					//		auto intersection = _cell->intersection(ObjectCountour);
@@ -146,7 +143,7 @@ std::shared_ptr<std::map<std::wstring, geos::geom::Geometry::Ptr>> GeometryHandl
 				else {
 					out->insert(std::make_pair(well.first, std::move(ncell)));
 				}*/
-				//выходим из цикла
+				//пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				break;
 			}
 
