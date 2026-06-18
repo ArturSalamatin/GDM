@@ -17,7 +17,7 @@ public:
     static constexpr double rho_water = 1000.0;
     static constexpr double Q_vol = 50.0; // m3/day
 
-    explicit TwoWellCase(size_t nx = 63, size_t ny = 63)
+    explicit TwoWellCase(size_t nx = 31, size_t ny = 31)
         : Nx(nx), Ny(ny) {}
 
     reservoir_simulator::DevelopedHorizon make_horizon() const override {
