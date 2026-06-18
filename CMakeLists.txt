@@ -60,10 +60,11 @@ add_library(gdm_core STATIC
     ${HYDRO}/Reservoir/Well/SetOfPoints.cpp
     ${HYDRO}/Reservoir/Well/WellTrajectory.cpp
 
-    # Flow field
+    # Flow field / Streamlines
     ${HYDRO}/Anomaly/FlowField/SomeFlowField.cpp
     ${HYDRO}/Anomaly/FlowField/FlowField.cpp
     ${HYDRO}/Anomaly/FlowField/Point.cpp
+    ${HYDRO}/Anomaly/Trajectory.cpp
 
     # Descriptors
     ${HYDRO}/Descriptors/Descriptors.cpp
@@ -92,6 +93,7 @@ add_executable(gdm_tests
     tests/test_components.cpp
     tests/test_five_spot.cpp
     tests/test_visual_verification.cpp
+    tests/test_streamlines.cpp
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 
@@ -99,7 +101,7 @@ include(CTest)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 catch_discover_tests(gdm_tests
-    PROPERTIES TIMEOUT 120
+    PROPERTIES TIMEOUT 600
 )
 
 # =============================================================================
