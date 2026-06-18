@@ -78,6 +78,12 @@ dist/
 *.user
 *.sln.docstates
 
+# Visual Studio project files (CMake is the source of truth)
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
 # OS
 Thumbs.db
 Desktop.ini
