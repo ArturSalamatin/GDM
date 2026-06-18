@@ -29,7 +29,7 @@ std::wstring BinaryFileRead::GetGridcellGuidFromProject(std::wstring path)
 	int itr = 0;
 	while (itr < 127)
 	{
-		GetPrivateProfileStringW(L"Elements", std::to_wstring(itr + 1).c_str(), L"", str, (DWORD)127, path.c_str()); //ищем элемент Wells
+		GetPrivateProfileStringW(L"Elements", std::to_wstring(itr + 1).c_str(), L"", str, (DWORD)127, path.c_str()); //РёС‰РµРј СЌР»РµРјРµРЅС‚ Wells
 		std::wstring names(str);
 		if (names == L"Grdecl")
 		{
@@ -38,11 +38,11 @@ std::wstring BinaryFileRead::GetGridcellGuidFromProject(std::wstring path)
 		itr++;
 	}
 	std::wstring names(str);
-	if (names != L"") //проверка на пустую строку
+	if (names != L"") //РїСЂРѕРІРµСЂРєР° РЅР° РїСѓСЃС‚СѓСЋ СЃС‚СЂРѕРєСѓ
 	{
 		wchar_t str1[127];
-		GetPrivateProfileStringW(L"Guids", std::to_wstring(itr + 1).c_str(), L"", str1, (DWORD)127, path.c_str()); //Находим соответсвующий guid
-		return std::wstring(str1); //Возвращаем guid папки с Model.bin
+		GetPrivateProfileStringW(L"Guids", std::to_wstring(itr + 1).c_str(), L"", str1, (DWORD)127, path.c_str()); //РќР°С…РѕРґРёРј СЃРѕРѕС‚РІРµС‚СЃРІСѓСЋС‰РёР№ guid
+		return std::wstring(str1); //Р’РѕР·РІСЂР°С‰Р°РµРј guid РїР°РїРєРё СЃ Model.bin
 	}
 	return L"";
 }
@@ -55,32 +55,32 @@ std::map<std::wstring, std::wstring> BinaryFileRead::ReadGRDECLModels(
 	int& ny, 
 	int& nz)
 {
-	auto file = Read(path); //читаем файл
+	auto file = Read(path); //С‡РёС‚Р°РµРј С„Р°Р№Р»
 	std::map<std::wstring, std::wstring> out;
 	if (file.size() > 0)
 	{
 		std::string sign(&file[0], 16);
-		if (sign == "KPFUBOIL  GRDECL") //проверяем сигнатуру
+		if (sign == "KPFUBOIL  GRDECL") //РїСЂРѕРІРµСЂСЏРµРј СЃРёРіРЅР°С‚СѓСЂСѓ
 		{
-			//загружаем смешение и кол-ва
+			//Р·Р°РіСЂСѓР¶Р°РµРј СЃРјРµС€РµРЅРёРµ Рё РєРѕР»-РІР°
 			memcpy_s(&nx, 4, &file[20], 4);
 			memcpy_s(&ny, 4, &file[24], 4);
 			memcpy_s(&nz, 4, &file[28], 4);
 			memcpy_s(&xshift, 8, &file[32], 8);
 			memcpy_s(&yshifth, 8, &file[40], 8);
-			//загружаем guid
+			//Р·Р°РіСЂСѓР¶Р°РµРј guid
 			std::vector<char> Buffer;
 			std::vector<std::string> sBuffer;
 			for (int i = 48; i < file.size(); i++)
 			{
 				if (file[i] != '|')
 				{
-					Buffer.push_back(file[i]); //все символы собираем в один массив
+					Buffer.push_back(file[i]); //РІСЃРµ СЃРёРјРІРѕР»С‹ СЃРѕР±РёСЂР°РµРј РІ РѕРґРёРЅ РјР°СЃСЃРёРІ
 				}
 				else {
-					sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //на разделителе парсим строку
+					sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //РЅР° СЂР°Р·РґРµР»РёС‚РµР»Рµ РїР°СЂСЃРёРј СЃС‚СЂРѕРєСѓ
 					Buffer.clear();
-					if (sBuffer.size() == 2) //если строка собралась, то добавляем её в выходной массив
+					if (sBuffer.size() == 2) //РµСЃР»Рё СЃС‚СЂРѕРєР° СЃРѕР±СЂР°Р»Р°СЃСЊ, С‚Рѕ РґРѕР±Р°РІР»СЏРµРј РµС‘ РІ РІС‹С…РѕРґРЅРѕР№ РјР°СЃСЃРёРІ
 					{
 						out.insert({ CP1251ToUTF16LE(std::move(sBuffer[0])), CP1251ToUTF16LE(std::move(sBuffer[1])) });
 
@@ -88,7 +88,7 @@ std::map<std::wstring, std::wstring> BinaryFileRead::ReadGRDECLModels(
 					}
 				}
 			}
-			sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //для последней строки
+			sBuffer.push_back(std::string(Buffer.begin(), Buffer.end())); //РґР»СЏ РїРѕСЃР»РµРґРЅРµР№ СЃС‚СЂРѕРєРё
 			out.insert({ CP1251ToUTF16LE(std::move(sBuffer[0])), CP1251ToUTF16LE(std::move(sBuffer[1])) });
 			return out;
 		}
@@ -101,17 +101,17 @@ std::map<std::wstring, std::wstring> BinaryFileRead::ReadGRDECLModels(
 
 std::vector<char> BinaryFileRead::Read(std::wstring path, long long pos, long long len)
 {
-	auto size = std::filesystem::file_size(path); //получаем размер файла
+	auto size = std::filesystem::file_size(path); //РїРѕР»СѓС‡Р°РµРј СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°
 	if (size)
 	{
-		if (pos + len - 1 > size) //проверка на размер
+		if (pos + len - 1 > size) //РїСЂРѕРІРµСЂРєР° РЅР° СЂР°Р·РјРµСЂ
 			return std::vector<char>();
 		std::ifstream file(path, std::ios::binary);
 		std::vector<char> buffer(len);
 		if (file.is_open())
 		{
-			file.seekg(pos); //устанавливает каретка 
-			file.read(&buffer[0], len); //читаем
+			file.seekg(pos); //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РєР°СЂРµС‚РєР° 
+			file.read(&buffer[0], len); //С‡РёС‚Р°РµРј
 			file.close();
 			return buffer;
 		}
@@ -119,7 +119,7 @@ std::vector<char> BinaryFileRead::Read(std::wstring path, long long pos, long lo
 			return std::vector<char>();
 	}
 	else {
-		throw std::exception("Файл не найден");
+		throw std::exception("Р¤Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ");
 	}
 }
 
@@ -129,14 +129,14 @@ void BinaryFileRead::OpenFile(std::wstring path)
 	if (file_size != -1)
 	{
 		file_path = path;
-		if (file_size > READ_FILE_BUFFER_SIZE) //проверяем размер файла, если он больше 10 мб то грузим по частям
+		if (file_size > READ_FILE_BUFFER_SIZE) //РїСЂРѕРІРµСЂСЏРµРј СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°, РµСЃР»Рё РѕРЅ Р±РѕР»СЊС€Рµ 10 РјР± С‚Рѕ РіСЂСѓР·РёРј РїРѕ С‡Р°СЃС‚СЏРј
 			segment_heap_size = READ_FILE_BUFFER_SIZE;
 		else
-			segment_heap_size = file_size; //иначе весь
-		//нулевая позиция
+			segment_heap_size = file_size; //РёРЅР°С‡Рµ РІРµСЃСЊ
+		//РЅСѓР»РµРІР°СЏ РїРѕР·РёС†РёСЏ
 		current_position = 0;
 		file_buffer = std::vector<char>(segment_heap_size);
-		//заполняем буфер
+		//Р·Р°РїРѕР»РЅСЏРµРј Р±СѓС„РµСЂ
 		std::ifstream file(path, std::ios::binary);
 		if (file.is_open())
 		{
@@ -145,7 +145,7 @@ void BinaryFileRead::OpenFile(std::wstring path)
 		}
 	}
 	else {
-		throw std::exception("Файл не найден");
+		throw std::exception("Р¤Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ");
 	}
 }
 
@@ -153,28 +153,28 @@ void BinaryFileRead::OpenFile(std::wstring path)
 char* BinaryFileRead::Read(long long pos, long long len)
 {
 	if (pos + len <= current_position + segment_heap_size
-		&& pos >= current_position) //если запрашиваемый сегмент уже считан то просто его возвращаем
+		&& pos >= current_position) //РµСЃР»Рё Р·Р°РїСЂР°С€РёРІР°РµРјС‹Р№ СЃРµРіРјРµРЅС‚ СѓР¶Рµ СЃС‡РёС‚Р°РЅ С‚Рѕ РїСЂРѕСЃС‚Рѕ РµРіРѕ РІРѕР·РІСЂР°С‰Р°РµРј
 	{
 		return &file_buffer[pos - current_position];
 	}
-	else { //читаем сегмент
+	else { //С‡РёС‚Р°РµРј СЃРµРіРјРµРЅС‚
 		std::ifstream file(file_path, std::ios::binary);
 		if (file.is_open())
 		{
 			auto cp = file.tellg();
-			file.seekg(cp + pos);//двигаем на нужную позицию
+			file.seekg(cp + pos);//РґРІРёРіР°РµРј РЅР° РЅСѓР¶РЅСѓСЋ РїРѕР·РёС†РёСЋ
 			current_position = pos;
 			if (file_size > current_position + READ_FILE_BUFFER_SIZE - 1)
 			{
-				file.read(&file_buffer[0], READ_FILE_BUFFER_SIZE); //читаем полный блок
+				file.read(&file_buffer[0], READ_FILE_BUFFER_SIZE); //С‡РёС‚Р°РµРј РїРѕР»РЅС‹Р№ Р±Р»РѕРє
 				segment_heap_size = READ_FILE_BUFFER_SIZE;
 			}
 			else
 			{
-				file.read(&file_buffer[0], file_size - current_position); //читаем остаток
+				file.read(&file_buffer[0], file_size - current_position); //С‡РёС‚Р°РµРј РѕСЃС‚Р°С‚РѕРє
 				segment_heap_size = file_size - current_position;
 			}
-			file.close(); //хватит
+			file.close(); //С…РІР°С‚РёС‚
 		}
 		return &file_buffer[0];
 	}
@@ -182,7 +182,7 @@ char* BinaryFileRead::Read(long long pos, long long len)
 
 BinaryFileRead::~BinaryFileRead()
 {
-	file_buffer.~vector(); //вызываем деструктор
+	file_buffer.~vector(); //РІС‹Р·С‹РІР°РµРј РґРµСЃС‚СЂСѓРєС‚РѕСЂ
 	file_path.~basic_string();
 }
 

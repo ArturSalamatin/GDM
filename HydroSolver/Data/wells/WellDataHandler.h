@@ -34,7 +34,7 @@ namespace WellDataHandler {
 		std::map<std::wstring, float> WellsName;
 		std::mutex DataAccessMutex;
 		/// <summary>
-		/// Метод должен вызываться из метода, который уже заблокировал мьютекс
+		/// РњРµС‚РѕРґ РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РёР· РјРµС‚РѕРґР°, РєРѕС‚РѕСЂС‹Р№ СѓР¶Рµ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°Р» РјСЊСЋС‚РµРєСЃ
 		/// </summary>
 		void Optimize();
 		
@@ -51,13 +51,13 @@ namespace WellDataHandler {
 		virtual void Add(pqxx::connection& con, std::mutex& mut);
 
 		/// <summary>
-		///	Возвращает все данные по указаной скважине
+		///	Р’РѕР·РІСЂР°С‰Р°РµС‚ РІСЃРµ РґР°РЅРЅС‹Рµ РїРѕ СѓРєР°Р·Р°РЅРѕР№ СЃРєРІР°Р¶РёРЅРµ
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		const virtual std::vector<std::map<std::wstring, float>>& GetDataPerWell(std::wstring name)
 		{
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			if (Container.find(name) != Container.end())
 				return Container.at(name);
@@ -66,7 +66,7 @@ namespace WellDataHandler {
 		};
 		const virtual std::vector<std::map<std::wstring, float>>& GetDataPerWellWithSimilarName(std::wstring name)
 		{
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			if (Container.find(name) == Container.end())
 			{
@@ -86,18 +86,18 @@ namespace WellDataHandler {
 		};
 		
 		/// <summary>
-		/// Возвращает данные ближайщие к текущей даты
-		/// работает только если есть ключ time
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ Р±Р»РёР¶Р°Р№С‰РёРµ Рє С‚РµРєСѓС‰РµР№ РґР°С‚С‹
+		/// СЂР°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РµСЃР»Рё РµСЃС‚СЊ РєР»СЋС‡ time
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		const virtual std::map<std::wstring, float>& GetDataForClosestForCurrentTime(std::wstring name)
 		{
-			//получаем текущее время
+			//РїРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ
 			__time64_t long_time;
 			_time64(&long_time);
-			//переводим секунды в минуты
-			size_t current_time = long_time / 86400 + 25569; //+25569 - смешение с  1970
+			//РїРµСЂРµРІРѕРґРёРј СЃРµРєСѓРЅРґС‹ РІ РјРёРЅСѓС‚С‹
+			size_t current_time = long_time / 86400 + 25569; //+25569 - СЃРјРµС€РµРЅРёРµ СЃ  1970
 			auto& data = GetDataPerWell(name);
 
 			float time_diff = 1e36f;
@@ -118,11 +118,11 @@ namespace WellDataHandler {
 			return (closest_id != -1) ? data.at(closest_id) : m_nullReference;
 		}
 		/// <summary>
-		/// Возвращает данные наиболее близкие к указанной дате
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ РЅР°РёР±РѕР»РµРµ Р±Р»РёР·РєРёРµ Рє СѓРєР°Р·Р°РЅРЅРѕР№ РґР°С‚Рµ
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <param name="current_time">Дата в днях</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <param name="current_time">Р”Р°С‚Р° РІ РґРЅСЏС…</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		const virtual std::map<std::wstring, float>& GetDataForClosestTime(std::wstring name, int current_time)
 		{
 			auto& data = GetDataPerWell(name);
@@ -146,7 +146,7 @@ namespace WellDataHandler {
 		}
 
 		std::vector<std::wstring> GetWellsName() {
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			std::vector<std::wstring> names;
 			for (const auto& val : Container)

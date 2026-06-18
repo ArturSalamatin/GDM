@@ -29,7 +29,7 @@ void GeoJsonEngine::WriteGeoJson()
 	writer.Close();
 	isWrote = true;
 
-	this->~GeoJsonEngine(); //чистим за собой
+	this->~GeoJsonEngine(); //С‡РёСЃС‚РёРј Р·Р° СЃРѕР±РѕР№
 }
 
 bool isDetroyed = false;
@@ -61,7 +61,7 @@ void GeoJsonEngine::AddFeature(
 	std::list<std::vector<double>> coordinates, 
 	std::vector<Parameters> params)
 {
-	//Задаем тип
+	//Р—Р°РґР°РµРј С‚РёРї
 	std::wstring tp;
 	switch (type)
 	{
@@ -75,15 +75,15 @@ void GeoJsonEngine::AddFeature(
 		tp = L"Polygon";
 		break;
 	}
-	//Парсим координаты
+	//РџР°СЂСЃРёРј РєРѕРѕСЂРґРёРЅР°С‚С‹
 	std::wstring coordints = L"[";
 	int cntr = 0;
 	for (auto xy : coordinates)
 	{
-		if (type == Geom::Point) //Точка
+		if (type == Geom::Point) //РўРѕС‡РєР°
 		{
 			coordints += L"[" + ReplaceDecimalSeparator(std::to_wstring(xy[0])) + L"," + ReplaceDecimalSeparator(std::to_wstring(xy[1])) + L"]";
-			if (cntr != coordinates.size() - 1) //концевую запятую не ставим
+			if (cntr != coordinates.size() - 1) //РєРѕРЅС†РµРІСѓСЋ Р·Р°РїСЏС‚СѓСЋ РЅРµ СЃС‚Р°РІРёРј
 				coordints += L",";
 		}
 		else {
@@ -91,7 +91,7 @@ void GeoJsonEngine::AddFeature(
 		}
 		cntr++;
 	}
-	if (type != Geom::Point) //закрываем если не точка
+	if (type != Geom::Point) //Р·Р°РєСЂС‹РІР°РµРј РµСЃР»Рё РЅРµ С‚РѕС‡РєР°
 		coordints += L"]";
 	std::wstring props;
 	cntr = 0;
@@ -104,7 +104,7 @@ void GeoJsonEngine::AddFeature(
 				props += L",";
 		}
 		else {
-			if (std::isnormal(key.Value)) //проверка на битые значения
+			if (std::isnormal(key.Value)) //РїСЂРѕРІРµСЂРєР° РЅР° Р±РёС‚С‹Рµ Р·РЅР°С‡РµРЅРёСЏ
 				props += L"\"" + key.Key + L"\" : " + ReplaceDecimalSeparator(std::to_wstring(key.Value));
 			else
 				props += L"\"" + key.Key + L"\" : 0";
@@ -121,7 +121,7 @@ void GeoJsonEngine::AddFeature(
 
 void GeoJsonEngine::AddFeature(Geom type, geos::geom::Geometry* g, std::vector<Parameters> params)
 {
-	//Задаем тип
+	//Р—Р°РґР°РµРј С‚РёРї
 	std::wstring tp;
 	switch (type)
 	{
@@ -135,23 +135,23 @@ void GeoJsonEngine::AddFeature(Geom type, geos::geom::Geometry* g, std::vector<P
 		tp = L"Polygon";
 		break;
 	}
-	//Парсим координаты
+	//РџР°СЂСЃРёРј РєРѕРѕСЂРґРёРЅР°С‚С‹
 	std::wstring coordints = L"[";
 	int cntr = 0;
-	//генерируем геометрию
+	//РіРµРЅРµСЂРёСЂСѓРµРј РіРµРѕРјРµС‚СЂРёСЋ
 	std::list<std::vector<double>> coordinates;
 	geos::geom::CoordinateSequence::Ptr gm = g->getCoordinates();
 	for (int i = 0; i < gm->size(); i++)
 	{
 		coordinates.push_back(std::vector<double> {gm->getAt(i).x, gm->getAt(i).y});
 	}
-	//сохраняем
+	//СЃРѕС…СЂР°РЅСЏРµРј
 	for (auto xy : coordinates)
 	{
-		if (type == Geom::Point) //Точка
+		if (type == Geom::Point) //РўРѕС‡РєР°
 		{
 			coordints += L"[" + ReplaceDecimalSeparator(std::to_wstring(xy[0])) + L"," + ReplaceDecimalSeparator(std::to_wstring(xy[1])) + L"]";
-			if (cntr != coordinates.size() - 1) //концевую запятую не ставим
+			if (cntr != coordinates.size() - 1) //РєРѕРЅС†РµРІСѓСЋ Р·Р°РїСЏС‚СѓСЋ РЅРµ СЃС‚Р°РІРёРј
 				coordints += L",";
 		}
 		else {
@@ -159,7 +159,7 @@ void GeoJsonEngine::AddFeature(Geom type, geos::geom::Geometry* g, std::vector<P
 		}
 		cntr++;
 	}
-	if (type != Geom::Point) //закрываем если не точка
+	if (type != Geom::Point) //Р·Р°РєСЂС‹РІР°РµРј РµСЃР»Рё РЅРµ С‚РѕС‡РєР°
 		coordints += L"]";
 	std::wstring props;
 	cntr = 0;
@@ -172,7 +172,7 @@ void GeoJsonEngine::AddFeature(Geom type, geos::geom::Geometry* g, std::vector<P
 				props += L",";
 		}
 		else {
-			if (std::isnormal(key.Value)) //проверка на битые значения
+			if (std::isnormal(key.Value)) //РїСЂРѕРІРµСЂРєР° РЅР° Р±РёС‚С‹Рµ Р·РЅР°С‡РµРЅРёСЏ
 				props += L"\"" + key.Key + L"\" : " + ReplaceDecimalSeparator(std::to_wstring(key.Value));
 			else
 				props +=  L"\"" + key.Key + L"\" : 0";

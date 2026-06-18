@@ -8,21 +8,21 @@ namespace PathUtils {
 	public:
 		static std::wstring GetDir(std::wstring project_path)
 		{
-			//вычисляем путь папки с проектом
+			//РІС‹С‡РёСЃР»СЏРµРј РїСѓС‚СЊ РїР°РїРєРё СЃ РїСЂРѕРµРєС‚РѕРј
 			std::wstring prpath = project_path;
-			std::reverse(prpath.begin(), prpath.end()); //реверсим путь
-			int size = prpath.find(L"\\"); //находим первое вхождение обратного слеша
-			prpath.erase(0, size); //удаляем все до него
-			std::reverse(prpath.begin(), prpath.end()); //реверсим путь обратно
+			std::reverse(prpath.begin(), prpath.end()); //СЂРµРІРµСЂСЃРёРј РїСѓС‚СЊ
+			int size = prpath.find(L"\\"); //РЅР°С…РѕРґРёРј РїРµСЂРІРѕРµ РІС…РѕР¶РґРµРЅРёРµ РѕР±СЂР°С‚РЅРѕРіРѕ СЃР»РµС€Р°
+			prpath.erase(0, size); //СѓРґР°Р»СЏРµРј РІСЃРµ РґРѕ РЅРµРіРѕ
+			std::reverse(prpath.begin(), prpath.end()); //СЂРµРІРµСЂСЃРёРј РїСѓС‚СЊ РѕР±СЂР°С‚РЅРѕ
 			return prpath;
 		}
 		static std::wstring RelativePathParser(std::wstring raw, std::wstring MainDirPath)
 		{
 			/*
-				* ./ - установить текущий катало
-				* ././ - установить на один каталог выше
-				* ./././ - на два каталога выше
-				* и так далее
+				* ./ - СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РµРєСѓС‰РёР№ РєР°С‚Р°Р»Рѕ
+				* ././ - СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РЅР° РѕРґРёРЅ РєР°С‚Р°Р»РѕРі РІС‹С€Рµ
+				* ./././ - РЅР° РґРІР° РєР°С‚Р°Р»РѕРіР° РІС‹С€Рµ
+				* Рё С‚Р°Рє РґР°Р»РµРµ
 				*/
 
 			int _off = 0;
@@ -39,7 +39,7 @@ namespace PathUtils {
 			if (entry)
 			{
 				std::wstring add_path = MainDirPath;
-				//i == 1 т.к. при entry = 1 добавляем только путь до рабочей папки
+				//i == 1 С‚.Рє. РїСЂРё entry = 1 РґРѕР±Р°РІР»СЏРµРј С‚РѕР»СЊРєРѕ РїСѓС‚СЊ РґРѕ СЂР°Р±РѕС‡РµР№ РїР°РїРєРё
 				for (int i = 1; i < entry; i++)
 				{
 					add_path = GetDir(add_path.substr(0, add_path.size() - 1));
@@ -71,7 +71,7 @@ namespace PathUtils {
 			const std::wregex date_regex(L"\\d{2}\\W\\d{2}\\W\\d{4}");
 			std::wsmatch base_match;
 
-			if (std::regex_match(date, base_match, date_regex))//дд.мм.гггг
+			if (std::regex_match(date, base_match, date_regex))//РґРґ.РјРј.РіРіРіРі
 			{
 				int year = stoi(std::wstring(date.begin() + 6, date.end())) - 1900 + 70;
 				int month = stoi(std::wstring(date.begin() + 3, date.begin() + 5));

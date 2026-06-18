@@ -25,28 +25,28 @@ public:
 	};
 
 	struct Parameters {
-		std::wstring Key; //ключ к параметру
-		double Value = 0; //числовое значение
-		std::wstring value; //текстовое значение
+		std::wstring Key; //РєР»СЋС‡ Рє РїР°СЂР°РјРµС‚СЂСѓ
+		double Value = 0; //С‡РёСЃР»РѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ
+		std::wstring value; //С‚РµРєСЃС‚РѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ
 	};
 	/// <summary>
-	/// Создает обьект GeoJsonEngine
+	/// РЎРѕР·РґР°РµС‚ РѕР±СЊРµРєС‚ GeoJsonEngine
 	/// </summary>
-	/// <param name="path">Путь куда записать geojson</param>
+	/// <param name="path">РџСѓС‚СЊ РєСѓРґР° Р·Р°РїРёСЃР°С‚СЊ geojson</param>
 	GeoJsonEngine(std::wstring path);
 	/// <summary>
-	/// Создает обьект геометрии
+	/// РЎРѕР·РґР°РµС‚ РѕР±СЊРµРєС‚ РіРµРѕРјРµС‚СЂРёРё
 	/// </summary>
-	/// <param name="type">Тип геометрии. Смотреть в дефайнах</param>
-	/// <param name="coordinates">Вектор с координатами геометрии. Должен быть замкнут для полигона!</param>
-	/// <param name="params">Параметры</param>
+	/// <param name="type">РўРёРї РіРµРѕРјРµС‚СЂРёРё. РЎРјРѕС‚СЂРµС‚СЊ РІ РґРµС„Р°Р№РЅР°С…</param>
+	/// <param name="coordinates">Р’РµРєС‚РѕСЂ СЃ РєРѕРѕСЂРґРёРЅР°С‚Р°РјРё РіРµРѕРјРµС‚СЂРёРё. Р”РѕР»Р¶РµРЅ Р±С‹С‚СЊ Р·Р°РјРєРЅСѓС‚ РґР»СЏ РїРѕР»РёРіРѕРЅР°!</param>
+	/// <param name="params">РџР°СЂР°РјРµС‚СЂС‹</param>
 	void AddFeature(Geom type, std::list<std::vector<double>> coordinates, std::vector<Parameters> params);
 #ifdef USE_GEOS
 	void AddFeature(Geom type,  geos::geom::Geometry* g, std::vector<Parameters> params);
 #endif
 	
 	/// <summary>
-	/// Записывает geojson файл
+	/// Р—Р°РїРёСЃС‹РІР°РµС‚ geojson С„Р°Р№Р»
 	/// </summary>
 	void WriteGeoJson();
 	virtual ~GeoJsonEngine();

@@ -4,7 +4,7 @@
 
 int UniversalSCParser::EncodingFinder::FindEncoding(std::vector<char>* file)
 {
-	//определяем по BOM
+	//РѕРїСЂРµРґРµР»СЏРµРј РїРѕ BOM
 	if (file->at(0) == '\xff' && file->at(1) == '\xfe')
 		return 0;
 	if (file->at(1) == '\xff' && file->at(2) == '\xfe')
@@ -92,72 +92,72 @@ std::vector<wchar_t> UniversalSCParser::CP1251FileParser::ReadArray()
 UniversalSCParser::CP1251Encoder::CP1251Encoder()
 {
 	EncodingMap = {
-			{0xC0, L'А'},{0xe0, L'а'},
-			{0xC1, L'Б'},{0xe1, L'б'},
-			{0xC2, L'В'},{0xe2, L'в'},
-			{0xC3, L'Г'},{0xe3, L'г'},
-			{0xc4, L'Д'},{0xe4, L'д'},
-			{0xc5, L'Е'},{0xe5, L'е'},
-			{0xc6, L'Ж'},{0xe6, L'ж'},
-			{0xc7, L'З'},{0xe7, L'з'},
-			{0xc8, L'И'},{0xe8, L'и'},
-			{0xc9, L'Й'},{0xe9, L'й'},
-			{0xca, L'К'},{0xea, L'к'},
-			{0xcb, L'Л'},{0xeb, L'л'},
-			{0xcc, L'М'},{0xec, L'м'},
-			{0xcd, L'Н'},{0xed, L'н'},
-			{0xce, L'О'},{0xee, L'о'},
-			{0xcf, L'П'},{0xef, L'п'},
-			{0xd0, L'Р'},{0xf0, L'р'},
-			{0xd1, L'С'},{0xf1, L'с'},
-			{0xd2, L'Т'},{0xf2, L'т'},
-			{0xd3, L'У'},{0xf3, L'у'},
-			{0xd4, L'Ф'},{0xf4, L'ф'},
-			{0xd5, L'Х'},{0xf5, L'х'},
-			{0xd6, L'Ц'},{0xf6, L'ц'},
-			{0xd7, L'Ч'},{0xf7, L'ч'},
-			{0xd8, L'Ш'},{0xf8, L'ш'},
-			{0xd9, L'Щ'},{0xf9, L'щ'},
-			{0xda, L'Ъ'},{0xfa, L'ъ'},
-			{0xdb, L'Ы'},{0xfb, L'ы'},
-			{0xdc, L'Ь'},{0xfc, L'ь'},
-			{0xdd, L'Э'},{0xfd, L'э'},
-			{0xde, L'Ю'},{0xfe, L'ю'},
-			{0xdf, L'Я'},{0xff, L'я'},
+			{0xC0, L'Рђ'},{0xe0, L'Р°'},
+			{0xC1, L'Р‘'},{0xe1, L'Р±'},
+			{0xC2, L'Р’'},{0xe2, L'РІ'},
+			{0xC3, L'Р“'},{0xe3, L'Рі'},
+			{0xc4, L'Р”'},{0xe4, L'Рґ'},
+			{0xc5, L'Р•'},{0xe5, L'Рµ'},
+			{0xc6, L'Р–'},{0xe6, L'Р¶'},
+			{0xc7, L'Р—'},{0xe7, L'Р·'},
+			{0xc8, L'Р'},{0xe8, L'Рё'},
+			{0xc9, L'Р™'},{0xe9, L'Р№'},
+			{0xca, L'Рљ'},{0xea, L'Рє'},
+			{0xcb, L'Р›'},{0xeb, L'Р»'},
+			{0xcc, L'Рњ'},{0xec, L'Рј'},
+			{0xcd, L'Рќ'},{0xed, L'РЅ'},
+			{0xce, L'Рћ'},{0xee, L'Рѕ'},
+			{0xcf, L'Рџ'},{0xef, L'Рї'},
+			{0xd0, L'Р '},{0xf0, L'СЂ'},
+			{0xd1, L'РЎ'},{0xf1, L'СЃ'},
+			{0xd2, L'Рў'},{0xf2, L'С‚'},
+			{0xd3, L'РЈ'},{0xf3, L'Сѓ'},
+			{0xd4, L'Р¤'},{0xf4, L'С„'},
+			{0xd5, L'РҐ'},{0xf5, L'С…'},
+			{0xd6, L'Р¦'},{0xf6, L'С†'},
+			{0xd7, L'Р§'},{0xf7, L'С‡'},
+			{0xd8, L'РЁ'},{0xf8, L'С€'},
+			{0xd9, L'Р©'},{0xf9, L'С‰'},
+			{0xda, L'РЄ'},{0xfa, L'СЉ'},
+			{0xdb, L'Р«'},{0xfb, L'С‹'},
+			{0xdc, L'Р¬'},{0xfc, L'СЊ'},
+			{0xdd, L'Р­'},{0xfd, L'СЌ'},
+			{0xde, L'Р®'},{0xfe, L'СЋ'},
+			{0xdf, L'РЇ'},{0xff, L'СЏ'},
 	};
 	DecodingMap = {
-		   {L'А', 0xC0},{L'а', 0xe0, },
-		   {L'Б', 0xC1},{L'б',0xe1},
-		   {L'В', 0xC2, },{L'в',0xe2},
-		   {L'Г',0xC3},{L'г', 0xe3},
-		   {L'Д', 0xc4},{L'д', 0xe4},
-		   {L'Е', 0xc5},{L'е', 0xe5},
-		   {L'Ж', 0xc6},{L'ж',0xe6},
-		   {L'З',0xc7},{L'з',0xe7 },
-		   {L'И', 0xc8 },{L'и', 0xe8},
-		   {L'Й',0xc9},{ L'й', 0xe9},
-		   { L'К',0xca},{ L'к',0xea},
-		   { L'Л',0xcb},{ L'л',0xeb},
-		   { L'М',0xcc},{ L'м',0xec},
-		   { L'Н',0xcd},{ L'н',0xed},
-		   { L'О',0xce},{ L'о',0xee},
-		   { L'П',0xcf},{ L'п',0xef},
-		   { L'Р',0xd0},{ L'р',0xf0},
-		   { L'С',0xd1},{ L'с',0xf1},
-		   { L'Т',0xd2},{ L'т',0xf2},
-		   { L'У',0xd3},{ L'у',0xf3},
-		   { L'Ф',0xd4},{ L'ф',0xf4},
-		   { L'Х',0xd5},{ L'х',0xf5},
-		   { L'Ц',0xd6},{ L'ц',0xf6},
-		   { L'Ч',0xd7},{ L'ч',0xf7},
-		   { L'Ш',0xd8},{ L'ш',0xf8},
-		   { L'Щ',0xd9},{ L'щ',0xf9},
-		   { L'Ъ',0xda},{ L'ъ',0xfa},
-		   { L'Ы',0xdb},{ L'ы',0xfb},
-		   { L'Ь',0xdc},{ L'ь',0xfc},
-		   { L'Э',0xdd},{ L'э',0xfd},
-		   { L'Ю',0xde},{ L'ю',0xfe},
-		   { L'Я',0xdf},{ L'я',0xff},
+		   {L'Рђ', 0xC0},{L'Р°', 0xe0, },
+		   {L'Р‘', 0xC1},{L'Р±',0xe1},
+		   {L'Р’', 0xC2, },{L'РІ',0xe2},
+		   {L'Р“',0xC3},{L'Рі', 0xe3},
+		   {L'Р”', 0xc4},{L'Рґ', 0xe4},
+		   {L'Р•', 0xc5},{L'Рµ', 0xe5},
+		   {L'Р–', 0xc6},{L'Р¶',0xe6},
+		   {L'Р—',0xc7},{L'Р·',0xe7 },
+		   {L'Р', 0xc8 },{L'Рё', 0xe8},
+		   {L'Р™',0xc9},{ L'Р№', 0xe9},
+		   { L'Рљ',0xca},{ L'Рє',0xea},
+		   { L'Р›',0xcb},{ L'Р»',0xeb},
+		   { L'Рњ',0xcc},{ L'Рј',0xec},
+		   { L'Рќ',0xcd},{ L'РЅ',0xed},
+		   { L'Рћ',0xce},{ L'Рѕ',0xee},
+		   { L'Рџ',0xcf},{ L'Рї',0xef},
+		   { L'Р ',0xd0},{ L'СЂ',0xf0},
+		   { L'РЎ',0xd1},{ L'СЃ',0xf1},
+		   { L'Рў',0xd2},{ L'С‚',0xf2},
+		   { L'РЈ',0xd3},{ L'Сѓ',0xf3},
+		   { L'Р¤',0xd4},{ L'С„',0xf4},
+		   { L'РҐ',0xd5},{ L'С…',0xf5},
+		   { L'Р¦',0xd6},{ L'С†',0xf6},
+		   { L'Р§',0xd7},{ L'С‡',0xf7},
+		   { L'РЁ',0xd8},{ L'С€',0xf8},
+		   { L'Р©',0xd9},{ L'С‰',0xf9},
+		   { L'РЄ',0xda},{ L'СЉ',0xfa},
+		   { L'Р«',0xdb},{ L'С‹',0xfb},
+		   { L'Р¬',0xdc},{ L'СЊ',0xfc},
+		   { L'Р­',0xdd},{ L'СЌ',0xfd},
+		   { L'Р®',0xde},{ L'СЋ',0xfe},
+		   { L'РЇ',0xdf},{ L'СЏ',0xff},
 	};
 }
 
@@ -186,13 +186,13 @@ std::vector<std::vector<std::wstring>> UniversalSCParser::SVParser::Read()
 	std::vector<wchar_t> lines;
 
 	lines = Parser->ReadArray();
-	//добавляем концевое \n для правильного парсинга
+	//РґРѕР±Р°РІР»СЏРµРј РєРѕРЅС†РµРІРѕРµ \n РґР»СЏ РїСЂР°РІРёР»СЊРЅРѕРіРѕ РїР°СЂСЃРёРЅРіР°
 	//if (lines.back() != L'\n')
 	//	lines.push_back(L'\n');
 
 	//int cpuid[4]; //EAX EBX ECX EDX
 	//__cpuidex(&cpuid[0], 7, 0); //eax=7 ecx=0 - Extended Features
-	//int isAVX2Suport = (cpuid[1] >> 5) & 1; //5 бит в EBX отвечает за AVX2
+	//int isAVX2Suport = (cpuid[1] >> 5) & 1; //5 Р±РёС‚ РІ EBX РѕС‚РІРµС‡Р°РµС‚ Р·Р° AVX2
 	////std::cout << ((isAVX2Suport) ? "Support" : "Unsupport") << "\n";
 	//
 
@@ -207,18 +207,18 @@ std::vector<std::vector<std::wstring>> UniversalSCParser::SVParser::Read()
 
 	//for (long long pos = 0; pos < lines.size(); pos+=16)
 	//{
-	//	buffer = _mm256_loadu_si256((__m256i*)ptr); //загружаем кусок памяти
-	//	cmp_result = _mm256_cmpeq_epi16(buffer, cmp_buffer); //сравниваем с массивом \n => ищем конец линии
-	//	unsigned int isnl = _mm256_movemask_epi8(cmp_result); //порядок байт инвертированный
-	//	if (isnl != 0) //isnl != 0 если нашлось совпадение строк
+	//	buffer = _mm256_loadu_si256((__m256i*)ptr); //Р·Р°РіСЂСѓР¶Р°РµРј РєСѓСЃРѕРє РїР°РјСЏС‚Рё
+	//	cmp_result = _mm256_cmpeq_epi16(buffer, cmp_buffer); //СЃСЂР°РІРЅРёРІР°РµРј СЃ РјР°СЃСЃРёРІРѕРј \n => РёС‰РµРј РєРѕРЅРµС† Р»РёРЅРёРё
+	//	unsigned int isnl = _mm256_movemask_epi8(cmp_result); //РїРѕСЂСЏРґРѕРє Р±Р°Р№С‚ РёРЅРІРµСЂС‚РёСЂРѕРІР°РЅРЅС‹Р№
+	//	if (isnl != 0) //isnl != 0 РµСЃР»Рё РЅР°С€Р»РѕСЃСЊ СЃРѕРІРїР°РґРµРЅРёРµ СЃС‚СЂРѕРє
 	//	{
-	//		//ищем позицию этоих \n
-	//		//поскольку маска из epi8, то мы будем иметь 11 в месте где нашлось \n
+	//		//РёС‰РµРј РїРѕР·РёС†РёСЋ СЌС‚РѕРёС… \n
+	//		//РїРѕСЃРєРѕР»СЊРєСѓ РјР°СЃРєР° РёР· epi8, С‚Рѕ РјС‹ Р±СѓРґРµРј РёРјРµС‚СЊ 11 РІ РјРµСЃС‚Рµ РіРґРµ РЅР°С€Р»РѕСЃСЊ \n
 	//		for (int i = 0; i < 16; i++)
 	//		{
 	//			/*
-	//			* делаем сдвиг влево и сравниваем с 11
-	//			* результат битового сравнения должен быть равен 11 -> 3
+	//			* РґРµР»Р°РµРј СЃРґРІРёРі РІР»РµРІРѕ Рё СЃСЂР°РІРЅРёРІР°РµРј СЃ 11
+	//			* СЂРµР·СѓР»СЊС‚Р°С‚ Р±РёС‚РѕРІРѕРіРѕ СЃСЂР°РІРЅРµРЅРёСЏ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЂР°РІРµРЅ 11 -> 3
 	//			*/
 	//			if ( ((isnl >> i*2) & 3) == 3) 
 	//			{
@@ -269,24 +269,24 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 
 	for (int i = 0; i < lines.size(); i += 16)
 	{
-		buffer = _mm256_loadu_si256((__m256i*)ptr); //загружаем
-		cmp_result = _mm256_cmpeq_epi16(buffer, cmp_buffer_divider); //проверяем наличие разделителя
+		buffer = _mm256_loadu_si256((__m256i*)ptr); //Р·Р°РіСЂСѓР¶Р°РµРј
+		cmp_result = _mm256_cmpeq_epi16(buffer, cmp_buffer_divider); //РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ СЂР°Р·РґРµР»РёС‚РµР»СЏ
 		cmp_result_nl = _mm256_cmpeq_epi16(buffer, cmp_buffer_nl);
 		unsigned int mask = _mm256_movemask_epi8(cmp_result);
 		unsigned int mask_nl = _mm256_movemask_epi8(cmp_result_nl);
-		/*if (mask != 0) //если он есть то рекурсивно создаем новые ячейки
+		/*if (mask != 0) //РµСЃР»Рё РѕРЅ РµСЃС‚СЊ С‚Рѕ СЂРµРєСѓСЂСЃРёРІРЅРѕ СЃРѕР·РґР°РµРј РЅРѕРІС‹Рµ СЏС‡РµР№РєРё
 		{
 		int last_pos = 0;
 		for (int j = 0; j < 16; j++)
 		{
-			if ((mask >> j*2) & 3) { //находим разделитель
-				(*iterator).append(ptr + last_pos, j - last_pos); //копируем нужную часть в текущую ячейку
-				//проверяем на концевое \n
+			if ((mask >> j*2) & 3) { //РЅР°С…РѕРґРёРј СЂР°Р·РґРµР»РёС‚РµР»СЊ
+				(*iterator).append(ptr + last_pos, j - last_pos); //РєРѕРїРёСЂСѓРµРј РЅСѓР¶РЅСѓСЋ С‡Р°СЃС‚СЊ РІ С‚РµРєСѓС‰СѓСЋ СЏС‡РµР№РєСѓ
+				//РїСЂРѕРІРµСЂСЏРµРј РЅР° РєРѕРЅС†РµРІРѕРµ \n
 
-				last_pos = j + 1; //+1 т.к. i указывает на разделитель
-				//двигаем итератор
+				last_pos = j + 1; //+1 С‚.Рє. i СѓРєР°Р·С‹РІР°РµС‚ РЅР° СЂР°Р·РґРµР»РёС‚РµР»СЊ
+				//РґРІРёРіР°РµРј РёС‚РµСЂР°С‚РѕСЂ
 				//++iterator;
-				//создаем под него контейнер
+				//СЃРѕР·РґР°РµРј РїРѕРґ РЅРµРіРѕ РєРѕРЅС‚РµР№РЅРµСЂ
 				iterator = (*container).emplace(iterator + 1, L"");
 			}
 			if ((mask_nl >> j * 2) & 3)
@@ -299,12 +299,12 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 				iterator = (*container).begin();
 			}
 		}
-		(*iterator).append(ptr + last_pos, 16 - last_pos); //копируем остаток
+		(*iterator).append(ptr + last_pos, 16 - last_pos); //РєРѕРїРёСЂСѓРµРј РѕСЃС‚Р°С‚РѕРє
 
 		ptr += 16;
 
 		/* }
-		else { //если его нет то прибавляем к текущей ячейки
+		else { //РµСЃР»Рё РµРіРѕ РЅРµС‚ С‚Рѕ РїСЂРёР±Р°РІР»СЏРµРј Рє С‚РµРєСѓС‰РµР№ СЏС‡РµР№РєРё
 			(*iterator).append(ptr, 16);
 		}
 	}
@@ -314,7 +314,7 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 
 	int cpuid[4]; //EAX EBX ECX EDX
 	__cpuidex(&cpuid[0], 7, 0); //eax=7 ecx=0 - Extended Features
-	int isAVX2Suport = (cpuid[1] >> 5) & 1; //5 бит в EBX отвечает за AVX2
+	int isAVX2Suport = (cpuid[1] >> 5) & 1; //5 Р±РёС‚ РІ EBX РѕС‚РІРµС‡Р°РµС‚ Р·Р° AVX2
 	//std::cout << ((isAVX2Suport) ? "Support" : "Unsupport") << "\n";
 
 
@@ -336,18 +336,18 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 
 	for (size_t pos = 0; pos < lines.size(); pos += 16)
 	{
-		buffer = _mm256_loadu_si256((__m256i*)ptr); //загружаем кусок памяти
-		cmp_result = _mm256_cmpeq_epi16(buffer, cmp_buffer); //сравниваем с массивом \n => ищем конец линии
-		unsigned int isnl = _mm256_movemask_epi8(cmp_result); //порядок байт инвертированный
-		if (isnl != 0) //isnl != 0 если нашлось совпадение строк
+		buffer = _mm256_loadu_si256((__m256i*)ptr); //Р·Р°РіСЂСѓР¶Р°РµРј РєСѓСЃРѕРє РїР°РјСЏС‚Рё
+		cmp_result = _mm256_cmpeq_epi16(buffer, cmp_buffer); //СЃСЂР°РІРЅРёРІР°РµРј СЃ РјР°СЃСЃРёРІРѕРј \n => РёС‰РµРј РєРѕРЅРµС† Р»РёРЅРёРё
+		unsigned int isnl = _mm256_movemask_epi8(cmp_result); //РїРѕСЂСЏРґРѕРє Р±Р°Р№С‚ РёРЅРІРµСЂС‚РёСЂРѕРІР°РЅРЅС‹Р№
+		if (isnl != 0) //isnl != 0 РµСЃР»Рё РЅР°С€Р»РѕСЃСЊ СЃРѕРІРїР°РґРµРЅРёРµ СЃС‚СЂРѕРє
 		{
-			//ищем позицию этоих \n
-			//поскольку маска из epi8, то мы будем иметь 11 в месте где нашлось \n
+			//РёС‰РµРј РїРѕР·РёС†РёСЋ СЌС‚РѕРёС… \n
+			//РїРѕСЃРєРѕР»СЊРєСѓ РјР°СЃРєР° РёР· epi8, С‚Рѕ РјС‹ Р±СѓРґРµРј РёРјРµС‚СЊ 11 РІ РјРµСЃС‚Рµ РіРґРµ РЅР°С€Р»РѕСЃСЊ \n
 			for (int i = 0; i < 16; i++)
 			{
 				/*
-				* делаем сдвиг влево и сравниваем с 11
-				* результат битового сравнения должен быть равен 11 -> 3
+				* РґРµР»Р°РµРј СЃРґРІРёРі РІР»РµРІРѕ Рё СЃСЂР°РІРЅРёРІР°РµРј СЃ 11
+				* СЂРµР·СѓР»СЊС‚Р°С‚ Р±РёС‚РѕРІРѕРіРѕ СЃСЂР°РІРЅРµРЅРёСЏ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЂР°РІРµРЅ 11 -> 3
 
 				if (((isnl >> i * 2) & 3) == 3)
 				{
@@ -386,7 +386,7 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 				if (readed > 0)
 					out1.push_back(std::move(data));
 			}
-			offset1 = pos - lines.begin() + 1; //+1 - перемешение за каретку
+			offset1 = pos - lines.begin() + 1; //+1 - РїРµСЂРµРјРµС€РµРЅРёРµ Р·Р° РєР°СЂРµС‚РєСѓ
 		}
 		else {
 			size_t diff = lines.size() - offset1;
@@ -454,17 +454,17 @@ std::unique_ptr<std::unique_ptr<wchar_t[]>[]> UniversalSCParser::SVParser::Parse
 	do {
 		pos = std::find(lines.begin() + ioffset, lines.begin() + diff + offset, Separator);
 
-		//вычисляем абсолютную позицию разделителя в строке
+		//РІС‹С‡РёСЃР»СЏРµРј Р°Р±СЃРѕР»СЋС‚РЅСѓСЋ РїРѕР·РёС†РёСЋ СЂР°Р·РґРµР»РёС‚РµР»СЏ РІ СЃС‚СЂРѕРєРµ
 		size_t cpos = pos - lines.begin();
-		//если предыдущая позиция - нулевая, то размер - текущая позиция +1 (нуль терминатор), иначе их разница (нуль терминатор включен)
+		//РµСЃР»Рё РїСЂРµРґС‹РґСѓС‰Р°СЏ РїРѕР·РёС†РёСЏ - РЅСѓР»РµРІР°СЏ, С‚Рѕ СЂР°Р·РјРµСЂ - С‚РµРєСѓС‰Р°СЏ РїРѕР·РёС†РёСЏ +1 (РЅСѓР»СЊ С‚РµСЂРјРёРЅР°С‚РѕСЂ), РёРЅР°С‡Рµ РёС… СЂР°Р·РЅРёС†Р° (РЅСѓР»СЊ С‚РµСЂРјРёРЅР°С‚РѕСЂ РІРєР»СЋС‡РµРЅ)
 		size_t size = cpos - last_pos + ((!out.size()) ? 1 : 0);
 		if (lines[cpos - 1] == L'\r')
 			size--;
-		//копируем байты
+		//РєРѕРїРёСЂСѓРµРј Р±Р°Р№С‚С‹
 
 		auto buffer = std::make_unique<wchar_t[]>(size);
-		std::memcpy(&buffer[0], &lines[last_pos + ((last_pos == offset) ? 0 : 1)], (size - 1) * sizeof(wchar_t)); //+1 т.к. last_pos указывает на предыдущий разделитель
-		//перемешаем указатель
+		std::memcpy(&buffer[0], &lines[last_pos + ((last_pos == offset) ? 0 : 1)], (size - 1) * sizeof(wchar_t)); //+1 С‚.Рє. last_pos СѓРєР°Р·С‹РІР°РµС‚ РЅР° РїСЂРµРґС‹РґСѓС‰РёР№ СЂР°Р·РґРµР»РёС‚РµР»СЊ
+		//РїРµСЂРµРјРµС€Р°РµРј СѓРєР°Р·Р°С‚РµР»СЊ
 		out.push_back(std::move(buffer));
 		ioffset = cpos + 1;
 		last_pos = cpos;
@@ -486,15 +486,15 @@ std::unique_ptr<std::unique_ptr<wchar_t[]>[]> UniversalSCParser::SVParser::Parse
 	out.~vector();
 	//for (int i = 0; i < position.size(); i++)
 	//{
-	//	size_t bsize = (i) ? position[i] - position[i - 1] : position[i] + 1; //+1 - нуль терминатор
-	//	size_t _offset = (i) ? position[i - 1] + 1 : 0; //+1 чтобы перескачить разделитель
+	//	size_t bsize = (i) ? position[i] - position[i - 1] : position[i] + 1; //+1 - РЅСѓР»СЊ С‚РµСЂРјРёРЅР°С‚РѕСЂ
+	//	size_t _offset = (i) ? position[i - 1] + 1 : 0; //+1 С‡С‚РѕР±С‹ РїРµСЂРµСЃРєР°С‡РёС‚СЊ СЂР°Р·РґРµР»РёС‚РµР»СЊ
 
 	//	auto buffer = std::make_unique<wchar_t[]>(bsize);
 	//	std::memcpy(&buffer[0], &lines[_offset + offset], (bsize - 1)*sizeof(wchar_t));
 
 	//	out.push_back(std::move(buffer));
 	//}
-	//lines.erase(lines.begin(), lines.begin() + diff + 1); //+1 - удалить \n
+	//lines.erase(lines.begin(), lines.begin() + diff + 1); //+1 - СѓРґР°Р»РёС‚СЊ \n
 	if (read_cell == 1)
 	{
 		if (!wcscmp(_out[0].get(), L""))
@@ -521,15 +521,15 @@ std::unique_ptr<std::unique_ptr<wchar_t[]>[]> UniversalSCParser::SVParser::Parse
 
 	for (size_t i = start; i < stop; i += 16)
 	{
-		buffer = _mm256_loadu_si256((__m256i*)ptr); //грузим буффер
-		cmp_result = _mm256_cmpeq_epi16(buffer, compare); //сравниваем со строкой
-		unsigned int issep = _mm256_movemask_epi8(cmp_result); //получаем маску
-		if (issep != 0) //если != 0 значит сепаратор найден
+		buffer = _mm256_loadu_si256((__m256i*)ptr); //РіСЂСѓР·РёРј Р±СѓС„С„РµСЂ
+		cmp_result = _mm256_cmpeq_epi16(buffer, compare); //СЃСЂР°РІРЅРёРІР°РµРј СЃРѕ СЃС‚СЂРѕРєРѕР№
+		unsigned int issep = _mm256_movemask_epi8(cmp_result); //РїРѕР»СѓС‡Р°РµРј РјР°СЃРєСѓ
+		if (issep != 0) //РµСЃР»Рё != 0 Р·РЅР°С‡РёС‚ СЃРµРїР°СЂР°С‚РѕСЂ РЅР°Р№РґРµРЅ
 		{
 			int ccize = (stop - i < 16) ? stop - i : 16;
-			for (int i = 0; i < ccize; i++) //ищем все сепараторы
+			for (int i = 0; i < ccize; i++) //РёС‰РµРј РІСЃРµ СЃРµРїР°СЂР°С‚РѕСЂС‹
 			{
-				if (((issep >> i * 2) & 3) == 3) //битовый сдвиг дает ...11 => & даст 11 => 3
+				if (((issep >> i * 2) & 3) == 3) //Р±РёС‚РѕРІС‹Р№ СЃРґРІРёРі РґР°РµС‚ ...11 => & РґР°СЃС‚ 11 => 3
 				{
 					size_t cpos = i + (ptr - fptr);
 
@@ -576,7 +576,7 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 	auto ptr = Reader.Read(size);
 
 	std::wstring out;
-	//i = 2 т.к. первым идем BOM
+	//i = 2 С‚.Рє. РїРµСЂРІС‹Рј РёРґРµРј BOM
 	int start = 0;
 	if (ptr[0] == '\xFF' && ptr[1] == '\xFE')
 		start = 2;
@@ -587,7 +587,7 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 		std::memcpy(&ch, ptr.get() + i, sizeof(wchar_t));
 		out += ch;
 	}
-	//убираем экранирование внутри кавычек
+	//СѓР±РёСЂР°РµРј СЌРєСЂР°РЅРёСЂРѕРІР°РЅРёРµ РІРЅСѓС‚СЂРё РєР°РІС‹С‡РµРє
 	size_t slash = 0;
 	size_t offset = 0;
 	do {
@@ -595,7 +595,7 @@ std::unique_ptr<std::unique_ptr<std::unique_ptr<wchar_t[]>[]>[]> UniversalSCPars
 		if (slash != std::wstring::npos)
 		{
 			out.erase(out.begin() + slash);
-			offset = slash + 1; //+1 т.к. slash указывает на '\'
+			offset = slash + 1; //+1 С‚.Рє. slash СѓРєР°Р·С‹РІР°РµС‚ РЅР° '\'
 		}
 	} while (slash != std::wstring::npos);
 
@@ -608,7 +608,7 @@ std::vector<wchar_t> UniversalSCParser::UTF16LEFileParser::ReadArray()
 	size_t size = 0;
 	auto ptr = Reader.Read(size);
 
-	//i = 2 т.к. первым идем BOM
+	//i = 2 С‚.Рє. РїРµСЂРІС‹Рј РёРґРµРј BOM
 	int start = 0;
 	if (ptr[0] == '\xFF' && ptr[1] == '\xFE')
 		start = 2;
@@ -654,7 +654,7 @@ std::wstring UniversalSCParser::UTF8Encoder::FromUT8toUTF16(std::unique_ptr<char
 
 std::vector<wchar_t> UniversalSCParser::UTF8Encoder::FromUT8toUTF16A(std::unique_ptr<char[]> src, size_t size)
 {
-	size_t actual_size = 0; //размер в wchar
+	size_t actual_size = 0; //СЂР°Р·РјРµСЂ РІ wchar
 	auto ptr = Convert(std::move(src), size, actual_size);
 	std::vector<wchar_t> buffer(actual_size);
 	std::memcpy(&buffer[0], ptr.get(), actual_size * sizeof(wchar_t));
@@ -666,24 +666,24 @@ std::unique_ptr<wchar_t[]> UniversalSCParser::UTF8Encoder::Convert(
 	size_t size,
 	size_t& actual_size_inwchar) //
 {
-	//получаем необходимый размер буфера в чарах
+	//РїРѕР»СѓС‡Р°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РІ С‡Р°СЂР°С…
 	actual_size_inwchar = MultiByteToWideChar(
-		CP_UTF8, //кодировка utf8
-		0, //совмешаем сложные символы
-		src.get(), //указатель на исодник
-		-1, //исходник нуль-терминаторный
-		nullptr, //указатель на буфер
-		0 //0 чтобы получить размер буфера
+		CP_UTF8, //РєРѕРґРёСЂРѕРІРєР° utf8
+		0, //СЃРѕРІРјРµС€Р°РµРј СЃР»РѕР¶РЅС‹Рµ СЃРёРјРІРѕР»С‹
+		src.get(), //СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РёСЃРѕРґРЅРёРє
+		-1, //РёСЃС…РѕРґРЅРёРє РЅСѓР»СЊ-С‚РµСЂРјРёРЅР°С‚РѕСЂРЅС‹Р№
+		nullptr, //СѓРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ
+		0 //0 С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР°
 	);
-	//создаем буффер правильного размера
+	//СЃРѕР·РґР°РµРј Р±СѓС„С„РµСЂ РїСЂР°РІРёР»СЊРЅРѕРіРѕ СЂР°Р·РјРµСЂР°
 	auto buffer = std::make_unique<wchar_t[]>(actual_size_inwchar);
 	auto res = MultiByteToWideChar(
-		CP_UTF8, //кодировка utf8
-		0, //совмешаем сложные символы
-		src.get(), //указатель на исодник
-		-1, //исходник нуль-терминаторный
-		buffer.get(), //указатель на буфер
-		actual_size_inwchar //памяти с запасом
+		CP_UTF8, //РєРѕРґРёСЂРѕРІРєР° utf8
+		0, //СЃРѕРІРјРµС€Р°РµРј СЃР»РѕР¶РЅС‹Рµ СЃРёРјРІРѕР»С‹
+		src.get(), //СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РёСЃРѕРґРЅРёРє
+		-1, //РёСЃС…РѕРґРЅРёРє РЅСѓР»СЊ-С‚РµСЂРјРёРЅР°С‚РѕСЂРЅС‹Р№
+		buffer.get(), //СѓРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ
+		actual_size_inwchar //РїР°РјСЏС‚Рё СЃ Р·Р°РїР°СЃРѕРј
 	);
 	if (res)
 	{

@@ -21,7 +21,7 @@ void IRCGEngine::IrapClassicGrid::Add(std::pair<float, float> p, float value)
 void IRCGEngine::IrapClassicGrid::Write()
 {
 	UniversalWriter::UTF8Writer writer(Path);
-	//заголовок
+	//Р·Р°РіРѕР»РѕРІРѕРє
 	auto h1 = L"-996 " + std::to_wstring(_ny) + L" " + FloatToWS(_dx) + L" " + FloatToWS(_dy) + L"\n";
 	writer.Write(h1);
 	auto h2 =
@@ -33,8 +33,8 @@ void IRCGEngine::IrapClassicGrid::Write()
 	auto h3 = std::to_wstring(_nx) + L" 0.0 " + FloatToWS(std::get<0>(Bounds)) + L" " + FloatToWS(std::get<2>(Bounds)) + L"\n";
 	writer.Write(h3);
 	writer.Write(L"0 0 0 0 0 0 0\n");
-	//значения
-	//по 6 штук в строке
+	//Р·РЅР°С‡РµРЅРёСЏ
+	//РїРѕ 6 С€С‚СѓРє РІ СЃС‚СЂРѕРєРµ
 	int allrow = _nx * _ny;
 	int itr = allrow / 6;
 	for (int i = 0; i < itr; i++)

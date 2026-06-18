@@ -9,99 +9,99 @@ namespace ModelHanlder {
 	public:
 	//	static 
 			struct WellData {
-			std::wstring Name; //имя скважины
-		//	std::wstring Guid; //гуид
-			std::vector<double> IntersectionCoords; //координаты пластопересечения
-		//	BinaryFileRead::MERResult MerData; //Данные по МЭР
-		//	std::vector<std::map<std::wstring, float>> PerfData; //Данные перфорации
+			std::wstring Name; //РёРјСЏ СЃРєРІР°Р¶РёРЅС‹
+		//	std::wstring Guid; //РіСѓРёРґ
+			std::vector<double> IntersectionCoords; //РєРѕРѕСЂРґРёРЅР°С‚С‹ РїР»Р°СЃС‚РѕРїРµСЂРµСЃРµС‡РµРЅРёСЏ
+		//	BinaryFileRead::MERResult MerData; //Р”Р°РЅРЅС‹Рµ РїРѕ РњР­Р 
+		//	std::vector<std::map<std::wstring, float>> PerfData; //Р”Р°РЅРЅС‹Рµ РїРµСЂС„РѕСЂР°С†РёРё
 		};
-		int nx; //кол-во ячеек по х
-		int ny; //кол-во ячеек по y
-		int nz; //кол-во ячеек по z
-		double xshift; //сдвиг начала координат модели
+		int nx; //РєРѕР»-РІРѕ СЏС‡РµРµРє РїРѕ С…
+		int ny; //РєРѕР»-РІРѕ СЏС‡РµРµРє РїРѕ y
+		int nz; //РєРѕР»-РІРѕ СЏС‡РµРµРє РїРѕ z
+		double xshift; //СЃРґРІРёРі РЅР°С‡Р°Р»Р° РєРѕРѕСЂРґРёРЅР°С‚ РјРѕРґРµР»Рё
 		double yshift; 
 		/// <summary>
-		/// Инициализирует чтение модели
+		/// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ С‡С‚РµРЅРёРµ РјРѕРґРµР»Рё
 		/// </summary>
-		/// <param name="ProjectPath">Путь до файла проекта</param>
+		/// <param name="ProjectPath">РџСѓС‚СЊ РґРѕ С„Р°Р№Р»Р° РїСЂРѕРµРєС‚Р°</param>
 		ReadModel(std::wstring ProjectPath);
 		ReadModel() {}
 		/// <summary>
-		/// Возвращает векторы-направляющие сетки
-		/// Приводит их в координаты скважин
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РІРµРєС‚РѕСЂС‹-РЅР°РїСЂР°РІР»СЏСЋС‰РёРµ СЃРµС‚РєРё
+		/// РџСЂРёРІРѕРґРёС‚ РёС… РІ РєРѕРѕСЂРґРёРЅР°С‚С‹ СЃРєРІР°Р¶РёРЅ
 		/// </summary>
-		/// <returns>Вектор вида [y][x][0-1] где 0-1 нижняя и верхняя координата направляющей</returns>
+		/// <returns>Р’РµРєС‚РѕСЂ РІРёРґР° [y][x][0-1] РіРґРµ 0-1 РЅРёР¶РЅСЏСЏ Рё РІРµСЂС…РЅСЏСЏ РєРѕРѕСЂРґРёРЅР°С‚Р° РЅР°РїСЂР°РІР»СЏСЋС‰РµР№</returns>
 		std::vector < std::vector < std::vector< std::vector<float> >>> ReadPillars();
 		/// <summary>
-		/// Возвращает диагонали кубов
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґРёР°РіРѕРЅР°Р»Рё РєСѓР±РѕРІ
 		/// </summary>
-		/// <param name="plrs">Массив с векторами-направляющими сетки</param>
-		/// <returns>Вектор вида [y][x][0-1], где 0 - нижняя ближняя левая точка, 1 - верхняя дальняя правая</returns>
+		/// <param name="plrs">РњР°СЃСЃРёРІ СЃ РІРµРєС‚РѕСЂР°РјРё-РЅР°РїСЂР°РІР»СЏСЋС‰РёРјРё СЃРµС‚РєРё</param>
+		/// <returns>Р’РµРєС‚РѕСЂ РІРёРґР° [y][x][0-1], РіРґРµ 0 - РЅРёР¶РЅСЏСЏ Р±Р»РёР¶РЅСЏСЏ Р»РµРІР°СЏ С‚РѕС‡РєР°, 1 - РІРµСЂС…РЅСЏСЏ РґР°Р»СЊРЅСЏСЏ РїСЂР°РІР°СЏ</returns>
 		std::vector < std::vector < std::vector< std::vector<float> >>> GetDiagonals(
 			std::vector < std::vector < std::vector< std::vector<float> >>> *plrs);
 		/// <summary>
-		/// Считывает пористость и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ РїРѕСЂРёСЃС‚РѕСЃС‚СЊ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadPoro();
 		/// <summary>
-		/// Считывает начальную нефтенасыщенность и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ РЅР°С‡Р°Р»СЊРЅСѓСЋ РЅРµС„С‚РµРЅР°СЃС‹С‰РµРЅРЅРѕСЃС‚СЊ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadSoil();
 		/// <summary>
-		/// Считывает объем и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ РѕР±СЉРµРј Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadVolume();
 		/// <summary>
-		/// Считывает текущую нефтенасыщенность и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ С‚РµРєСѓС‰СѓСЋ РЅРµС„С‚РµРЅР°СЃС‹С‰РµРЅРЅРѕСЃС‚СЊ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadSo();
 		/// <summary>
-		/// Считывает проницаемость по Х и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ РїСЂРѕРЅРёС†Р°РµРјРѕСЃС‚СЊ РїРѕ РҐ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadPermx();
 		/// <summary>
-		/// Считывает проницаемость по У и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ РїСЂРѕРЅРёС†Р°РµРјРѕСЃС‚СЊ РїРѕ РЈ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadPermz();
 		/// <summary>
-		/// Считывает активные ячейки и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ Р°РєС‚РёРІРЅС‹Рµ СЏС‡РµР№РєРё Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadActnum();
 		/// <summary>
-		/// Считывает давление и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ РґР°РІР»РµРЅРёРµ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadPressure();
 		/// <summary>
-		/// Считывает P и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ P Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadP();
 		/// <summary>
-		/// Возвращает информацию по скважинам
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РёРЅС„РѕСЂРјР°С†РёСЋ РїРѕ СЃРєРІР°Р¶РёРЅР°Рј
 		/// </summary>
-		/// <returns>Вектор с WellData по каждой скважине</returns>
+		/// <returns>Р’РµРєС‚РѕСЂ СЃ WellData РїРѕ РєР°Р¶РґРѕР№ СЃРєРІР°Р¶РёРЅРµ</returns>
 		std::vector<WellData> GetWellsData(const std::wstring& Path);
 
 	//	std::map<std::wstring, std::vector<std::tuple<int, int, std::pair<float, float>>>> ComparePerfWithGIS(WellDataHandler::GISData& gis, std::wstring name);
 	private:
-		std::wstring ProjectPath; //путь до проекта
-		std::wstring ProjectDirectory; //c концевым '\'
-		std::wstring ModelFilePath; //с концевым '\'
-		std::map<std::wstring, std::wstring> ModelsFile;//карта с название - гуид
+		std::wstring ProjectPath; //РїСѓС‚СЊ РґРѕ РїСЂРѕРµРєС‚Р°
+		std::wstring ProjectDirectory; //c РєРѕРЅС†РµРІС‹Рј '\'
+		std::wstring ModelFilePath; //СЃ РєРѕРЅС†РµРІС‹Рј '\'
+		std::map<std::wstring, std::wstring> ModelsFile;//РєР°СЂС‚Р° СЃ РЅР°Р·РІР°РЅРёРµ - РіСѓРёРґ
 	//	WellDataHandler::PerfData Pfd;
 		/// <summary>
-		/// Считывает указанный массив и возвращает в виде вектора [z][y][x]
+		/// РЎС‡РёС‚С‹РІР°РµС‚ СѓРєР°Р·Р°РЅРЅС‹Р№ РјР°СЃСЃРёРІ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РІ РІРёРґРµ РІРµРєС‚РѕСЂР° [z][y][x]
 		/// </summary>
-		/// <param name="Name">Имя считываемого</param>
-		/// <returns>Массив вида [z][y][x] - значение</returns>
+		/// <param name="Name">РРјСЏ СЃС‡РёС‚С‹РІР°РµРјРѕРіРѕ</param>
+		/// <returns>РњР°СЃСЃРёРІ РІРёРґР° [z][y][x] - Р·РЅР°С‡РµРЅРёРµ</returns>
 		std::vector < std::vector < std::vector< float >>> ReadModelFile(std::wstring&& Name) {
 			std::wstring path_to_file = ModelFilePath + ModelsFile[Name];
 			if (std::filesystem::exists(path_to_file))
@@ -110,7 +110,7 @@ namespace ModelHanlder {
 				Reader.OpenFile(path_to_file.c_str());
 				std::vector<std::vector<std::vector<float>>> out;
 				std::string sign(Reader.Read(0, 16), 16);
-				if (sign == "KPFUBOIL    GRID") //Проверяем заголовок
+				if (sign == "KPFUBOIL    GRID") //РџСЂРѕРІРµСЂСЏРµРј Р·Р°РіРѕР»РѕРІРѕРє
 				{
 					long last_pos = 32;
 					for (long k = 0; k < nz; k++)
@@ -131,24 +131,24 @@ namespace ModelHanlder {
 					return out;
 				}
 				else {
-					std::string exception_msg = "Файл  повержден";
+					std::string exception_msg = "Р¤Р°Р№Р»  РїРѕРІРµСЂР¶РґРµРЅ";
 					throw std::exception(exception_msg.c_str());
 				}
 			}
 			else {
-				std::string exception_msg = "Файл недоступен";
+				std::string exception_msg = "Р¤Р°Р№Р» РЅРµРґРѕСЃС‚СѓРїРµРЅ";
 				throw std::exception(exception_msg.c_str());
 			}
 		}
 
 		static std::wstring GetDir(std::wstring project_path)
 		{
-			//вычисляем путь папки с проектом
+			//РІС‹С‡РёСЃР»СЏРµРј РїСѓС‚СЊ РїР°РїРєРё СЃ РїСЂРѕРµРєС‚РѕРј
 			std::wstring prpath = project_path;
-			std::reverse(prpath.begin(), prpath.end()); //реверсим путь
-			size_t size = prpath.find(L"\\"); //находим первое вхождение обратного слеша
-			prpath.erase(0, size); //удаляем все до него
-			std::reverse(prpath.begin(), prpath.end()); //реверсим путь обратно
+			std::reverse(prpath.begin(), prpath.end()); //СЂРµРІРµСЂСЃРёРј РїСѓС‚СЊ
+			size_t size = prpath.find(L"\\"); //РЅР°С…РѕРґРёРј РїРµСЂРІРѕРµ РІС…РѕР¶РґРµРЅРёРµ РѕР±СЂР°С‚РЅРѕРіРѕ СЃР»РµС€Р°
+			prpath.erase(0, size); //СѓРґР°Р»СЏРµРј РІСЃРµ РґРѕ РЅРµРіРѕ
+			std::reverse(prpath.begin(), prpath.end()); //СЂРµРІРµСЂСЃРёРј РїСѓС‚СЊ РѕР±СЂР°С‚РЅРѕ
 			return prpath;
 		}
 	};

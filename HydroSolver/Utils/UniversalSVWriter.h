@@ -19,7 +19,7 @@ namespace UniversalWriter {
 	public:
 		UTF8Writer(std::wstring path) : ISVWriter(path)
 		{
-			//пишем заголовок UTF16LE
+			//РїРёС€РµРј Р·Р°РіРѕР»РѕРІРѕРє UTF16LE
 			/*if (BOM)
 			{
 				std::wstring header = L"\xfeff";

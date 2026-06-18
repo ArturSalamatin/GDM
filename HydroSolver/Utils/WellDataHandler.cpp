@@ -11,39 +11,39 @@ std::vector<std::vector<WellDataHandler::DataReader::ValueContainer>> WellDataHa
 		std::ifstream read(path, std::ios::binary);
 		if (read.is_open())
 		{
-			//читаем файл
+			//С‡РёС‚Р°РµРј С„Р°Р№Р»
 			read.read(&buffer[0], size);
 			std::string sign(&buffer[0], 16);
 			if (sign == "KPFUBOIL    HOLE")
 			{
-				int header_Lenght = 0; //читаем размер заголовка
+				int header_Lenght = 0; //С‡РёС‚Р°РµРј СЂР°Р·РјРµСЂ Р·Р°РіРѕР»РѕРІРєР°
 				memcpy_s(&header_Lenght, sizeof(int), &buffer[16], sizeof(int));
-				//получаем кол-во значений в строке
+				//РїРѕР»СѓС‡Р°РµРј РєРѕР»-РІРѕ Р·РЅР°С‡РµРЅРёР№ РІ СЃС‚СЂРѕРєРµ
 				int line_size = header_Lenght / 5;
 				int line_bytes_size = 0;
-				//получаем типы файлов
+				//РїРѕР»СѓС‡Р°РµРј С‚РёРїС‹ С„Р°Р№Р»РѕРІ
 				std::string types(&buffer[20], line_size);
-				//получаем размеры файлов
+				//РїРѕР»СѓС‡Р°РµРј СЂР°Р·РјРµСЂС‹ С„Р°Р№Р»РѕРІ
 				std::vector<int> sizes;
 				for (int i = 0; i < line_size; i++)
 				{
 					int sz = 0;
-					memcpy_s(&sz, 4, &buffer[20l + line_size + i * 4], 4); //+line_size т.к. мы считали только тексовый зщаголовок
-					sizes.push_back(sz); //сохраняем размеры
+					memcpy_s(&sz, 4, &buffer[20l + line_size + i * 4], 4); //+line_size С‚.Рє. РјС‹ СЃС‡РёС‚Р°Р»Рё С‚РѕР»СЊРєРѕ С‚РµРєСЃРѕРІС‹Р№ Р·С‰Р°РіРѕР»РѕРІРѕРє
+					sizes.push_back(sz); //СЃРѕС…СЂР°РЅСЏРµРј СЂР°Р·РјРµСЂС‹
 					line_bytes_size += sz;
 				}
-				//читаем файлы
+				//С‡РёС‚Р°РµРј С„Р°Р№Р»С‹
 				for (long long i = 20 + header_Lenght; i < size; i += line_bytes_size)
 				{
 					int shift = 0;
 					out.push_back(std::vector<WellDataHandler::DataReader::ValueContainer>());
-					for (int j = 0; j < line_size; j++) //перебираем колонки
+					for (int j = 0; j < line_size; j++) //РїРµСЂРµР±РёСЂР°РµРј РєРѕР»РѕРЅРєРё
 					{
 						//std::vector<char> lbuffer(sizes[j]);
 						char* var = new char[sizes[j]];
 						memcpy_s(var, sizes[j], &buffer[i + shift], sizes[j]);
 						ValueContainer vc;
-						//преобразуем переменную
+						//РїСЂРµРѕР±СЂР°Р·СѓРµРј РїРµСЂРµРјРµРЅРЅСѓСЋ
 						if (types[j] == 'A')
 						{
 							vc.Value = *reinterpret_cast<int*>(var);
@@ -65,17 +65,17 @@ std::vector<std::vector<WellDataHandler::DataReader::ValueContainer>> WellDataHa
 							vc.values = std::string(var, sizes[j]);
 						}*/
 						(*(out.end() - 1)).push_back(vc);
-						shift += sizes[j]; //двигаем внутренний указатель
+						shift += sizes[j]; //РґРІРёРіР°РµРј РІРЅСѓС‚СЂРµРЅРЅРёР№ СѓРєР°Р·Р°С‚РµР»СЊ
 					}
 				}
 				return out;
 			}
 			else {
-				throw std::exception("Файл содержит неправильную сигнатуру");
+				throw std::exception("Р¤Р°Р№Р» СЃРѕРґРµСЂР¶РёС‚ РЅРµРїСЂР°РІРёР»СЊРЅСѓСЋ СЃРёРіРЅР°С‚СѓСЂСѓ");
 			}
 		}
 		else {
-			throw std::exception("Файл недоступен для чтения");
+			throw std::exception("Р¤Р°Р№Р» РЅРµРґРѕСЃС‚СѓРїРµРЅ РґР»СЏ С‡С‚РµРЅРёСЏ");
 		}
 	}
 	else {
@@ -83,18 +83,18 @@ std::vector<std::vector<WellDataHandler::DataReader::ValueContainer>> WellDataHa
 	}
 }
 /// <summary>
-/// Ключ:Значение
-/// time - Дата перфорации
-/// is_open - Коллектор/Неколлетор
-/// perf_start - Глубина начала перфорации
-/// perf_stop - Глубина конца перфорации
-/// perf_density - Плотность перфорации дырок/м 
+/// РљР»СЋС‡:Р—РЅР°С‡РµРЅРёРµ
+/// time - Р”Р°С‚Р° РїРµСЂС„РѕСЂР°С†РёРё
+/// is_open - РљРѕР»Р»РµРєС‚РѕСЂ/РќРµРєРѕР»Р»РµС‚РѕСЂ
+/// perf_start - Р“Р»СѓР±РёРЅР° РЅР°С‡Р°Р»Р° РїРµСЂС„РѕСЂР°С†РёРё
+/// perf_stop - Р“Р»СѓР±РёРЅР° РєРѕРЅС†Р° РїРµСЂС„РѕСЂР°С†РёРё
+/// perf_density - РџР»РѕС‚РЅРѕСЃС‚СЊ РїРµСЂС„РѕСЂР°С†РёРё РґС‹СЂРѕРє/Рј 
 /// </summary>
-/// <param name="path">Путь до файла перфорации</param>
-/// <param name="name">Имя скважины</param>
+/// <param name="path">РџСѓС‚СЊ РґРѕ С„Р°Р№Р»Р° РїРµСЂС„РѕСЂР°С†РёРё</param>
+/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
 void WellDataHandler::PerfData::Push(std::wstring path, std::wstring name)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto data = WellDataHandler::DataReader::Read(path);
 	for (const auto& line : data)
@@ -111,7 +111,7 @@ void WellDataHandler::PerfData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::PerfData::Push(std::wstring path_to_perf)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_perf);
 	size_t size = 0;
@@ -144,16 +144,16 @@ void WellDataHandler::PerfData::Push(std::wstring path_to_perf)
 		std::map<std::wstring, float> ldata;
 		ldata[L"time"] = PathUtils::Utils::ConvertDateToExcelDate(std::wstring(line[1].get()));
 		ldata[L"is_open"] = (
-			!wcscmp(line[4].get(), L"Затруб.циркуляция") ||
-			!wcscmp(line[4].get(), L"Отключение") ||
-			!wcscmp(line[4].get(), L"ИЗОЛЯЦИЯ") ||
-			!wcscmp(line[4].get(), L"Спец.перфорация") ||
-			!wcscmp(line[4].get(), L"Наруш.изоляции") ||
-			!wcscmp(line[4].get(), L"Нарушение колонны")) ? 0 : 1;
+			!wcscmp(line[4].get(), L"Р—Р°С‚СЂСѓР±.С†РёСЂРєСѓР»СЏС†РёСЏ") ||
+			!wcscmp(line[4].get(), L"РћС‚РєР»СЋС‡РµРЅРёРµ") ||
+			!wcscmp(line[4].get(), L"РР—РћР›РЇР¦РРЇ") ||
+			!wcscmp(line[4].get(), L"РЎРїРµС†.РїРµСЂС„РѕСЂР°С†РёСЏ") ||
+			!wcscmp(line[4].get(), L"РќР°СЂСѓС€.РёР·РѕР»СЏС†РёРё") ||
+			!wcscmp(line[4].get(), L"РќР°СЂСѓС€РµРЅРёРµ РєРѕР»РѕРЅРЅС‹")) ? 0 : 1;
 		ldata[L"is_grp"] = (
-			!wcscmp(line[4].get(), L"Перфорация с ГРП") ||
-			!wcscmp(line[4].get(), L"Перестрел с ГРП") ||
-			!wcscmp(line[4].get(), L"Достел с ГРП")) ? 1 : 0;
+			!wcscmp(line[4].get(), L"РџРµСЂС„РѕСЂР°С†РёСЏ СЃ Р“Р Рџ") ||
+			!wcscmp(line[4].get(), L"РџРµСЂРµСЃС‚СЂРµР» СЃ Р“Р Рџ") ||
+			!wcscmp(line[4].get(), L"Р”РѕСЃС‚РµР» СЃ Р“Р Рџ")) ? 1 : 0;
 		ldata[L"perf_start"] = wcstof(DataReader::ReplaceCommaWithDot(line[7].get()).c_str(), &stopscan);
 		ldata[L"perf_stop"] = wcstof(DataReader::ReplaceCommaWithDot(line[8].get()).c_str(), &stopscan);
 		ldata[L"perf_density"] = wcstof(DataReader::ReplaceCommaWithDot(line[13].get()).c_str(), &stopscan);
@@ -173,16 +173,16 @@ void WellDataHandler::GISData::Push(std::wstring path, std::wstring name)
 {
 }
 
-//TODO: наличие ГРП при вводе (если от даты бурения в течении 3х месяцев было ГРП то считаем) (1 - было, 0 нет)
-//TODO: колличество проведенных ГРП вообще (чтобы не было повторяющихся и близких дат, между ГРП должно быть больше полугода)
-//TODO: Сумарная добыча/закачка
-//TODO: если была закачка воды (больше 1т/сут) (если не получитсяы закачку починить)
-//TODO: пластовое давление
-//TODO: вставить безводный период
+//TODO: РЅР°Р»РёС‡РёРµ Р“Р Рџ РїСЂРё РІРІРѕРґРµ (РµСЃР»Рё РѕС‚ РґР°С‚С‹ Р±СѓСЂРµРЅРёСЏ РІ С‚РµС‡РµРЅРёРё 3С… РјРµСЃСЏС†РµРІ Р±С‹Р»Рѕ Р“Р Рџ С‚Рѕ СЃС‡РёС‚Р°РµРј) (1 - Р±С‹Р»Рѕ, 0 РЅРµС‚)
+//TODO: РєРѕР»Р»РёС‡РµСЃС‚РІРѕ РїСЂРѕРІРµРґРµРЅРЅС‹С… Р“Р Рџ РІРѕРѕР±С‰Рµ (С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ РїРѕРІС‚РѕСЂСЏСЋС‰РёС…СЃСЏ Рё Р±Р»РёР·РєРёС… РґР°С‚, РјРµР¶РґСѓ Р“Р Рџ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ РїРѕР»СѓРіРѕРґР°)
+//TODO: РЎСѓРјР°СЂРЅР°СЏ РґРѕР±С‹С‡Р°/Р·Р°РєР°С‡РєР°
+//TODO: РµСЃР»Рё Р±С‹Р»Р° Р·Р°РєР°С‡РєР° РІРѕРґС‹ (Р±РѕР»СЊС€Рµ 1С‚/СЃСѓС‚) (РµСЃР»Рё РЅРµ РїРѕР»СѓС‡РёС‚СЃСЏС‹ Р·Р°РєР°С‡РєСѓ РїРѕС‡РёРЅРёС‚СЊ)
+//TODO: РїР»Р°СЃС‚РѕРІРѕРµ РґР°РІР»РµРЅРёРµ
+//TODO: РІСЃС‚Р°РІРёС‚СЊ Р±РµР·РІРѕРґРЅС‹Р№ РїРµСЂРёРѕРґ
 
 void WellDataHandler::GISData::Push(std::wstring path_to_gis_file)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_gis_file);
 	size_t size = 0;
@@ -199,10 +199,10 @@ void WellDataHandler::GISData::Push(std::wstring path_to_gis_file)
 		wchar_t* stopscan;
 
 		auto line = std::move(data[i]);
-		if (/*line[1].get() != L"Н/Д" && line[2].get() != L"Н/Д"*/
-			wcscmp(line[1].get(), L"Н/Д") != 0
-			&& wcscmp(line[2].get(), L"Н/Д") != 0
-			&& (*line[1].get() == L'Д' || *line[1].get() == L'д') //берем только пласты с индексом Д
+		if (/*line[1].get() != L"Рќ/Р”" && line[2].get() != L"Рќ/Р”"*/
+			wcscmp(line[1].get(), L"Рќ/Р”") != 0
+			&& wcscmp(line[2].get(), L"Рќ/Р”") != 0
+			&& (*line[1].get() == L'Р”' || *line[1].get() == L'Рґ') //Р±РµСЂРµРј С‚РѕР»СЊРєРѕ РїР»Р°СЃС‚С‹ СЃ РёРЅРґРµРєСЃРѕРј Р”
 			)
 		{
 			std::wstring name(line[0].get());
@@ -213,8 +213,8 @@ void WellDataHandler::GISData::Push(std::wstring path_to_gis_file)
 			ldata[L"porosity"] = /*(line[18].get() != L'\x0') ?*/ wcstof(DataReader::ReplaceCommaWithDot(line[18].get()).c_str(), &stopscan) / 100 /*: 0*/;
 			ldata[L"permability"] = /*(line[19].get() != L'\x0') ?*/ wcstof(DataReader::ReplaceCommaWithDot(line[19].get()).c_str(), &stopscan) / 1000 /*: 0*/;
 			ldata[L"oil_saturation"] = /*(line[20].get() != L'\x0') ?*/ wcstof(DataReader::ReplaceCommaWithDot(line[20].get()).c_str(), &stopscan) / 100 /*: 0*/;
-			ldata[L"is_collector"] = (!wcscmp(line[10].get(), L"Да")) ? 1 : 0;
-			ldata[L"saturated_height"] =/* (line[34].get() != L'\x0') ?*/ wcstof(DataReader::ReplaceCommaWithDot(line[34].get()).c_str(), &stopscan) /*: 0*/; //нефтенасышенная толщина
+			ldata[L"is_collector"] = (!wcscmp(line[10].get(), L"Р”Р°")) ? 1 : 0;
+			ldata[L"saturated_height"] =/* (line[34].get() != L'\x0') ?*/ wcstof(DataReader::ReplaceCommaWithDot(line[34].get()).c_str(), &stopscan) /*: 0*/; //РЅРµС„С‚РµРЅР°СЃС‹С€РµРЅРЅР°СЏ С‚РѕР»С‰РёРЅР°
 			Container[name].push_back(ldata);
 			std::map<std::wstring, std::wstring> lsdata;
 			lsdata[L"layer_name"] = std::wstring(line[1].get());
@@ -229,7 +229,7 @@ void WellDataHandler::GISData::Push(std::wstring path_to_gis_file)
 
 void WellDataHandler::MerData::Push(std::wstring path, std::wstring name)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto data = WellDataHandler::DataReader::Read(path);
 	for (const auto& line : data)
@@ -241,9 +241,9 @@ void WellDataHandler::MerData::Push(std::wstring path, std::wstring name)
 		ldata[L"pump_water"] = line[20].Value;
 		ldata[L"worked_time"] = line[6].Value;
 		ldata[L"colection_time"] = line[7].Value;
-		ldata[L"type"] = (ldata[L"pump_water"] == 0) ? 1 : 0; //1 - нефть 0 - наг 
+		ldata[L"type"] = (ldata[L"pump_water"] == 0) ? 1 : 0; //1 - РЅРµС„С‚СЊ 0 - РЅР°Рі 
 		Container[name].push_back(ldata);
-		//накопленные значения
+		//РЅР°РєРѕРїР»РµРЅРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
 		CumOil[name] += (ldata[L"oil"] > 0) ? ldata[L"oil"] : 0;
 		CumWater[name] += (ldata[L"water"] > 0) ? ldata[L"water"] : 0;
 		CumPumpWater[name] += (ldata[L"pump_water"] > 0) ? ldata[L"pump_water"] : 0;
@@ -252,7 +252,7 @@ void WellDataHandler::MerData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::MerData::Push(std::wstring path_to_mer)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_mer);
 	size_t size = 0;
@@ -272,9 +272,9 @@ void WellDataHandler::MerData::Push(std::wstring path_to_mer)
 	//	ldata[L"time"] = PathUtils::Utils::ConvertDateToExcelDate(std::wstring(line[1].get()));
 
 		double type=0;
-		if (wcscmp(line[3].get(), L"НЕФ") == 0)
+		if (wcscmp(line[3].get(), L"РќР•Р¤") == 0)
 			type= 1;
-		else if (wcscmp(line[3].get(), L"НАГ") == 0)
+		else if (wcscmp(line[3].get(), L"РќРђР“") == 0)
 			type = -1;
 
 		// if type == 0
@@ -302,7 +302,7 @@ void WellDataHandler::MerData::Push(std::wstring path_to_mer)
 			{ L"oil_m",  oil_m },
 			{ L"water_m", water_m },
 			{ L"type", type },
-			{ L"is_work" , (!wcscmp(line[4].get(), L"РАБ.")) ? 1 : 0 }
+			{ L"is_work" , (!wcscmp(line[4].get(), L"Р РђР‘.")) ? 1 : 0 }
 		});
 		line.reset();
 
@@ -317,7 +317,7 @@ void WellDataHandler::MerData::PushManualy(
 	std::wstring Name,
 	std::map<std::wstring, float> Data)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	Container[Name].push_back(Data);
 	CumOil[Name] += (Data[L"oil"] > 0) ? Data[L"oil"] : 0;
@@ -333,7 +333,7 @@ void WellDataHandler::MerData::PushManualy(
 
 	float wtrc = Data[L"water"] / (Data[L"water"] + Data[L"oil"]);
 	if (!std::isnormal(wtrc))
-		wtrc = -1;//-1 чтобы не в миксед тайм не попадали моменты когда скважина вообще не работала
+		wtrc = -1;//-1 С‡С‚РѕР±С‹ РЅРµ РІ РјРёРєСЃРµРґ С‚Р°Р№Рј РЅРµ РїРѕРїР°РґР°Р»Рё РјРѕРјРµРЅС‚С‹ РєРѕРіРґР° СЃРєРІР°Р¶РёРЅР° РІРѕРѕР±С‰Рµ РЅРµ СЂР°Р±РѕС‚Р°Р»Р°
 
 	SumMixedTime[Name] += (
 		Data[L"is_work"]
@@ -359,7 +359,7 @@ void WellDataHandler::MerData::PushManualy(
 
 float WellDataHandler::MerData::GetValue(int id, std::wstring name)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	switch (id)
 	{
@@ -402,13 +402,13 @@ void WellDataHandler::GDISData::Push(std::wstring path, std::wstring name)
 
 }
 /// <summary>
-/// time - Дата
-/// pressure - Давление (атм)
+/// time - Р”Р°С‚Р°
+/// pressure - Р”Р°РІР»РµРЅРёРµ (Р°С‚Рј)
 /// </summary>
 /// <param name="path_to_gdis"></param>
 void WellDataHandler::GDISData::Push(std::wstring path_to_gdis)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_gdis);
 	size_t size = 0;
@@ -426,7 +426,7 @@ void WellDataHandler::GDISData::Push(std::wstring path_to_gdis)
 
 		auto line = std::move(data[i]);
 
-		if (/*line.size() > 85 &&*/ !wcscmp(line[48].get(), L"Рпл") || !wcscmp(line[48].get(), L"Нст"))
+		if (/*line.size() > 85 &&*/ !wcscmp(line[48].get(), L"Р РїР»") || !wcscmp(line[48].get(), L"РќСЃС‚"))
 		{
 			std::wstring name(line[0].get());
 			std::map<std::wstring, float> ldata;
@@ -440,12 +440,12 @@ void WellDataHandler::GDISData::Push(std::wstring path_to_gdis)
 	Optimize();
 }
 /// <summary>
-/// Возвращает перфорированные пропаслты с датой их перфорации и коллектор/неколлектор
+/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРµСЂС„РѕСЂРёСЂРѕРІР°РЅРЅС‹Рµ РїСЂРѕРїР°СЃР»С‚С‹ СЃ РґР°С‚РѕР№ РёС… РїРµСЂС„РѕСЂР°С†РёРё Рё РєРѕР»Р»РµРєС‚РѕСЂ/РЅРµРєРѕР»Р»РµРєС‚РѕСЂ
 /// </summary>
-/// <param name="gisd">Экздемпляр класса гисов</param>
-/// <param name="perfd">Экземпляр класса перфорации</param>
-/// <param name="name">Имя скважины</param>
-/// <returns>{Имя пропластка {Дата перфорирования, Коллектор/Неколлектор, Было ли ГРП, Глубина перфорации}}</returns>
+/// <param name="gisd">Р­РєР·РґРµРјРїР»СЏСЂ РєР»Р°СЃСЃР° РіРёСЃРѕРІ</param>
+/// <param name="perfd">Р­РєР·РµРјРїР»СЏСЂ РєР»Р°СЃСЃР° РїРµСЂС„РѕСЂР°С†РёРё</param>
+/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+/// <returns>{РРјСЏ РїСЂРѕРїР»Р°СЃС‚РєР° {Р”Р°С‚Р° РїРµСЂС„РѕСЂРёСЂРѕРІР°РЅРёСЏ, РљРѕР»Р»РµРєС‚РѕСЂ/РќРµРєРѕР»Р»РµРєС‚РѕСЂ, Р‘С‹Р»Рѕ Р»Рё Р“Р Рџ, Р“Р»СѓР±РёРЅР° РїРµСЂС„РѕСЂР°С†РёРё}}</returns>
 std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, float>>>> WellDataHandler::DataHandleUtils::ComparePerfWithGIS(GISData& gisd, PerfData& perfd, std::wstring name)
 {
 	std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, float>>>> out;
@@ -463,9 +463,9 @@ std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, fl
 			float lstart = gis_data[j][L"layer_start"];
 			float lstop = gis_data[j][L"layer_stop"];
 
-			if (!(pstop < lstart || pstart > lstop)) //начало пласта должно лежать ниже, чем начало перфорации, но выше, чем её конец
+			if (!(pstop < lstart || pstart > lstop)) //РЅР°С‡Р°Р»Рѕ РїР»Р°СЃС‚Р° РґРѕР»Р¶РЅРѕ Р»РµР¶Р°С‚СЊ РЅРёР¶Рµ, С‡РµРј РЅР°С‡Р°Р»Рѕ РїРµСЂС„РѕСЂР°С†РёРё, РЅРѕ РІС‹С€Рµ, С‡РµРј РµС‘ РєРѕРЅРµС†
 			{
-				if (giss_data[j][L"layer_name"] != L"Н/Д")
+				if (giss_data[j][L"layer_name"] != L"Рќ/Р”")
 				{
 					//double height = 0;
 					//height = std::min<float>(pstop, lstop) - std::max<float>(pstart, lstart);
@@ -486,7 +486,7 @@ std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, fl
 void WellDataHandler::DataHandleUtils::CompareGeoChemWithWaterCut(WCData& wcdat, GeoChemData& gcd)
 {
 	//std::ofstream toWrite("rustam.csv");
-	//toWrite << "№.п/п;№.Скв;Номер.партии;Дата;1.Methane;2.Ethane;3.Propane;i_butane;n_butane;6.i-.pentane;7.Pentane;8.gexane;Изобутан/бутан;Изопентан/пентан;ml_isobutane;ml_butane;ml_isobutane_butane;обв %;тек. обв;пл тек\n";
+	//toWrite << "в„–.Рї/Рї;в„–.РЎРєРІ;РќРѕРјРµСЂ.РїР°СЂС‚РёРё;Р”Р°С‚Р°;1.Methane;2.Ethane;3.Propane;i_butane;n_butane;6.i-.pentane;7.Pentane;8.gexane;РР·РѕР±СѓС‚Р°РЅ/Р±СѓС‚Р°РЅ;РР·РѕРїРµРЅС‚Р°РЅ/РїРµРЅС‚Р°РЅ;ml_isobutane;ml_butane;ml_isobutane_butane;РѕР±РІ %;С‚РµРє. РѕР±РІ;РїР» С‚РµРє\n";
 	//for (const auto& gc_well : gcd.GetWellsName())
 	//{
 	//	auto gc_well_data = gcd.GetDataPerWell(gc_well);
@@ -501,9 +501,9 @@ void WellDataHandler::DataHandleUtils::CompareGeoChemWithWaterCut(WCData& wcdat,
 	//		int id_counter = 0;
 	//		for (const auto& _wc_well_data : wc_well_data)
 	//		{
-	//			if (abs(_wc_well_data.at(L"time") - ctime) < 45) //диапазон +- 1,5 месяца
+	//			if (abs(_wc_well_data.at(L"time") - ctime) < 45) //РґРёР°РїР°Р·РѕРЅ +- 1,5 РјРµСЃСЏС†Р°
 	//			{
-	//				if (abs(_wc_well_data.at(L"time") - ctime) < last_diffs)//сравниваем с последним минимальным показанием
+	//				if (abs(_wc_well_data.at(L"time") - ctime) < last_diffs)//СЃСЂР°РІРЅРёРІР°РµРј СЃ РїРѕСЃР»РµРґРЅРёРј РјРёРЅРёРјР°Р»СЊРЅС‹Рј РїРѕРєР°Р·Р°РЅРёРµРј
 	//				{
 	//					last_diffs = abs(_wc_well_data.at(L"time") - ctime);
 	//					closest_index = id_counter;
@@ -574,36 +574,36 @@ std::map<std::wstring, std::vector<std::map<std::wstring, float>>> WellDataHandl
 	PerfData& perf,
 	std::vector<std::wstring> LayersName)
 {
-	//получаем мер
+	//РїРѕР»СѓС‡Р°РµРј РјРµСЂ
 	auto mers = mer.GetDataPerWell(name);
 	std::map<std::wstring, std::vector<std::map<std::wstring, float>>> out;
 	for (const auto& ln : LayersName)
 		out.insert({ ln , std::vector<std::map<std::wstring, float>>() });
-	/*out.insert({"Д1А" , std::vector<std::map<std::string, float>>()});
-	out.insert({"Д1Б" , std::vector<std::map<std::string, float>>()});
-	out.insert({"Д1ВГД" , std::vector<std::map<std::string, float>>()});*/
+	/*out.insert({"Р”1Рђ" , std::vector<std::map<std::string, float>>()});
+	out.insert({"Р”1Р‘" , std::vector<std::map<std::string, float>>()});
+	out.insert({"Р”1Р’Р“Р”" , std::vector<std::map<std::string, float>>()});*/
 	for (const auto& mr : mers)
 	{
-		//находим включенные пласты
+		//РЅР°С…РѕРґРёРј РІРєР»СЋС‡РµРЅРЅС‹Рµ РїР»Р°СЃС‚С‹
 		int time = mr.at(L"time");
 		auto elayer = GetEnabledLayers(gis, perf, name, time);
-		//находим доли
+		//РЅР°С…РѕРґРёРј РґРѕР»Рё
 		std::vector<float> parst(elayer.size());
 		auto gd = gis.GetDataPerWell(name);
 		auto gds = gis.GetStringDataPerWell(name);
 
 		float summ_kh = 0;
-		//вычисляем доли
+		//РІС‹С‡РёСЃР»СЏРµРј РґРѕР»Рё
 		for (int g = 0; g < gd.size(); g++)
 		{
-			for (int l = 0; l < elayer.size(); l++) //находим слои
+			for (int l = 0; l < elayer.size(); l++) //РЅР°С…РѕРґРёРј СЃР»РѕРё
 			{
-				//находим вхождение слоя
+				//РЅР°С…РѕРґРёРј РІС…РѕР¶РґРµРЅРёРµ СЃР»РѕСЏ
 				if (gds[g].at(L"layer_name") == elayer[l])
 				{
-					//сумма KH
+					//СЃСѓРјРјР° KH
 					summ_kh += gd[g].at(L"permability") * gd[g].at(L"saturated_height");
-					//KH прослойка
+					//KH РїСЂРѕСЃР»РѕР№РєР°
 					parst[l] = gd[g].at(L"permability") * gd[g].at(L"saturated_height");
 				}
 			}
@@ -615,7 +615,7 @@ std::map<std::wstring, std::vector<std::map<std::wstring, float>>> WellDataHandl
 
 		for (int i = 0; i < parst.size(); i++)
 		{
-			//считаем долевые величины
+			//СЃС‡РёС‚Р°РµРј РґРѕР»РµРІС‹Рµ РІРµР»РёС‡РёРЅС‹
 			float oil = mr.at(L"oil") * parst[i];
 			float water = mr.at(L"water") * parst[i];
 			float pwater = mr.at(L"pump_water") * parst[i];
@@ -635,14 +635,14 @@ std::map<std::wstring, std::vector<std::map<std::wstring, float>>> WellDataHandl
 			{
 				std::wstring prefix = ln.substr(0, 2);
 				std::wstring suffix = ln.substr(2);
-				//проверяем нашли ли мы префикс Д0 или Д1
+				//РїСЂРѕРІРµСЂСЏРµРј РЅР°С€Р»Рё Р»Рё РјС‹ РїСЂРµС„РёРєСЃ Р”0 РёР»Рё Р”1
 				if (elayer[i].find(prefix) != std::string::npos)
 				{
-					//выделяем букву текущего слоя
+					//РІС‹РґРµР»СЏРµРј Р±СѓРєРІСѓ С‚РµРєСѓС‰РµРіРѕ СЃР»РѕСЏ
 					std::wstring elayer_suffix = elayer[i].substr(2, 1);
 					if (suffix.find(elayer_suffix) != std::wstring::npos)
 					{
-						//проверяем есть ли запись с близкой датой
+						//РїСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё Р·Р°РїРёСЃСЊ СЃ Р±Р»РёР·РєРѕР№ РґР°С‚РѕР№
 						if (out[ln].size() &&
 							abs((*(out[ln].end() - 1)).at(L"time") - ldata.at(L"time")) <= 1)
 						{
@@ -668,7 +668,7 @@ void WellDataHandler::WCData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::WCData::Push(std::wstring path_to_wc)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_wc);
 	std::vector<std::vector<std::wstring>> data = std::move(parser.Read());
@@ -693,7 +693,7 @@ void WellDataHandler::GeoChemData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::GeoChemData::Push(std::wstring path_to_gc)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_gc);
 	std::vector<std::vector<std::wstring>> data = std::move(parser.Read());
@@ -730,7 +730,7 @@ void WellDataHandler::FECData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::FECData::Push(std::wstring path_to_fec)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_fec);
 	size_t size = 0;
@@ -741,7 +741,7 @@ void WellDataHandler::FECData::Push(std::wstring path_to_fec)
 	{
 		//if (line.size())
 		//{
-		//	if (line_counter) //пропускаем первую строку
+		//	if (line_counter) //РїСЂРѕРїСѓСЃРєР°РµРј РїРµСЂРІСѓСЋ СЃС‚СЂРѕРєСѓ
 		//	{
 		auto line = std::move(data[i]);
 		if (*line[5].get() != L'\x0')
@@ -762,7 +762,7 @@ void WellDataHandler::FECData::Push(std::wstring path_to_fec)
 
 std::vector<std::wstring> WellDataHandler::FECData::GetWellsPerPeriod(int start, int stop)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	std::vector<std::wstring> out;
 	for (const auto& wd : Container)
@@ -784,7 +784,7 @@ void WellDataHandler::AnomData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::AnomData::Push(std::wstring path_to_anom)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_anom);
 	size_t size = 0;
@@ -799,9 +799,9 @@ void WellDataHandler::AnomData::Push(std::wstring path_to_anom)
 		std::map<std::wstring, float> ldata;
 		ldata[L"time"] = PathUtils::Utils::ConvertDateToExcelDate(line[2].get());
 		// anomaly input:
-		// 1 - ложная аномалия
-		// 2 - геохимический след целиков
-		// 3 - тип аномалии не определен
+		// 1 - Р»РѕР¶РЅР°СЏ Р°РЅРѕРјР°Р»РёСЏ
+		// 2 - РіРµРѕС…РёРјРёС‡РµСЃРєРёР№ СЃР»РµРґ С†РµР»РёРєРѕРІ
+		// 3 - С‚РёРї Р°РЅРѕРјР°Р»РёРё РЅРµ РѕРїСЂРµРґРµР»РµРЅ
 		ldata[L"type"] = wcstof(DataReader::ReplaceCommaWithDot(line[3].get()).c_str(), &stopscan);
 		ldata[L"batch_number"] = wcstof(DataReader::ReplaceCommaWithDot(line[1].get()).c_str(), &stopscan);
 		Container[name].push_back(ldata);
@@ -842,9 +842,9 @@ void WellDataHandler::KH_MerLayeredData::Push(
 		std::vector<bool>& _th_status,
 		int id)
 	{
-		//делим
+		//РґРµР»РёРј
 		auto div = DataHandleUtils::DivideProduction(wn, _mer, _gis, _perf, _LayersName);
-		//блокируем поток и заполняем
+		//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє Рё Р·Р°РїРѕР»РЅСЏРµРј
 		std::lock_guard<std::mutex> lock(_MersMutex);
 		for (const auto& ln : _LayersName)
 		{
@@ -853,25 +853,25 @@ void WellDataHandler::KH_MerLayeredData::Push(
 				_Mers[ln]->PushManualy(wn, data);
 			}
 		}
-		//сообщаем о готовности
+		//СЃРѕРѕР±С‰Р°РµРј Рѕ РіРѕС‚РѕРІРЅРѕСЃС‚Рё
 		sync++;
-		//освобождаем ячейку под поток
+		//РѕСЃРІРѕР±РѕР¶РґР°РµРј СЏС‡РµР№РєСѓ РїРѕРґ РїРѕС‚РѕРє
 		_th_status[id] = false;
 	};
 
 	for (const auto& wn : WellNames)
 	{
-		//ищем свободную ячейку
+		//РёС‰РµРј СЃРІРѕР±РѕРґРЅСѓСЋ СЏС‡РµР№РєСѓ
 		std::lock_guard<std::mutex> lock(MersMutex);
 		bool exit = false;
 		while (!exit)
 		{
 			for (int i = 0; i < th_status.size(); i++)
 			{
-				//если ее находим
+				//РµСЃР»Рё РµРµ РЅР°С…РѕРґРёРј
 				if (!th_status[i])
 				{
-					//запускаем поток деления
+					//Р·Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРє РґРµР»РµРЅРёСЏ
 					std::thread div_thread(
 						lambda_divide_prod,
 						wn,
@@ -884,22 +884,22 @@ void WellDataHandler::KH_MerLayeredData::Push(
 						std::ref(th_counter),
 						std::ref(th_status),
 						i);
-					//сообщаем о потоке
+					//СЃРѕРѕР±С‰Р°РµРј Рѕ РїРѕС‚РѕРєРµ
 					ref_th_counter++;
 					th_status[i] == true;
-					//запускаем поток
+					//Р·Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРє
 					div_thread.detach();
-					//выходим из цикла
+					//РІС‹С…РѕРґРёРј РёР· С†РёРєР»Р°
 					exit = true;
 					break;
 				}
 			}
-			//если все ячейки потоков заняты, то ожидаем
+			//РµСЃР»Рё РІСЃРµ СЏС‡РµР№РєРё РїРѕС‚РѕРєРѕРІ Р·Р°РЅСЏС‚С‹, С‚Рѕ РѕР¶РёРґР°РµРј
 			if (!exit)
 				std::this_thread::sleep_for(std::chrono::microseconds(10));
 		}
 	}
-	//ждем все потоки
+	//Р¶РґРµРј РІСЃРµ РїРѕС‚РѕРєРё
 	while (ref_th_counter != th_counter)
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 
@@ -915,7 +915,7 @@ void WellDataHandler::RaschData::Push(std::wstring path, std::wstring name)
 
 void WellDataHandler::RaschData::Push(std::wstring path_to_rasch)
 {
-	//блокируем поток для чтения
+	//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 	auto parser = UniversalSCParser::UTF8SVParser(path_to_rasch);
 	std::vector<std::vector<std::wstring>> data = std::move(parser.Read());
@@ -927,11 +927,11 @@ void WellDataHandler::RaschData::Push(std::wstring path_to_rasch)
 
 			std::wstring name = line[0];
 			std::map<std::wstring, float> ldata;
-			ldata[L"Д0"] = stoi(line[3]);
-			ldata[L"Д кынов."] = stoi(line[3]);
-			ldata[L"Д1А"] = stoi(line[4]);
-			ldata[L"Д1Б"] = stoi(line[5]);
-			ldata[L"Д1ВГД"] = stoi(line[6]);
+			ldata[L"Р”0"] = stoi(line[3]);
+			ldata[L"Р” РєС‹РЅРѕРІ."] = stoi(line[3]);
+			ldata[L"Р”1Рђ"] = stoi(line[4]);
+			ldata[L"Р”1Р‘"] = stoi(line[5]);
+			ldata[L"Р”1Р’Р“Р”"] = stoi(line[6]);
 			Container[name].push_back(ldata);
 		}
 
@@ -963,13 +963,13 @@ void WellDataHandler::WellCoordData::Push(std::wstring path_to_pp)
 		//{
 		//	cntr++;
 		//	continue;
-		//} //пропускаем первую строку
+		//} //РїСЂРѕРїСѓСЃРєР°РµРј РїРµСЂРІСѓСЋ СЃС‚СЂРѕРєСѓ
 		std::wstring name(line[0].get());
 		std::map<std::wstring, float> ldata;
 		ldata[L"X"] = wcstof(DataReader::ReplaceCommaWithDot(line[2].get()).c_str(), &stopscan);
 		ldata[L"Y"] = wcstof(DataReader::ReplaceCommaWithDot(line[3].get()).c_str(), &stopscan);
 		Container[name].push_back(ldata);
-		//Сохраняем имена
+		//РЎРѕС…СЂР°РЅСЏРµРј РёРјРµРЅР°
 		if (std::find(WellsName.begin(), WellsName.end(), name) == WellsName.end())
 		{
 			WellsName.push_back(name);

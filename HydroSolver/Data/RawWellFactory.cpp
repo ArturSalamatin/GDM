@@ -20,14 +20,14 @@ namespace reservoir_simulator
 		RawWellFactory::RawWellFactory(ConnectionFactory& connection) :
 			LayerFactory{ connection }
 		{
-			/*для скважин соединение нужно создавать вручную*/
+			/*РґР»СЏ СЃРєРІР°Р¶РёРЅ СЃРѕРµРґРёРЅРµРЅРёРµ РЅСѓР¶РЅРѕ СЃРѕР·РґР°РІР°С‚СЊ РІСЂСѓС‡РЅСѓСЋ*/
 			auto temp_connection{ ProgramLauncher::Utils::GetConnection(connection.uuid()) };
 			ProgramLauncher::WellData_Handler well_data;
 			well_data.AddData(*temp_connection); // get data from the DB
 
 			auto geosObj{ std::make_shared<GeometryHandler::GEOSObjectHandler>() };
 			ProgramLauncher::Database_FileHandler dbWell{ temp_connection, geosObj };
-			dbWell.LoadWells(); // взяли данные по скважинам --- имена и координаты
+			dbWell.LoadWells(); // РІР·СЏР»Рё РґР°РЅРЅС‹Рµ РїРѕ СЃРєРІР°Р¶РёРЅР°Рј --- РёРјРµРЅР° Рё РєРѕРѕСЂРґРёРЅР°С‚С‹
 
 			well_position = dbWell.Wells;
 			well_name = dbWell.WellsName;
