@@ -32,14 +32,15 @@ std::map<std::wstring, GeosShell::GeosPoint> Maps::FindNearWell(
 	std::map<std::wstring, GeosShell::GeosPoint> out;
 	for (const auto& well_p : Wells)
 	{
-		auto ws = well_p.second.get();
+		auto& sp = well_p.second.get();
 
-		if (ws != nullptr)
+		if (sp != nullptr)
 		{
-			if (well_region->contains(ws))
+			auto ws_pt = geos::geom::GeometryFactory::getDefaultInstance()->createPoint(
+				geos::geom::Coordinate(sp->getX(), sp->getY()));
+			if (well_region->contains(ws_pt))
 			{
-				//сами себя не включаем
-				if (ws->getX() != well->getX() && ws->getY() != well->getY())
+				if (sp->getX() != well->getX() && sp->getY() != well->getY())
 					out.insert(well_p);
 			}
 		}

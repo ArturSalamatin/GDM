@@ -37,14 +37,14 @@ namespace PathUtils {
 				yyyymmdd_regex = std::basic_regex<T>(L"\\d{4}\\W\\d{2}\\W\\d{2}");
 			}
 
-			std::match_results<std::basic_string<T>::const_iterator> base_match;
+			std::match_results<typename std::basic_string<T>::const_iterator> base_match;
 
 			//const std::basic_regex<T> date_excel_regex(L".{4}\\d{4}");
 
 			//const std::basic_regex<T> yyyymmdd_regex(L"\\d{4}\\W\\d{2}\\W\\d{2}");
 
 			
-			if (std::regex_match(date, base_match, date_regex))//дд.мм.гггг
+			if (std::regex_match(date, base_match, date_regex))//пїЅпїЅ.пїЅпїЅ.пїЅпїЅпїЅпїЅ
 			{
 				int year = stoi(std::basic_string<T>(date.begin() + 6, date.end())) - 1900 + 70;
 				int month = stoi(std::basic_string<T>(date.begin() + 3, date.begin() + 5));
@@ -59,7 +59,7 @@ namespace PathUtils {
 				auto seconds = mktime(&time);
 				return seconds / 86400;
 			}
-			if (std::regex_match(date, base_match, yyyymmdd_regex))//гггг.мм.дд
+			if (std::regex_match(date, base_match, yyyymmdd_regex))//пїЅпїЅпїЅпїЅ.пїЅпїЅ.пїЅпїЅ
 			{
 				int year = stoi(std::basic_string<T>(date.begin(), date.begin() + 4)) - 1900 + 70;
 				int month = stoi(std::basic_string<T>(date.begin() + 5, date.begin() + 7));
@@ -74,22 +74,22 @@ namespace PathUtils {
 				auto seconds = mktime(&time);
 				return seconds / 86400;
 			}
-			//if (std::regex_match(date, base_match, date_excel_regex))//дд.мм.гггг
+			//if (std::regex_match(date, base_match, date_excel_regex))//пїЅпїЅ.пїЅпїЅ.пїЅпїЅпїЅпїЅ
 			//{
 			//	static const std::map<std::basic_string<T>, int> Month
 			//	{
-			//		{L"янв", 0},
-			//		{L"фев", 1},
-			//		{L"мар", 2},
-			//		{L"апр", 3},
-			//		{L"май", 4},
-			//		{L"июн", 5},
-			//		{L"июл", 6},
-			//		{L"авг", 7},
-			//		{L"сен", 8},
-			//		{L"окт", 9},
-			//		{L"ноя", 10},
-			//		{L"дек", 11}
+			//		{L"пїЅпїЅпїЅ", 0},
+			//		{L"пїЅпїЅпїЅ", 1},
+			//		{L"пїЅпїЅпїЅ", 2},
+			//		{L"пїЅпїЅпїЅ", 3},
+			//		{L"пїЅпїЅпїЅ", 4},
+			//		{L"пїЅпїЅпїЅ", 5},
+			//		{L"пїЅпїЅпїЅ", 6},
+			//		{L"пїЅпїЅпїЅ", 7},
+			//		{L"пїЅпїЅпїЅ", 8},
+			//		{L"пїЅпїЅпїЅ", 9},
+			//		{L"пїЅпїЅпїЅ", 10},
+			//		{L"пїЅпїЅпїЅ", 11}
 			//	};
 
 			//	auto moth = date.substr(0, 3);

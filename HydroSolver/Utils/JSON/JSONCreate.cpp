@@ -6,7 +6,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 	if (end != -1)
 	{
 		std::map<std::wstring, std::unique_ptr<JSON::IJObject>> out;
-		//удаляем все ненужные символы
+		//СѓРґР°Р»СЏРµРј РІСЃРµ РЅРµРЅСѓР¶РЅС‹Рµ СЃРёРјРІРѕР»С‹
 		JSrc.erase(std::remove_if(JSrc.begin(), JSrc.end(), [isQuotes = false](wchar_t x) mutable {
 			if (x == L'\"')
 			{
@@ -24,7 +24,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 		} while (JSrc.find(L"\\\\") != std::wstring::npos);
 
 		size_t fcolon = 0;
-		size_t foffset = 1; //указывает на следующий парный символ
+		size_t foffset = 1; //СѓРєР°Р·С‹РІР°РµС‚ РЅР° СЃР»РµРґСѓСЋС‰РёР№ РїР°СЂРЅС‹Р№ СЃРёРјРІРѕР»
 		do {
 			fcolon = JSrc.find(L':', foffset);
 			if (fcolon != std::wstring::npos)
@@ -52,12 +52,12 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 					if (JSrc[fcolon + 1] == L'\"')
 					{
 						shiftNeed = 1;
-						close = JSrc.find(L'\"', fcolon + 2); //т.к. на +1 - начинающие кавычки 
+						close = JSrc.find(L'\"', fcolon + 2); //С‚.Рє. РЅР° +1 - РЅР°С‡РёРЅР°СЋС‰РёРµ РєР°РІС‹С‡РєРё 
 						if (close == std::wstring::npos)
 							throw std::exception("missing \"");
 					}
 					else {
-						close = JSrc.find(L',', fcolon) - 1; //-1 - т.к. указывать будет ровно на запятую
+						close = JSrc.find(L',', fcolon) - 1; //-1 - С‚.Рє. СѓРєР°Р·С‹РІР°С‚СЊ Р±СѓРґРµС‚ СЂРѕРІРЅРѕ РЅР° Р·Р°РїСЏС‚СѓСЋ
 						if (close + 1 == std::wstring::npos)
 						{
 							close = end - 1;
@@ -71,7 +71,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 				std::wstring src = L"";
 				if (type == 2 && shiftNeed)
 				{
-					src = JSrc.substr(fcolon + 2, close - (fcolon +2)); //+2 т.к. избегаем \"
+					src = JSrc.substr(fcolon + 2, close - (fcolon +2)); //+2 С‚.Рє. РёР·Р±РµРіР°РµРј \"
 				}
 				else {
 					src = JSrc.substr(fcolon + 1, close - fcolon);
@@ -80,7 +80,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 				//auto src = JSrc.substr(fcolon + 1, close - fcolon);
 				auto key = JSrc.substr(foffset, fcolon - foffset);
 
-				foffset = close + 2; //+2 т.к. } , {
+				foffset = close + 2; //+2 С‚.Рє. } , {
 
 				auto clean = [](wchar_t x)
 				{
@@ -112,7 +112,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 			}
 		} while (fcolon != std::wstring::npos);
 
-		////находим все запятые в строке
+		////РЅР°С…РѕРґРёРј РІСЃРµ Р·Р°РїСЏС‚С‹Рµ РІ СЃС‚СЂРѕРєРµ
 		//std::vector<size_t> commas;
 		//size_t pos = 0;
 		//size_t offset = 0;
@@ -124,17 +124,17 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 		//		offset = pos + 1;
 		//	}
 		//	else {
-		//		commas.push_back(JSrc.length() - 2); //-1 -> }, тогда конец строки - конец отдела (может быть и пустым фрагментом если последний символ запятая)
+		//		commas.push_back(JSrc.length() - 2); //-1 -> }, С‚РѕРіРґР° РєРѕРЅРµС† СЃС‚СЂРѕРєРё - РєРѕРЅРµС† РѕС‚РґРµР»Р° (РјРѕР¶РµС‚ Р±С‹С‚СЊ Рё РїСѓСЃС‚С‹Рј С„СЂР°РіРјРµРЅС‚РѕРј РµСЃР»Рё РїРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР» Р·Р°РїСЏС‚Р°СЏ)
 		//	}
 		//} while (pos != std::wstring::npos);
-		////делим на значения
+		////РґРµР»РёРј РЅР° Р·РЅР°С‡РµРЅРёСЏ
 		//for (int i = 0; i < commas.size(); i++)
 		//{
-		//	size_t prev = (i) ? commas[i - 1] + 1: 1; //+1 т.к. мы рассматриваем со следующей до текущей позиции
+		//	size_t prev = (i) ? commas[i - 1] + 1: 1; //+1 С‚.Рє. РјС‹ СЂР°СЃСЃРјР°С‚СЂРёРІР°РµРј СЃРѕ СЃР»РµРґСѓСЋС‰РµР№ РґРѕ С‚РµРєСѓС‰РµР№ РїРѕР·РёС†РёРё
 		//	//auto substr = JSrc.substr(prev, commas[i] - prev);
 		//	size_t colon = std::find(JSrc.begin() + prev, JSrc.begin() + commas[i], L':') - JSrc.begin();
 		//	//size_t colon = JSrc.find(L":", prev, (size_t)(commas[i] - prev));
-		//	//получаем ключ и значение
+		//	//РїРѕР»СѓС‡Р°РµРј РєР»СЋС‡ Рё Р·РЅР°С‡РµРЅРёРµ
 		//	auto key = JSrc.substr(prev, colon - prev);
 		//	auto src = JSrc.substr(colon + 1, commas[i - 1] - colon);
 
@@ -142,7 +142,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JObject::Value()
 		//	{
 		//		return x == L' ' || x == L'\n' || x == L'\r' || x == L'\"';
 		//	};
-		//	//удаляем все лишние символы
+		//	//СѓРґР°Р»СЏРµРј РІСЃРµ Р»РёС€РЅРёРµ СЃРёРјРІРѕР»С‹
 		//	key.erase(std::remove_if(key.begin(), key.end(), clean), key.end());
 		//	src.erase(std::remove_if(src.begin(), src.end(), clean), src.end());
 
@@ -182,7 +182,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JArray::Value()
 	if (end != -1)
 	{
 		std::map<std::wstring, std::unique_ptr<JSON::IJObject>> out;
-		//удаляем все ненужные символы
+		//СѓРґР°Р»СЏРµРј РІСЃРµ РЅРµРЅСѓР¶РЅС‹Рµ СЃРёРјРІРѕР»С‹
 		JSrc.erase(std::remove_if(JSrc.begin(), JSrc.end(), [isQuotes = false](wchar_t x) mutable {
 			if (x == L'\"')
 			{
@@ -194,7 +194,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JArray::Value()
 		
 		size_t fblock_start = 1;
 		size_t fblock_stop = 0;
-		size_t foffset = 1; //указывает на следующий парный символ
+		size_t foffset = 1; //СѓРєР°Р·С‹РІР°РµС‚ РЅР° СЃР»РµРґСѓСЋС‰РёР№ РїР°СЂРЅС‹Р№ СЃРёРјРІРѕР»
 
 		int kcount = 0;
 
@@ -229,13 +229,13 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JArray::Value()
 			{
 				if (JSrc[fblock_start] == L'\"')
 				{
-					fblock_start++;//+1 символ т.к. кавычки нам не нужны
+					fblock_start++;//+1 СЃРёРјРІРѕР» С‚.Рє. РєР°РІС‹С‡РєРё РЅР°Рј РЅРµ РЅСѓР¶РЅС‹
 
 					fblock_stop = JSrc.find(L'\"', fblock_start + 1);
 				}
 				else {
 					fblock_stop = JSrc.find(L',', fblock_start);
-					if (fblock_stop == std::wstring::npos) //если точек нет то читаем до конца
+					if (fblock_stop == std::wstring::npos) //РµСЃР»Рё С‚РѕС‡РµРє РЅРµС‚ С‚Рѕ С‡РёС‚Р°РµРј РґРѕ РєРѕРЅС†Р°
 					{
 						fblock_stop = end;
 						if (fblock_stop <= fblock_start)
@@ -244,7 +244,7 @@ std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSON::JArray::Value()
 				}
 				if (fblock_stop != std::wstring::npos)
 				{
-					if (fblock_stop != fblock_start) //Если они равны, то скорее всего неверный символ
+					if (fblock_stop != fblock_start) //Р•СЃР»Рё РѕРЅРё СЂР°РІРЅС‹, С‚Рѕ СЃРєРѕСЂРµРµ РІСЃРµРіРѕ РЅРµРІРµСЂРЅС‹Р№ СЃРёРјРІРѕР»
 					{
 						//auto src = JSrc.substr(fblock_start, fblock_stop - fblock_start);
 						out[std::to_wstring(kcount)] = std::make_unique<JValue>(

@@ -3,12 +3,12 @@
 void ProgramLauncher::Database_FileHandler::LoadWells()
 {
 	pqxx::work w(*Con);
-	pqxx::result result = w.exec(u8"SELECT * from get_all_coord_at_top_layer()");
+	pqxx::result result = w.exec("SELECT * from get_all_coord_at_top_layer()");
 	for (const auto& row : result)
 	{
-		float x = row[u8"x"].as<float>(std::numeric_limits<size_t>::max());
-		float y = row[u8"y"].as<float>(std::numeric_limits<size_t>::max());
-		size_t wid = row[u8"wellid"].as<size_t>(0);
+		float x = row["x"].as<float>(std::numeric_limits<size_t>::max());
+		float y = row["y"].as<float>(std::numeric_limits<size_t>::max());
+		size_t wid = row["wellid"].as<size_t>(0);
 
 		if (x == std::numeric_limits<size_t>::max() || y == std::numeric_limits<size_t>::max())
 			continue;
@@ -18,7 +18,7 @@ void ProgramLauncher::Database_FileHandler::LoadWells()
 		WellsName.push_back(std::to_wstring(wid));
 	}
 
-	pqxx::row zone = w.exec1(u8"SELECT * FROM input_data.object_contour");
+	pqxx::row zone = w.exec1("SELECT * FROM input_data.object_contour");
 	auto arr = zone["countour"].as_array();
 	auto elem = arr.get_next();
 

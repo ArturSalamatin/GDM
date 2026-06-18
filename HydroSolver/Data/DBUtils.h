@@ -51,7 +51,7 @@ namespace grdecl_memory {
 			Con =/* std::make_unique<pqxx::connection>(con_string.str().c_str());*/ Utils::CreateDBConnection(project_uuid);
 			CurrentTransaction = std::make_unique<pqxx::work>(*Con);
 
-			//10 MB буффер
+			//10 MB Р±СѓС„С„РµСЂ
 			//Buffer = std::make_unique<std::byte[]>(BufferSize);
 		}
 
@@ -64,7 +64,7 @@ namespace grdecl_memory {
 
 		virtual void SetObject(std::string name)
 		{
-			FlushBuffer(); //стрим и AddCount очищается вот тут
+			FlushBuffer(); //СЃС‚СЂРёРј Рё AddCount РѕС‡РёС‰Р°РµС‚СЃСЏ РІРѕС‚ С‚СѓС‚
 			if (DBAsyncUnload.valid())
 				DBAsyncUnload.wait();
 			

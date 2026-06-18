@@ -5,35 +5,35 @@ ModelHanlder::ReadModel::ReadModel(std::wstring projectPath)
 	if (std::filesystem::exists(projectPath))
 	{
 		ProjectPath = projectPath;
-		//получаем папку проекта
+		//РїРѕР»СѓС‡Р°РµРј РїР°РїРєСѓ РїСЂРѕРµРєС‚Р°
 		auto project_dir = GetDir(ProjectPath);
 		ProjectDirectory = project_dir;
-		//читаем путь до модели
+		//С‡РёС‚Р°РµРј РїСѓС‚СЊ РґРѕ РјРѕРґРµР»Рё
 		auto model_guid = BinaryFileRead::GetGridcellGuidFromProject(ProjectPath);
-		//читаем файлы модели и её параметры
+		//С‡РёС‚Р°РµРј С„Р°Р№Р»С‹ РјРѕРґРµР»Рё Рё РµС‘ РїР°СЂР°РјРµС‚СЂС‹
 		ModelFilePath = project_dir + model_guid + L"\\";
 		if(std::filesystem::exists(ModelFilePath + L"Model.bin"))
 			ModelsFile = BinaryFileRead::ReadGRDECLModels((ModelFilePath + L"Model.bin").c_str(), xshift, yshift, nx, ny, nz);
 		else
-			throw std::exception("Файл модели не существует");
+			throw std::exception("Р¤Р°Р№Р» РјРѕРґРµР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
 	}
 	else
-		throw std::exception("Файл проекта не существует");
+		throw std::exception("Р¤Р°Р№Р» РїСЂРѕРµРєС‚Р° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
 }
 
 std::vector<std::vector<std::vector<std::vector<float>>>> ModelHanlder::ReadModel::ReadPillars()
 {
 	if (
-		ModelsFile.find(L"COORD") != ModelsFile.end()  //проверяем наличие ключа
-		&& std::filesystem::exists(ModelFilePath + ModelsFile[L"COORD"])) //и файла
+		ModelsFile.find(L"COORD") != ModelsFile.end()  //РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РєР»СЋС‡Р°
+		&& std::filesystem::exists(ModelFilePath + ModelsFile[L"COORD"])) //Рё С„Р°Р№Р»Р°
 	{
 		std::vector<std::vector<std::vector<std::vector<float>>>> pillars;
 		BinaryFileRead filereader;
 		filereader.OpenFile( (ModelFilePath + ModelsFile[L"COORD"]).c_str() );
 		std::string sign(filereader.Read(0, 16), 16);
-		if (sign == "KPFUBOIL    GRID") //проверяем 
+		if (sign == "KPFUBOIL    GRID") //РїСЂРѕРІРµСЂСЏРµРј 
 		{
-			//получаем размеры
+			//РїРѕР»СѓС‡Р°РµРј СЂР°Р·РјРµСЂС‹
 			int xc = 0;
 			int yc = 0;
 			int zc = 0;
@@ -53,16 +53,16 @@ std::vector<std::vector<std::vector<std::vector<float>>>> ModelHanlder::ReadMode
 					float x1 = 0;
 					float y1 = 0;
 					float z1 = 0;
-					//Первая напрявляющая меньшая
+					//РџРµСЂРІР°СЏ РЅР°РїСЂСЏРІР»СЏСЋС‰Р°СЏ РјРµРЅСЊС€Р°СЏ
 					memcpy_s(&x, 4, filereader.Read(last_pos, 4), 4);
 					memcpy_s(&y, 4, filereader.Read(last_pos + 4l, 4), 4);
 					memcpy_s(&z, 4, filereader.Read(last_pos + 8l, 4), 4);
-					//Сторая направлющая большая
+					//РЎС‚РѕСЂР°СЏ РЅР°РїСЂР°РІР»СЋС‰Р°СЏ Р±РѕР»СЊС€Р°СЏ
 					memcpy_s(&x1, 4, filereader.Read(last_pos + 12l, 4), 4);
 					memcpy_s(&y1, 4, filereader.Read(last_pos + 16l, 4), 4);
 					memcpy_s(&z1, 4, filereader.Read(last_pos + 20l, 4), 4);
 					last_pos += 24;
-					//Сохраняем направляющую
+					//РЎРѕС…СЂР°РЅСЏРµРј РЅР°РїСЂР°РІР»СЏСЋС‰СѓСЋ
 					pillars[pillars.size() - 1].push_back(std::vector < std::vector<float>>
 					{
 						std::vector<float> {x + (float)xshift, y + (float)yshift, z},
@@ -75,11 +75,11 @@ std::vector<std::vector<std::vector<std::vector<float>>>> ModelHanlder::ReadMode
 		else
 		{
 			filereader.~BinaryFileRead();
-			throw std::exception("Файл COORD поврежден");
+			throw std::exception("Р¤Р°Р№Р» COORD РїРѕРІСЂРµР¶РґРµРЅ");
 		}
 	}
 	else {
-		throw std::exception("Файл COORD отсуствует");
+		throw std::exception("Р¤Р°Р№Р» COORD РѕС‚СЃСѓСЃС‚РІСѓРµС‚");
 	}
 }
 
@@ -156,7 +156,7 @@ std::vector<std::vector<std::vector<float>>> ModelHanlder::ReadModel::ReadP()
 	return ReadModelFile(L"P");
 }
 
-std::vector<ModelHanlder::ReadModel::WellData> ModelHanlder::ReadModel::GetWellsData(const std::wstring& Path) // путь до папки Original
+std::vector<ModelHanlder::ReadModel::WellData> ModelHanlder::ReadModel::GetWellsData(const std::wstring& Path) // РїСѓС‚СЊ РґРѕ РїР°РїРєРё Original
 {
 	//WellDataHandler::WellCoordData data;
 	WellDataHandler::WellCoordData wellCoords;
@@ -164,7 +164,7 @@ std::vector<ModelHanlder::ReadModel::WellData> ModelHanlder::ReadModel::GetWells
 	bool _entry = false;
 	for (const auto& entry : std::filesystem::directory_iterator(Path))
 	{
-		if (entry.path().wstring().find(L"Пластопересечение") != std::wstring::npos)
+		if (entry.path().wstring().find(L"РџР»Р°СЃС‚РѕРїРµСЂРµСЃРµС‡РµРЅРёРµ") != std::wstring::npos)
 		{
 			wellCoords.Push(entry.path().wstring());
 			_entry = true;

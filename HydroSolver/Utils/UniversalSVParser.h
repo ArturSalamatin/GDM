@@ -16,9 +16,9 @@ namespace UniversalSCParser {
 	class EncodingFinder {
 	public:
 		/// <summary>
-		/// Определяет кодировку по заголовку
+		/// РћРїСЂРµРґРµР»СЏРµС‚ РєРѕРґРёСЂРѕРІРєСѓ РїРѕ Р·Р°РіРѕР»РѕРІРєСѓ
 		/// </summary>
-		/// <param name="file">ссылка на буфер с файлом</param>
+		/// <param name="file">СЃСЃС‹Р»РєР° РЅР° Р±СѓС„РµСЂ СЃ С„Р°Р№Р»РѕРј</param>
 		/// <returns>0 - UTF16LE, 1 - UTF8, 2 - UTF16BE</returns>
 		static int FindEncoding(std::vector<char>* file);
 	};

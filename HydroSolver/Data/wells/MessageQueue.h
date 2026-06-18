@@ -9,12 +9,12 @@ namespace IPC {
 	class MessageQueue {
 	public:
 		/// <summary>
-		/// Отправляет сообщение в очередь
+		/// РћС‚РїСЂР°РІР»СЏРµС‚ СЃРѕРѕР±С‰РµРЅРёРµ РІ РѕС‡РµСЂРµРґСЊ
 		/// </summary>
-		/// <typeparam name="T">Любой тип для которого sizeof возвращает валидное значение</typeparam>
-		/// <param name="src">От кого</param>
-		/// <param name="dest">Кому</param>
-		/// <param name="content">Данные</param>
+		/// <typeparam name="T">Р›СЋР±РѕР№ С‚РёРї РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ sizeof РІРѕР·РІСЂР°С‰Р°РµС‚ РІР°Р»РёРґРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ</typeparam>
+		/// <param name="src">РћС‚ РєРѕРіРѕ</param>
+		/// <param name="dest">РљРѕРјСѓ</param>
+		/// <param name="content">Р”Р°РЅРЅС‹Рµ</param>
 		template<typename T> void Send(int src, int dest, T&& content)
 		{
 			auto ptr = std::make_unique<uint8_t[]>(sizeof(T));
@@ -22,12 +22,12 @@ namespace IPC {
 			send(src, dest, std::move(ptr));
 		}
 		/// <summary>
-		/// Получает сообщение
+		/// РџРѕР»СѓС‡Р°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ
 		/// </summary>
-		/// <typeparam name="T">Любой тип для которого sizeof возвращает валидное значение</typeparam>
-		/// <param name="to">Для кого</param>
-		/// <param name="from">От кого. Если -1 то значение игнорируется</param>
-		/// <returns>nullopt если сообщений нет или значение</returns>
+		/// <typeparam name="T">Р›СЋР±РѕР№ С‚РёРї РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ sizeof РІРѕР·РІСЂР°С‰Р°РµС‚ РІР°Р»РёРґРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ</typeparam>
+		/// <param name="to">Р”Р»СЏ РєРѕРіРѕ</param>
+		/// <param name="from">РћС‚ РєРѕРіРѕ. Р•СЃР»Рё -1 С‚Рѕ Р·РЅР°С‡РµРЅРёРµ РёРіРЅРѕСЂРёСЂСѓРµС‚СЃСЏ</param>
+		/// <returns>nullopt РµСЃР»Рё СЃРѕРѕР±С‰РµРЅРёР№ РЅРµС‚ РёР»Рё Р·РЅР°С‡РµРЅРёРµ</returns>
 		template<typename T> std::optional<T> Get(int to, int from)
 		{
 			auto res = get(to, from);
@@ -53,13 +53,13 @@ namespace IPC {
 	};
 
 	/*
-	* 1) Все потоки запущены, ждем когда потоки MapCalculation досчитают
-	* флаг завершения - IsMapCalculationFinished
-	* 2)Посылаем команду завершения потоку GPUConveyor
-	* он получит её тогда когда все данные уже обработа - то есть он будет в конце очереди
-	* 3)Когда GPUConveyor отчитается о завершении то все сообщения от него уже будут в очереди
-	* Посылаем команду заверщения потоку DBHandler
-	* 4)После завершения DBHandler завершаем консоль
+	* 1) Р’СЃРµ РїРѕС‚РѕРєРё Р·Р°РїСѓС‰РµРЅС‹, Р¶РґРµРј РєРѕРіРґР° РїРѕС‚РѕРєРё MapCalculation РґРѕСЃС‡РёС‚Р°СЋС‚
+	* С„Р»Р°Рі Р·Р°РІРµСЂС€РµРЅРёСЏ - IsMapCalculationFinished
+	* 2)РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ Р·Р°РІРµСЂС€РµРЅРёСЏ РїРѕС‚РѕРєСѓ GPUConveyor
+	* РѕРЅ РїРѕР»СѓС‡РёС‚ РµС‘ С‚РѕРіРґР° РєРѕРіРґР° РІСЃРµ РґР°РЅРЅС‹Рµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р° - С‚Рѕ РµСЃС‚СЊ РѕРЅ Р±СѓРґРµС‚ РІ РєРѕРЅС†Рµ РѕС‡РµСЂРµРґРё
+	* 3)РљРѕРіРґР° GPUConveyor РѕС‚С‡РёС‚Р°РµС‚СЃСЏ Рѕ Р·Р°РІРµСЂС€РµРЅРёРё С‚Рѕ РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ РЅРµРіРѕ СѓР¶Рµ Р±СѓРґСѓС‚ РІ РѕС‡РµСЂРµРґРё
+	* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ Р·Р°РІРµСЂС‰РµРЅРёСЏ РїРѕС‚РѕРєСѓ DBHandler
+	* 4)РџРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ DBHandler Р·Р°РІРµСЂС€Р°РµРј РєРѕРЅСЃРѕР»СЊ
 	*/
 	class MapCalculationSync {
 	public:
@@ -70,7 +70,7 @@ namespace IPC {
 		void WaitMapCalculationFinish(std::shared_ptr<MessageQueue> queue);
 		template<int Sender> void WaitFinish(std::shared_ptr<MessageQueue> queue)
 		{
-			queue->Send(0, Sender, 'c');  //отправляем команду close
+			queue->Send(0, Sender, 'c');  //РѕС‚РїСЂР°РІР»СЏРµРј РєРѕРјР°РЅРґСѓ close
 			bool stop = false;
 			while (!stop)
 			{
@@ -80,7 +80,7 @@ namespace IPC {
 					stop = true;
 				}
 
-				//засыпаем на 1 мс
+				//Р·Р°СЃС‹РїР°РµРј РЅР° 1 РјСЃ
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 		}

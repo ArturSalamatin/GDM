@@ -1,22 +1,11 @@
 #pragma once
-#include "../Solver/Grids/RawHorizon.h"
+#include "../Solver/Grids/DevelopedHorizon.h"
 #include "ReservoirFactory.h"
 #include "WellFactory.h"
 #include "PhaseFactory.hpp"
 
 namespace reservoir_simulator
 {
-
-	class DevelopedHorizon : public RawHorizon
-	{
-	public:
-		MERofAllWells mer;
-		WellJobsContainer well_jobs;
-
-		WellNames well_names;
-		WellPositions well_positions;
-	};
-
 	namespace factories
 	{
 		class HorizonFactory

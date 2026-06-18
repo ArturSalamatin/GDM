@@ -44,15 +44,15 @@ namespace WellDataHandler {
 		std::map<std::wstring, float> WellsName;
 		std::mutex DataAccessMutex;
 		/// <summary>
-		/// Метод должен вызываться из метода, который уже заблокировал мьютекс
+		/// РњРµС‚РѕРґ РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РёР· РјРµС‚РѕРґР°, РєРѕС‚РѕСЂС‹Р№ СѓР¶Рµ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°Р» РјСЊСЋС‚РµРєСЃ
 		/// </summary>
 		void Optimize();
 	public:
 		/// <summary>
-		/// Добавляем скважину в список
+		/// Р”РѕР±Р°РІР»СЏРµРј СЃРєРІР°Р¶РёРЅСѓ РІ СЃРїРёСЃРѕРє
 		/// </summary>
-		/// <param name="path">Путь до файла</param>
-		/// <param name="name">Имя файла</param>
+		/// <param name="path">РџСѓС‚СЊ РґРѕ С„Р°Р№Р»Р°</param>
+		/// <param name="name">РРјСЏ С„Р°Р№Р»Р°</param>
 		virtual void Push(std::wstring path, std::wstring name) = 0;
 
 		virtual float GetValue(int id, std::wstring name)
@@ -60,16 +60,16 @@ namespace WellDataHandler {
 			return 0;
 		}
 		/// <summary>
-		/// Получаем список параметров за период времени (Если он есть)
-		/// тэг периода time
+		/// РџРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р° РїРµСЂРёРѕРґ РІСЂРµРјРµРЅРё (Р•СЃР»Рё РѕРЅ РµСЃС‚СЊ)
+		/// С‚СЌРі РїРµСЂРёРѕРґР° time
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <param name="start_period">Начало периода</param>
-		/// <param name="stop_period">Конец периода</param>
-		/// <returns>Вектор параметров на период</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <param name="start_period">РќР°С‡Р°Р»Рѕ РїРµСЂРёРѕРґР°</param>
+		/// <param name="stop_period">РљРѕРЅРµС† РїРµСЂРёРѕРґР°</param>
+		/// <returns>Р’РµРєС‚РѕСЂ РїР°СЂР°РјРµС‚СЂРѕРІ РЅР° РїРµСЂРёРѕРґ</returns>
 		virtual std::vector<std::map<std::wstring, float>> GetDataPerPeriod(std::wstring name, int start_period, int stop_period)
 		{
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			std::vector<std::map<std::wstring, float>> out;
 			if (Container.find(name) != Container.end())
@@ -89,7 +89,7 @@ namespace WellDataHandler {
 		}
 		virtual std::vector<std::map<std::wstring, std::wstring>> GetStringDataPerPeriod(std::wstring name, int start_period, int stop_period)
 		{
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			std::vector<std::map<std::wstring, std::wstring>> out;
 			if (Container[name][0].find(L"time") != Container[name][0].end())
@@ -107,13 +107,13 @@ namespace WellDataHandler {
 			return out;
 		}
 		/// <summary>
-		///	Возвращает все данные по указаной скважине
+		///	Р’РѕР·РІСЂР°С‰Р°РµС‚ РІСЃРµ РґР°РЅРЅС‹Рµ РїРѕ СѓРєР°Р·Р°РЅРѕР№ СЃРєРІР°Р¶РёРЅРµ
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		virtual std::vector<std::map<std::wstring, float>> GetDataPerWell(std::wstring name)
 		{
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			if (Container.find(name) != Container.end())
 				return Container.at(name);
@@ -122,7 +122,7 @@ namespace WellDataHandler {
 		};
 		virtual std::vector<std::map<std::wstring, float>> GetDataPerWellWithSimilarName(std::wstring name)
 		{
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			if (Container.find(name) == Container.end())
 			{
@@ -142,7 +142,7 @@ namespace WellDataHandler {
 		};
 		virtual std::vector<std::map<std::wstring, std::wstring>> GetStringDataPerWell(std::wstring name) 
 		{ 
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			if (StringContainer.find(name) != StringContainer.end())
 				return StringContainer.at(name);
@@ -150,33 +150,33 @@ namespace WellDataHandler {
 				return std::vector<std::map<std::wstring, std::wstring>>();
 		};
 		/// <summary>
-		/// Возвращает данные за период с текущей даты - период до текущей даты
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ Р·Р° РїРµСЂРёРѕРґ СЃ С‚РµРєСѓС‰РµР№ РґР°С‚С‹ - РїРµСЂРёРѕРґ РґРѕ С‚РµРєСѓС‰РµР№ РґР°С‚С‹
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <param name="period">Период в днях</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <param name="period">РџРµСЂРёРѕРґ РІ РґРЅСЏС…</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		virtual std::vector<std::map<std::wstring, float>> GetDataForLastTime(std::wstring name, int period)
 		{
-			//получаем текущее время
+			//РїРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ
 			__time64_t long_time;
 			_time64(&long_time);
-			//переводим секунды в минуты
-			int current_time = long_time / 86400 + 25569; //+25569 - смешение с  1970
+			//РїРµСЂРµРІРѕРґРёРј СЃРµРєСѓРЅРґС‹ РІ РјРёРЅСѓС‚С‹
+			int current_time = long_time / 86400 + 25569; //+25569 - СЃРјРµС€РµРЅРёРµ СЃ  1970
 			return GetDataPerPeriod(name, current_time - period, current_time);
 		}
 		/// <summary>
-		/// Возвращает данные ближайщие к текущей даты
-		/// работает только если есть ключ time
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ Р±Р»РёР¶Р°Р№С‰РёРµ Рє С‚РµРєСѓС‰РµР№ РґР°С‚С‹
+		/// СЂР°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РµСЃР»Рё РµСЃС‚СЊ РєР»СЋС‡ time
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		virtual std::map<std::wstring, float> GetDataForClosestForCurrentTime(std::wstring name)
 		{
-			//получаем текущее время
+			//РїРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ
 			__time64_t long_time;
 			_time64(&long_time);
-			//переводим секунды в минуты
-			int current_time = long_time / 86400 + 25569; //+25569 - смешение с  1970
+			//РїРµСЂРµРІРѕРґРёРј СЃРµРєСѓРЅРґС‹ РІ РјРёРЅСѓС‚С‹
+			int current_time = long_time / 86400 + 25569; //+25569 - СЃРјРµС€РµРЅРёРµ СЃ  1970
 			auto data = GetDataPerWell(name);
 
 			float time_diff = 1e36f;
@@ -197,11 +197,11 @@ namespace WellDataHandler {
 			return (closest_id != -1) ? data[closest_id] : std::map<std::wstring, float>();
 		}
 		/// <summary>
-		/// Возвращает данные наиболее близкие к указанной дате
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР°РЅРЅС‹Рµ РЅР°РёР±РѕР»РµРµ Р±Р»РёР·РєРёРµ Рє СѓРєР°Р·Р°РЅРЅРѕР№ РґР°С‚Рµ
 		/// </summary>
-		/// <param name="name">Имя скважины</param>
-		/// <param name="current_time">Дата в днях</param>
-		/// <returns>См в наследниках</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <param name="current_time">Р”Р°С‚Р° РІ РґРЅСЏС…</param>
+		/// <returns>РЎРј РІ РЅР°СЃР»РµРґРЅРёРєР°С…</returns>
 		virtual std::map<std::wstring, float> GetDataForClosestTime(std::wstring name, int current_time)
 		{
 			auto data = GetDataPerWell(name);
@@ -225,7 +225,7 @@ namespace WellDataHandler {
 		}
 
 		std::vector<std::wstring> GetWellsName() {
-			//блокируем поток для чтения
+			//Р±Р»РѕРєРёСЂСѓРµРј РїРѕС‚РѕРє РґР»СЏ С‡С‚РµРЅРёСЏ
 			std::lock_guard<std::mutex> lock(DataAccessMutex);
 			std::vector<std::wstring> names;
 			for (const auto& val : WellsName)
@@ -260,7 +260,7 @@ namespace WellDataHandler {
 			Optimize();
 		}
 		/// <summary>
-		/// Возвращает значение по скважине из одного из массивов
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ РїРѕ СЃРєРІР°Р¶РёРЅРµ РёР· РѕРґРЅРѕРіРѕ РёР· РјР°СЃСЃРёРІРѕРІ
 		/// </summary>
 		/// <param name="id">
 		/// 0 - CumOil
@@ -272,8 +272,8 @@ namespace WellDataHandler {
 		/// 6 - SumMixedTime
 		/// 7 - SumDryTime
 		/// </param>
-		/// <param name="name">Имя скважины</param>
-		/// <returns>Значение</returns>
+		/// <param name="name">РРјСЏ СЃРєРІР°Р¶РёРЅС‹</param>
+		/// <returns>Р—РЅР°С‡РµРЅРёРµ</returns>
 		virtual float GetValue(int id, std::wstring name) override;
 	
 		std::map<std::wstring, float> CumOil;

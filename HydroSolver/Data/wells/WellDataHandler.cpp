@@ -33,7 +33,7 @@ void WellDataHandler::IData::Add(pqxx::connection& con, std::mutex& mut)
 
 std::string WellDataHandler::PerfData::SQLSelectQuery()
 {
-	return u8"SELECT * FROM input_data.perforations";
+	return "SELECT * FROM input_data.perforations";
 }
 
 void WellDataHandler::PerfData::HandleRow(const pqxx::row& row)
@@ -42,17 +42,17 @@ void WellDataHandler::PerfData::HandleRow(const pqxx::row& row)
 		{L"time", PathUtils::Utils::ConvertDateToExcelDate<char>(row["date"].c_str())},
 		{ L"is_open", IsInclude(row["type"].as<size_t>(0), 10200ull, 10100ull, 10000ull, 10160ull, 10210ull, 10110ull) ? 0 : 1 },
 			/*	(
-			!wcscmp(line[4].get(), L"Затруб.циркуляция") ||
-			!wcscmp(line[4].get(), L"Отключение") ||
-			!wcscmp(line[4].get(), L"ИЗОЛЯЦИЯ") ||
-			!wcscmp(line[4].get(), L"Спец.перфорация") ||
-			!wcscmp(line[4].get(), L"Наруш.изоляции") ||
-			!wcscmp(line[4].get(), L"Нарушение колонны")) ? 0 : 1 },*/
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ")) ? 0 : 1 },*/
 		{ L"is_grp", IsInclude(row["type"].as<size_t>(0), 10130ull,10131ull, 10132ull, 10133ull) ? 1 : 0 },
 			/*	(
-			!wcscmp(line[4].get(), L"Перфорация с ГРП") ||
-			!wcscmp(line[4].get(), L"Перестрел с ГРП") ||
-			!wcscmp(line[4].get(), L"Достел с ГРП")) ? 1 : 0 },*/
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ") ||
+			!wcscmp(line[4].get(), L"пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ")) ? 1 : 0 },*/
 		{ L"perf_start", row["start_depth"].as<float>(0) },
 		{ L"perf_stop",  row["stop_depth"].as<float>(0) },
 		{ L"perf_density" , row["holes_count"].as<float>(0) }
@@ -62,7 +62,7 @@ void WellDataHandler::PerfData::HandleRow(const pqxx::row& row)
 
 std::string WellDataHandler::GISData::SQLSelectQuery()
 {
-	return u8"SELECT * FROM input_data.gis";
+	return "SELECT * FROM input_data.gis";
 }
 
 void WellDataHandler::GISData::HandleRow(const pqxx::row& row)
@@ -97,7 +97,7 @@ void WellDataHandler::MerData::PushManualy(
 	std::wstring Name,
 	std::map<std::wstring, float>&& Data)
 {
-	//блокируем поток для чтения
+	//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	std::lock_guard<std::mutex> lock(DataAccessMutex);
 
 	Container[Name].push_back(std::move(Data));
@@ -114,15 +114,15 @@ void WellDataHandler::MerData::HandleRow(const pqxx::row& row)
 
 std::string WellDataHandler::GDISData::SQLSelectQuery()
 {
-	return u8"SELECT wellid, layerid,start_date,wellbore_pressure FROM input_data.gdis WHERE measurement_type IN (1,11)";
+	return "SELECT wellid, layerid,start_date,wellbore_pressure FROM input_data.gdis WHERE measurement_type IN (1,11)";
 }
 void WellDataHandler::GDISData::HandleRow(const pqxx::row& row)
 {
 	auto name = std::to_wstring(row["wellid"].as<size_t>(0));
 	Container[name].emplace_back(std::initializer_list<std::pair<const std::wstring, float>> {
-		{L"time", PathUtils::Utils::ConvertDateToExcelDate<char>(row[u8"start_date"].c_str())},
-		{ L"pressure" , row[u8"wellbore_pressure"].as<float>(0) },
-		{ L"layer" , row[u8"layerid"].as<size_t>(0) }
+		{L"time", PathUtils::Utils::ConvertDateToExcelDate<char>(row["start_date"].c_str())},
+		{ L"pressure" , row["wellbore_pressure"].as<float>(0) },
+		{ L"layer" , row["layerid"].as<size_t>(0) }
 	});
 
 }
@@ -130,12 +130,12 @@ void WellDataHandler::GDISData::HandleRow(const pqxx::row& row)
 
 
 /// <summary>
-/// Возвращает перфорированные пропаслты с датой их перфорации и коллектор/неколлектор
+/// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 /// </summary>
-/// <param name="gisd">Экздемпляр класса гисов</param>
-/// <param name="perfd">Экземпляр класса перфорации</param>
-/// <param name="name">Имя скважины</param>
-/// <returns>{Имя пропластка {Дата перфорирования, Коллектор/Неколлектор, Было ли ГРП, Глубина перфорации}}</returns>
+/// <param name="gisd">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</param>
+/// <param name="perfd">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</param>
+/// <param name="name">пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</param>
+/// <returns>{пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ {пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}}</returns>
 std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, float>>>> WellDataHandler::DataHandleUtils::ComparePerfWithGIS(GISData& gisd, PerfData& perfd, std::wstring name)
 {
 	std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, float>>>> out;
@@ -155,9 +155,9 @@ std::map<std::wstring, std::vector<std::tuple<int, int, int, std::pair<float, fl
 
 			auto _layer = std::to_wstring(static_cast<size_t>(gis_data[j].at(L"layer")));
 
-			if (!(pstop < lstart || pstart > lstop)) //начало пласта должно лежать ниже, чем начало перфорации, но выше, чем её конец
+			if (!(pstop < lstart || pstart > lstop)) //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 			{
-				/*if (giss_data[j].at(L"layer_name") != L"Н/Д")
+				/*if (giss_data[j].at(L"layer_name") != L"пїЅ/пїЅ")
 				{*/
 					//double height = 0;
 					//height = std::min<float>(pstop, lstop) - std::max<float>(pstart, lstart);
@@ -220,7 +220,7 @@ void WellDataHandler::IData::Optimize()
 
 std::string WellDataHandler::GTMData::SQLSelectQuery()
 {
-	return u8"SELECT wellid,start_date,gtm_type FROM input_data.gtm";
+	return "SELECT wellid,start_date,gtm_type FROM input_data.gtm";
 }
 
 void WellDataHandler::GTMData::HandleRow(const pqxx::row& row)
@@ -235,7 +235,7 @@ void WellDataHandler::GTMData::HandleRow(const pqxx::row& row)
 
 std::string WellDataHandler::TechModeOil::SQLSelectQuery()
 {
-	return u8"SELECT wellid, date, pump_depth, nominal_pump_power, wellbore_pressure FROM input_data.trd_dob";
+	return "SELECT wellid, date, pump_depth, nominal_pump_power, wellbore_pressure FROM input_data.trd_dob";
 }
 
 void WellDataHandler::TechModeOil::HandleRow(const pqxx::row& row)
@@ -256,7 +256,7 @@ void WellDataHandler::Database_MerLayeredData::Push(pqxx::connection& con, std::
 	pqxx::work w(con);
 	try {
 		
-		pqxx::result layers = w.exec(u8"SELECT layerid from input_data.layers");
+		pqxx::result layers = w.exec("SELECT layerid from input_data.layers");
 		for (const auto& row : layers)
 		{
 			Mers.insert({ std::to_wstring(row["layerid"].as<size_t>(0)), std::make_shared<MerData>() });
@@ -284,11 +284,11 @@ void WellDataHandler::Database_MerLayeredData::Push(pqxx::connection& con, std::
 			= w1.exec1("select exists (select 1 from poorc.output_mer_full omf)");
 
 		if (poorc_exists["exists"].as<bool>(false)) {
-			mer = w1.exec(u8"SELECT * from poorc.output_mer_full");
+			mer = w1.exec("SELECT * from poorc.output_mer_full");
 		}
 		else*/
 		{
-			mer = w1.exec(u8"SELECT * from input_data.mer");
+			mer = w1.exec("SELECT * from input_data.mer");
 		}		
 	}
 	catch (std::exception err)

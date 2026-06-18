@@ -1,21 +1,21 @@
 #include "MessageQueue.h"
 /// <summary>
-/// Отправляет сообщение в очередь
+/// РћС‚РїСЂР°РІР»СЏРµС‚ СЃРѕРѕР±С‰РµРЅРёРµ РІ РѕС‡РµСЂРµРґСЊ
 /// </summary>
-/// <param name="src">Номер отправителя</param>
-/// <param name="dest">Номер получателя</param>
-/// <param name="content">Указатель на данные</param>
+/// <param name="src">РќРѕРјРµСЂ РѕС‚РїСЂР°РІРёС‚РµР»СЏ</param>
+/// <param name="dest">РќРѕРјРµСЂ РїРѕР»СѓС‡Р°С‚РµР»СЏ</param>
+/// <param name="content">РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅРЅС‹Рµ</param>
 __declspec(noinline) void IPC::MessageQueue::send(int src,int dest, std::unique_ptr<uint8_t[]> content)
 {
 	std::lock_guard lock(queueLock);
 	queue.push_back({ src, dest, std::move(content) });
 }
 /// <summary>
-/// Получает сообщение из очереди
+/// РџРѕР»СѓС‡Р°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ РёР· РѕС‡РµСЂРµРґРё
 /// </summary>
-/// <param name="to">Номер получателя</param>
-/// <param name="from">Номер отправителя. Если -1 то отправитель не важен</param>
-/// <returns>Указатель на данные</returns>
+/// <param name="to">РќРѕРјРµСЂ РїРѕР»СѓС‡Р°С‚РµР»СЏ</param>
+/// <param name="from">РќРѕРјРµСЂ РѕС‚РїСЂР°РІРёС‚РµР»СЏ. Р•СЃР»Рё -1 С‚Рѕ РѕС‚РїСЂР°РІРёС‚РµР»СЊ РЅРµ РІР°Р¶РµРЅ</param>
+/// <returns>РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅРЅС‹Рµ</returns>
 __declspec(noinline) std::optional<std::unique_ptr<uint8_t[]>> IPC::MessageQueue::get(int to, int from)
 {
 	std::lock_guard lock(queueLock);
@@ -50,9 +50,9 @@ void IPC::MapCalculationSync::Run(std::shared_ptr<MessageQueue> queue)
 	WaitFinish<13>(queue); //Console
 }
 /// <summary>
-/// Ожидаем когда все зарегистрированные MapCalculation потоки завершат работу
+/// РћР¶РёРґР°РµРј РєРѕРіРґР° РІСЃРµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Рµ MapCalculation РїРѕС‚РѕРєРё Р·Р°РІРµСЂС€Р°С‚ СЂР°Р±РѕС‚Сѓ
 /// </summary>
-/// <param name="queue">Очередь</param>
+/// <param name="queue">РћС‡РµСЂРµРґСЊ</param>
 void IPC::MapCalculationSync::WaitMapCalculationFinish(std::shared_ptr<MessageQueue> queue)
 {
 	int entries = 0;
@@ -64,7 +64,7 @@ void IPC::MapCalculationSync::WaitMapCalculationFinish(std::shared_ptr<MessageQu
 			entries++;
 		}
 
-		//засыпаем на 1 мс
+		//Р·Р°СЃС‹РїР°РµРј РЅР° 1 РјСЃ
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }

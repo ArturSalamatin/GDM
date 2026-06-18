@@ -105,13 +105,13 @@ namespace JSON {
 	class JSONMessage {
 	public:
 		static /// <summary>
-		/// Создает JSON сообщение
+		/// РЎРѕР·РґР°РµС‚ JSON СЃРѕРѕР±С‰РµРЅРёРµ
 		/// </summary>
-		/// <param name="Sender">Отправитель</param>
-		/// <param name="ChildSender">Участок отправления</param>
-		/// <param name="Status">Статус участка отправления</param>
-		/// <param name="Options">Произвольный json обьект отправителя</param>
-		/// <returns>Строку JSON</returns>
+		/// <param name="Sender">РћС‚РїСЂР°РІРёС‚РµР»СЊ</param>
+		/// <param name="ChildSender">РЈС‡Р°СЃС‚РѕРє РѕС‚РїСЂР°РІР»РµРЅРёСЏ</param>
+		/// <param name="Status">РЎС‚Р°С‚СѓСЃ СѓС‡Р°СЃС‚РєР° РѕС‚РїСЂР°РІР»РµРЅРёСЏ</param>
+		/// <param name="Options">РџСЂРѕРёР·РІРѕР»СЊРЅС‹Р№ json РѕР±СЊРµРєС‚ РѕС‚РїСЂР°РІРёС‚РµР»СЏ</param>
+		/// <returns>РЎС‚СЂРѕРєСѓ JSON</returns>
 			std::wstring CreateJSONMessage(
 				std::wstring&& Sender,
 				std::wstring&& ChildSender,

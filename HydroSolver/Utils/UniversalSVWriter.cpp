@@ -39,7 +39,7 @@ void UniversalWriter::UTF8Writer::Write(std::wstring content)
 		);
 		if (res)
 		{
-			Stream.write(ptr.get(), reqired_byte_size-1); //-1 т.к. последний символ - \0, который не нужно записывать в файл
+			Stream.write(ptr.get(), reqired_byte_size-1); //-1 С‚.Рє. РїРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР» - \0, РєРѕС‚РѕСЂС‹Р№ РЅРµ РЅСѓР¶РЅРѕ Р·Р°РїРёСЃС‹РІР°С‚СЊ РІ С„Р°Р№Р»
 		}
 		else {
 			throw std::exception("unable to convert utf16 to utf8. Error code: " + res);

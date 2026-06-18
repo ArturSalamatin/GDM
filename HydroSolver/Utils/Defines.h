@@ -1,5 +1,5 @@
 #pragma once
-//так выключаем
+//С‚Р°Рє РІС‹РєР»СЋС‡Р°РµРј
 #define _ENABLE_XB
 //#define _AverageEnable
 //#define _CALC_STOCKS_BY_LAYER

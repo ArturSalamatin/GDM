@@ -21,13 +21,13 @@ public:
 	
 	
 	/// <summary>
-	/// Формирует геометрию зоны из файла проекта
+	/// Р¤РѕСЂРјРёСЂСѓРµС‚ РіРµРѕРјРµС‚СЂРёСЋ Р·РѕРЅС‹ РёР· С„Р°Р№Р»Р° РїСЂРѕРµРєС‚Р°
 	/// </summary>
-	/// <param name="ZonePoint">Точки зоны</param>
-	/// <param name="global_factory">Указатель на основную фабрику геоса</param>
-	/// <param name="xshift">Смещение по x</param>
-	/// <param name="yshift">Смещение по y</param>
-	/// <returns>Геометрия зоны или nullptr в случае пустой зоны</returns>
+	/// <param name="ZonePoint">РўРѕС‡РєРё Р·РѕРЅС‹</param>
+	/// <param name="global_factory">РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РѕСЃРЅРѕРІРЅСѓСЋ С„Р°Р±СЂРёРєСѓ РіРµРѕСЃР°</param>
+	/// <param name="xshift">РЎРјРµС‰РµРЅРёРµ РїРѕ x</param>
+	/// <param name="yshift">РЎРјРµС‰РµРЅРёРµ РїРѕ y</param>
+	/// <returns>Р“РµРѕРјРµС‚СЂРёСЏ Р·РѕРЅС‹ РёР»Рё nullptr РІ СЃР»СѓС‡Р°Рµ РїСѓСЃС‚РѕР№ Р·РѕРЅС‹</returns>
 	static geos::geom::Geometry::Ptr CreateZone(const std::vector<std::vector<double>>& ZonePoint,
 		GeometryFactory* global_factory);
 		

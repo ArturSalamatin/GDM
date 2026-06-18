@@ -50,11 +50,11 @@ namespace reservoir_simulator
 				positions() const;
 		protected:
 			//	ProgramLauncher::WellData_Handler well_data;
-			/*имя скважины -- пластопересечение(точка пространства)*/
+			/*РёРјСЏ СЃРєРІР°Р¶РёРЅС‹ -- РїР»Р°СЃС‚РѕРїРµСЂРµСЃРµС‡РµРЅРёРµ(С‚РѕС‡РєР° РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР°)*/
 			std::map<reservoir_simulator::WellName, GeosShell::GeosPoint> well_position;
-			/*все имена скважин*/
+			/*РІСЃРµ РёРјРµРЅР° СЃРєРІР°Р¶РёРЅ*/
 			std::vector<reservoir_simulator::WellName> well_name;
-			/* граница участка, произвольная граница*/
+			/* РіСЂР°РЅРёС†Р° СѓС‡Р°СЃС‚РєР°, РїСЂРѕРёР·РІРѕР»СЊРЅР°СЏ РіСЂР°РЅРёС†Р°*/
 			std::vector<std::vector<double>> workzone_countour;
 
 			std::shared_ptr<const WellDataHandler::GISData> Gis;
