@@ -77,54 +77,67 @@ def animate_fields_3d(results_dir, output=None, fps=4, dpi=100):
         p_min -= 1
         p_max += 1
 
-    fig, axes = plt.subplots(2, nz, figsize=(4 * nz, 7), squeeze=False)
-    fig.suptitle(f"t = {times[0]:.0f} дней", fontsize=14)
+    # GridSpec: nz столбцов для данных + 1 узкий столбец для colorbar
+    ncols = nz + 1
+    width_ratios = [1] * nz + [0.05]
+    fig_w = max(7.0, 3.5 * nz + 0.8)
+    fig = plt.figure(figsize=(fig_w, 7))
+    right_margin = 0.88 if nz <= 2 else 0.95
+    gs = fig.add_gridspec(2, ncols, width_ratios=width_ratios,
+                          wspace=0.35, hspace=0.30,
+                          left=0.08, right=right_margin, top=0.92, bottom=0.06)
+    title_text = fig.suptitle(f"t = {times[0]:.0f} дней", fontsize=14)
+
+    axes_sw = [fig.add_subplot(gs[0, k]) for k in range(nz)]
+    axes_p = [fig.add_subplot(gs[1, k]) for k in range(nz)]
+    cax_sw = fig.add_subplot(gs[0, nz])
+    cax_p = fig.add_subplot(gs[1, nz])
 
     ims_sw = []
     ims_p = []
 
     for k in range(nz):
-        ax_sw = axes[0, k]
-        im_sw = ax_sw.imshow(
+        im_sw = axes_sw[k].imshow(
             snapshots[0][0][k], origin="lower", cmap="Blues",
             vmin=0, vmax=1, extent=[0, lx, 0, ly], aspect="equal")
-        ax_sw.set_title(f"$S_w$, пласт {k}")
+        axes_sw[k].set_title(f"$S_w$, пласт {k}", fontsize=10)
         if k == 0:
-            ax_sw.set_ylabel("y, м")
+            axes_sw[k].set_ylabel("y, м")
+        else:
+            axes_sw[k].set_yticklabels([])
+        axes_sw[k].set_xticklabels([])
         ims_sw.append(im_sw)
 
-        ax_p = axes[1, k]
-        im_p = ax_p.imshow(
+        im_p = axes_p[k].imshow(
             snapshots[0][1][k], origin="lower", cmap="RdYlBu_r",
             vmin=p_min, vmax=p_max, extent=[0, lx, 0, ly], aspect="equal")
-        ax_p.set_title(f"P, пласт {k}")
-        ax_p.set_xlabel("x, м")
+        axes_p[k].set_title(f"P, пласт {k}", fontsize=10)
+        axes_p[k].set_xlabel("x, м")
         if k == 0:
-            ax_p.set_ylabel("y, м")
+            axes_p[k].set_ylabel("y, м")
+        else:
+            axes_p[k].set_yticklabels([])
         ims_p.append(im_p)
 
-    fig.colorbar(ims_sw[0], ax=axes[0, :].tolist(), shrink=0.8, label="$S_w$")
-    fig.colorbar(ims_p[0], ax=axes[1, :].tolist(), shrink=0.8, label="P, атм")
+    fig.colorbar(ims_sw[0], cax=cax_sw, label="$S_w$")
+    fig.colorbar(ims_p[0], cax=cax_p, label="P, атм")
 
     if "wells" in meta:
         for w in meta["wells"]:
             marker = "v" if w["type"] == "injector" else "^"
             color = "b" if w["type"] == "injector" else "r"
             for k in range(nz):
-                for row in range(2):
-                    axes[row, k].plot(
-                        w["x"], w["y"], marker,
-                        color=color, markersize=7,
-                        markeredgecolor="k", zorder=5)
-
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
+                for ax in (axes_sw[k], axes_p[k]):
+                    ax.plot(w["x"], w["y"], marker,
+                            color=color, markersize=7,
+                            markeredgecolor="k", zorder=5)
 
     def update(frame):
         sw_layers, p_layers = snapshots[frame]
         for k in range(nz):
             ims_sw[k].set_data(sw_layers[k])
             ims_p[k].set_data(p_layers[k])
-        fig.suptitle(f"t = {times[frame]:.0f} дней", fontsize=14)
+        title_text.set_text(f"t = {times[frame]:.0f} дней")
         return ims_sw + ims_p
 
     anim = animation.FuncAnimation(
