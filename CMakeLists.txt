@@ -94,6 +94,7 @@ add_executable(gdm_tests
     tests/test_five_spot.cpp
     tests/test_visual_verification.cpp
     tests/test_streamlines.cpp
+    tests/test_variable_debit.cpp
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 
