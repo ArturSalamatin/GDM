@@ -71,6 +71,10 @@ namespace reservoir_simulator
 			ItsName{ well_name }, RawWellPerforationData{jobs}
 		{ }
 
+		WellJobs(const WellName& well_name, const WellJobsPerLayer& jobs_per_layer) noexcept :
+			ItsName{ well_name }, RawWellPerforationData{ jobs_per_layer }
+		{ }
+
 	protected:
 		const WellName& ItsName; // = L"The name is not assigned.";
 		// create a collection of perforations for the well

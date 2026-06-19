@@ -1,6 +1,7 @@
 #pragma once
 
 #include "test_helpers.h"
+#include "well_completion_builder.h"
 #include <cmath>
 #include <stdexcept>
 #include <string>
@@ -10,7 +11,7 @@ namespace test_helpers {
 struct WellSchedule {
     reservoir_simulator::WellName name;
     reservoir_simulator::mer_descriptor::SingleWell_MER_Data mer_data;
-    reservoir_simulator::JobsInLayer jobs;
+    reservoir_simulator::WellJobsPerLayer jobs_per_layer;
     double x, y;
     double r_app;
 };
@@ -84,12 +85,24 @@ public:
         return *this;
     }
 
+    WellScheduleBuilder& set_completions(const WellCompletionBuilder& completions) {
+        completions_ = completions.build();
+        has_completions_ = true;
+        return *this;
+    }
+
     WellSchedule build() const {
-        reservoir_simulator::JobsInLayer jobs;
-        jobs.emplace_back(0.0, hz_, true, 0.0);
+        reservoir_simulator::WellJobsPerLayer jpl;
+        if (has_completions_) {
+            jpl = completions_;
+        } else {
+            reservoir_simulator::JobsInLayer jobs;
+            jobs.emplace_back(0.0, hz_, true, 0.0);
+            jpl.push_back(jobs);
+        }
 
         return WellSchedule{
-            name_, mer_data_, jobs, x_, y_, r_app_
+            name_, mer_data_, jpl, x_, y_, r_app_
         };
     }
 
@@ -103,7 +116,7 @@ public:
         if (effective_r <= 0.0)
             effective_r = 0.2 * horizon.block_size.step_x;
 
-        reservoir_simulator::WellJobs well_jobs(schedule.name, schedule.jobs);
+        reservoir_simulator::WellJobs well_jobs(schedule.name, schedule.jobs_per_layer);
         reservoir_simulator::WellPosition pos(schedule.x, schedule.y);
 
         sim.AddWell_FixedProduction(
@@ -123,6 +136,9 @@ private:
     double pending_oil_mass_rate_ = 0.0;
     double pending_water_mass_rate_ = 0.0;
     bool is_shut_ = false;
+
+    reservoir_simulator::WellJobsPerLayer completions_;
+    bool has_completions_ = false;
 
     static constexpr double month_ = 30.74;
     static constexpr double rho_oil_ = 800.0;
