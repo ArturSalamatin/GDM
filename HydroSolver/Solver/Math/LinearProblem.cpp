@@ -140,5 +140,78 @@ namespace reservoir_simulator
 			Matrix().AddOffDiagBlock(l, neibIdx, data);
 		}
 
+		template<typename SolverType>
+		SolveResult LinearProblem::SolveWith(int maxIter, typename SolverType::params& custom_prm)
+		{
+			using clock = std::chrono::steady_clock;
+			custom_prm.solver.maxiter = maxIter;
+
+			auto t0 = clock::now();
+			auto A = amgcl::adapter::block_matrix<value_type<B>>(
+				std::tie(rhsSize, Matrix().Row(), Matrix().Col(), Matrix().Val()));
+			SolverType solve(A, custom_prm);
+			auto t1 = clock::now();
+
+			rhs_type<B> const* fptr = reinterpret_cast<rhs_type<B> const*>(&rhs[0]);
+			rhs_type<B>* xptr = reinterpret_cast<rhs_type<B>*>(&solutionCorrections[0]);
+			amgcl::backend::numa_vector<rhs_type<B>> F(fptr, fptr + cellNmbr);
+			amgcl::backend::numa_vector<rhs_type<B>> X(xptr, xptr + cellNmbr);
+
+			auto [iters, error] = solve(F, X);
+			std::copy(X.data(), X.data() + X.size(), xptr);
+			auto t2 = clock::now();
+
+			double setup_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+			double solve_ms = std::chrono::duration<double, std::milli>(t2 - t1).count();
+
+			return { iters, error, true, setup_ms, solve_ms };
+		}
+
 	} // linear_problem
 } // reservoir_simulator
+
+// Explicit instantiations for benchmark solver types
+#include <amgcl/solver/bicgstab.hpp>
+#include <amgcl/solver/bicgstabl.hpp>
+#include <amgcl/solver/fgmres.hpp>
+#include <amgcl/solver/lgmres.hpp>
+#include <amgcl/solver/idrs.hpp>
+#include <amgcl/coarsening/smoothed_aggregation.hpp>
+#include <amgcl/relaxation/spai0.hpp>
+#include <amgcl/relaxation/ilu0.hpp>
+#include <amgcl/relaxation/gauss_seidel.hpp>
+#include <amgcl/relaxation/chebyshev.hpp>
+
+namespace {
+using namespace reservoir_simulator::linear_problem;
+using BB = BBackend<B>;
+}
+
+// Series A: Krylov solvers (AMG<aggregation, damped_jacobi> preconditioner)
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::gmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::gmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::bicgstab<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::bicgstab<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::bicgstabl<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::bicgstabl<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::lgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::fgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::fgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::idrs<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::idrs<BB>>::params&);
+
+// Series B: Relaxation (lgmres solver, aggregation coarsening)
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::damped_jacobi>, amgcl::solver::lgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::spai0>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::spai0>, amgcl::solver::lgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>, amgcl::solver::lgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::gauss_seidel>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::gauss_seidel>, amgcl::solver::lgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::chebyshev>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::chebyshev>, amgcl::solver::lgmres<BB>>::params&);
+
+// Series C: Coarsening (ilu0 relaxation, lgmres solver)
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>, amgcl::solver::lgmres<BB>>::params&);
+
+template SolveResult LinearProblem::SolveWith<amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::smoothed_aggregation, amgcl::relaxation::ilu0>, amgcl::solver::lgmres<BB>>>(int, amgcl::make_solver<amgcl::amg<BB, amgcl::coarsening::smoothed_aggregation, amgcl::relaxation::ilu0>, amgcl::solver::lgmres<BB>>::params&);

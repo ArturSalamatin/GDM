@@ -99,11 +99,22 @@ add_executable(gdm_tests
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 
+# =============================================================================
+# gdm_benchmark — AMGCL configuration benchmark (separate binary)
+# =============================================================================
+add_executable(gdm_benchmark
+    tests/test_amgcl_benchmark.cpp
+)
+target_link_libraries(gdm_benchmark PRIVATE gdm_core Catch2::Catch2WithMain)
+
 include(CTest)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 catch_discover_tests(gdm_tests
     PROPERTIES TIMEOUT 600
+)
+catch_discover_tests(gdm_benchmark
+    PROPERTIES TIMEOUT 1800
 )
 
 # =============================================================================
