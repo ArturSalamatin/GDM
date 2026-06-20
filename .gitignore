@@ -104,3 +104,10 @@ WellTestData/P2/well_MER_debit.txt
 WellTestData/P3/well_MER_debit.txt
 WellTestData/P4/well_MER_debit.txt
 WellTestData/PROD/well_MER_debit.txt
+WellTestData/INJ-1/well_MER_debit.txt
+WellTestData/INJ-2/well_MER_debit.txt
+WellTestData/INJ-3/well_MER_debit.txt
+WellTestData/PROD-1/well_MER_debit.txt
+WellTestData/PROD-2/well_MER_debit.txt
+WellTestData/PROD-3/well_MER_debit.txt
+WellTestData/PROD-4/well_MER_debit.txt
