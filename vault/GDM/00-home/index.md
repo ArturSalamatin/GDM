@@ -51,6 +51,7 @@ date: 2026-06-15
 
 #### Debugging (`knowledge/debugging/`)
 - [[Newton divergence при закачке воды через скважину]]
+- [[SIGSEGV в MatrixCSR ResetMatrix вызванном из конструктора]]
 
 #### Валидация (`knowledge/validation/`)
 - [[five-spot сравнение с MRST]]
@@ -90,4 +91,10 @@ date: 2026-06-15
     - [[prompt-оптимизация-01-перебор-конфигураций-AMGCL]] — фаза 1: test_amgcl_benchmark.cpp с SECTION-ами
     - [[prompt-оптимизация-02-структурные-оптимизации]] — фаза 2: reuse setup (unique_ptr), CPR partial_update, OpenMP
     - [[возможности amgcl для блочных СЛАУ]] — справочник компонентов amgcl
+  - [[2026-06-20 инструментация AMGCL и baseline профиль]]
+  - [[2026-06-20 оптимизация AMGCL солвера lgmres ilu0]]
+
+#### Архитектурные решения (новые)
+- [[amgcl конфигурация lgmres ilu0 aggregation]]
+
 - `inbox/` — необработанные идеи и заметки
