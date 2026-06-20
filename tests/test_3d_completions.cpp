@@ -177,6 +177,78 @@ RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
     };
 }
 
+std::vector<test_helpers::WellScheduleBuilder>
+make_7well_builders(size_t Nz, double hz_val, double total_time,
+                    double rate_mult = 1.0)
+{
+    std::vector<test_helpers::WellScheduleBuilder> builders;
+
+    auto c_inj1 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(0, 0.0).open_layer(1, 0.0);
+    builders.emplace_back(L"INJ-1", 125.0, 125.0);
+    builders.back()
+        .set_completions(c_inj1)
+        .inject_water(40.0 * rate_mult).for_days(total_time);
+
+    auto c_inj2 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(0, 0.0).open_layer(2, 200.0);
+    builders.emplace_back(L"INJ-2", 375.0, 375.0);
+    builders.back()
+        .set_completions(c_inj2)
+        .inject_water(30.0 * rate_mult).for_days(total_time);
+
+    auto c_prod1 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(0, 0.0).open_layer(1, 0.0)
+        .open_layer(2, 0.0).open_layer(3, 0.0);
+    builders.emplace_back(L"PROD-1", 375.0, 125.0);
+    builders.back()
+        .set_completions(c_prod1)
+        .produce_oil(25.0 * rate_mult).for_days(total_time);
+
+    auto c_prod2 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(3, 0.0);
+    builders.emplace_back(L"PROD-2", 125.0, 375.0);
+    builders.back()
+        .set_completions(c_prod2)
+        .produce_oil(15.0 * rate_mult).for_days(total_time);
+
+    auto c_prod3 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(1, 0.0).open_layer(2, 0.0)
+        .close_layer(1, 300.0);
+    builders.emplace_back(L"PROD-3", 250.0, 250.0);
+    builders.back()
+        .set_completions(c_prod3)
+        .produce_oil(20.0 * rate_mult).for_days(total_time);
+
+    auto c_inj3 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(0, 150.0).open_layer(1, 150.0);
+    builders.emplace_back(L"INJ-3", 250.0, 125.0);
+    builders.back()
+        .set_completions(c_inj3)
+        .shut_in().for_days(150.0)
+        .inject_water(35.0 * rate_mult).for_days(total_time - 150.0);
+
+    auto c_prod4 = test_helpers::WellCompletionBuilder(Nz, hz_val)
+        .open_layer(2, 300.0).open_layer(3, 300.0);
+    builders.emplace_back(L"PROD-4", 250.0, 375.0);
+    builders.back()
+        .set_completions(c_prod4)
+        .shut_in().for_days(300.0)
+        .produce_oil(15.0 * rate_mult).for_days(total_time - 300.0);
+
+    return builders;
+}
+
+const std::vector<simulation_cases::WellInfo> seven_wells_info = {
+    {"INJ-1",  "injector", 125.0, 125.0},
+    {"INJ-2",  "injector", 375.0, 375.0},
+    {"PROD-1", "producer", 375.0, 125.0},
+    {"PROD-2", "producer", 125.0, 375.0},
+    {"PROD-3", "producer", 250.0, 250.0},
+    {"INJ-3",  "injector", 250.0, 125.0},
+    {"PROD-4", "producer", 250.0, 375.0}
+};
+
 } // namespace
 
 
@@ -190,78 +262,8 @@ TEST_CASE("3D completions: 7-well 4-layer smoke",
     simulation_cases::MultiLayerCase sc(
         "3d_smoke", Nx, Ny, Nz, Lx, Ly, hz,
         total_time, 30.0,
-        [&](double, double) {
-            std::vector<test_helpers::WellScheduleBuilder> builders;
-
-            // INJ-1: пласты 0,1 с t=0, Q=40
-            auto c_inj1 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(0, 0.0).open_layer(1, 0.0);
-            builders.emplace_back(L"INJ-1", 125.0, 125.0);
-            builders.back()
-                .set_completions(c_inj1)
-                .inject_water(40.0).for_days(total_time);
-
-            // INJ-2: пласт 0 с t=0, пласт 2 добавлен при t=200, Q=30
-            auto c_inj2 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(0, 0.0).open_layer(2, 200.0);
-            builders.emplace_back(L"INJ-2", 375.0, 375.0);
-            builders.back()
-                .set_completions(c_inj2)
-                .inject_water(30.0).for_days(total_time);
-
-            // PROD-1: все 4 пласта с t=0, Q=25
-            auto c_prod1 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(0, 0.0).open_layer(1, 0.0)
-                .open_layer(2, 0.0).open_layer(3, 0.0);
-            builders.emplace_back(L"PROD-1", 375.0, 125.0);
-            builders.back()
-                .set_completions(c_prod1)
-                .produce_oil(25.0).for_days(total_time);
-
-            // PROD-2: только пласт 3, Q=15
-            auto c_prod2 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(3, 0.0);
-            builders.emplace_back(L"PROD-2", 125.0, 375.0);
-            builders.back()
-                .set_completions(c_prod2)
-                .produce_oil(15.0).for_days(total_time);
-
-            // PROD-3: пласты 1,2 с t=0, закрытие пласта 1 при t=300, Q=20
-            auto c_prod3 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(1, 0.0).open_layer(2, 0.0)
-                .close_layer(1, 300.0);
-            builders.emplace_back(L"PROD-3", 250.0, 250.0);
-            builders.back()
-                .set_completions(c_prod3)
-                .produce_oil(20.0).for_days(total_time);
-
-            // INJ-3: появляется при t=150, пласты 0,1, Q=35
-            auto c_inj3 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(0, 150.0).open_layer(1, 150.0);
-            builders.emplace_back(L"INJ-3", 250.0, 125.0);
-            builders.back()
-                .set_completions(c_inj3)
-                .shut_in().for_days(150.0)
-                .inject_water(35.0).for_days(total_time - 150.0);
-
-            // PROD-4: появляется при t=300, пласты 2,3, Q=15
-            auto c_prod4 = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(2, 300.0).open_layer(3, 300.0);
-            builders.emplace_back(L"PROD-4", 250.0, 375.0);
-            builders.back()
-                .set_completions(c_prod4)
-                .shut_in().for_days(300.0)
-                .produce_oil(15.0).for_days(total_time - 300.0);
-
-            return builders;
-        },
-        {{"INJ-1",  "injector", 125.0, 125.0},
-         {"INJ-2",  "injector", 375.0, 375.0},
-         {"PROD-1", "producer", 375.0, 125.0},
-         {"PROD-2", "producer", 125.0, 375.0},
-         {"PROD-3", "producer", 250.0, 250.0},
-         {"INJ-3",  "injector", 250.0, 125.0},
-         {"PROD-4", "producer", 250.0, 375.0}}
+        [](double, double) { return make_7well_builders(4, hz, 600.0); },
+        seven_wells_info
     );
 
     auto result = run_case_3d(sc, true);
@@ -394,4 +396,187 @@ TEST_CASE("3D completions: partial perforation",
     CHECK(result_partial.max_oil_balance_rel < 1e-3);
     CHECK(result_full.max_water_balance_rel < 1e-3);
     CHECK(result_partial.max_water_balance_rel < 1e-3);
+}
+
+
+// --- 7.5: Fine grid — 51×51×4, 7 скважин, 730 дней, дебиты ×1.4 ---
+// (see also 7.6 below for 10-year dynamic-rate variant)
+TEST_CASE("3D completions: 7-well fine grid 51x51x4",
+          "[3d][completions][fine][.slow]")
+{
+    constexpr size_t Nx_fine = 51, Ny_fine = 51, Nz = 4;
+    constexpr double total_time = 730.0;
+    constexpr double rate_mult = 1.4;
+
+    simulation_cases::MultiLayerCase sc(
+        "3d_fine_51x51", Nx_fine, Ny_fine, Nz, Lx, Ly, hz,
+        total_time, 5.0,
+        [](double, double) { return make_7well_builders(4, hz, 730.0, 1.4); },
+        seven_wells_info
+    );
+
+    auto result = run_case_3d(sc, true);
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
+}
+
+
+// --- 7.6: Fine grid, 10 лет, динамические расходы (ежемесячная смена) ---
+TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
+          "[3d][completions][fine][dynamic][.slow]")
+{
+    constexpr size_t Nx_fine = 51, Ny_fine = 51, Nz = 4;
+    constexpr double T = 3650.0;
+
+    auto make_builders = [](double, double) {
+        constexpr size_t Nz = 4;
+        constexpr double hz_val = 10.0;
+        std::vector<test_helpers::WellScheduleBuilder> builders;
+
+        // INJ-1: слои 0–1, весь период. Расход меняется каждые 2 мес.
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(0, 0.0).open_layer(1, 0.0);
+            builders.emplace_back(L"INJ-1", 125.0, 125.0);
+            const double rates[] = {50, 30, 45, 25, 55, 35, 40};
+            double cursor = 0.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(60.0, T - cursor);
+                builders.back().inject_water(rates[idx % 7]).for_days(dt);
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        // INJ-2: слой 0, слой 2 открывается в год 2. Расход каждые 3 мес.
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(0, 0.0).open_layer(2, 730.0);
+            builders.emplace_back(L"INJ-2", 375.0, 375.0);
+            const double rates[] = {35, 20, 40, 50, 30, 45, 25, 55};
+            double cursor = 0.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(90.0, T - cursor);
+                builders.back().inject_water(rates[idx % 8]).for_days(dt);
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        // PROD-1: все 4 слоя, весь период. Расход каждый мес (30 дней).
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(0, 0.0).open_layer(1, 0.0)
+                .open_layer(2, 0.0).open_layer(3, 0.0);
+            builders.emplace_back(L"PROD-1", 375.0, 125.0);
+            const double rates[] = {30, 20, 35, 15, 25, 40, 10, 30, 22, 28, 18, 33};
+            double cursor = 0.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(30.0, T - cursor);
+                builders.back().produce_oil(rates[idx % 12]).for_days(dt);
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        // PROD-2: слой 3. Shut-in первый год, затем сезонный цикл 4 мес.
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(3, 365.0);
+            builders.emplace_back(L"PROD-2", 125.0, 375.0);
+            builders.back().shut_in().for_days(365.0);
+            const double rates[] = {25, 15, 10, 20};
+            double cursor = 365.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(120.0, T - cursor);
+                builders.back().produce_oil(rates[idx % 4]).for_days(dt);
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        // PROD-3: слои 1–2, закрытие слоя 1 год 3, повторное открытие год 5.
+        // Расход каждые 45 дней.
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(1, 0.0).open_layer(2, 0.0)
+                .close_layer(1, 1095.0)
+                .open_layer(1, 1825.0);
+            builders.emplace_back(L"PROD-3", 250.0, 250.0);
+            const double rates[] = {20, 28, 12, 35, 18, 25, 30, 22};
+            double cursor = 0.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(45.0, T - cursor);
+                builders.back().produce_oil(rates[idx % 8]).for_days(dt);
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        // INJ-3: слои 0–1, вводится в год 2. Расход каждые 30 дней.
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(0, 730.0).open_layer(1, 730.0);
+            builders.emplace_back(L"INJ-3", 250.0, 125.0);
+            builders.back().shut_in().for_days(730.0);
+            const double rates[] = {40, 20, 50, 30, 45, 15, 55, 25, 35, 48};
+            double cursor = 730.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(30.0, T - cursor);
+                builders.back().inject_water(rates[idx % 10]).for_days(dt);
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        // PROD-4: слои 2–3, вводится в год 3.
+        // Расход каждые 60 дней с shut-in каждый 5-й интервал.
+        {
+            auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
+                .open_layer(2, 1095.0).open_layer(3, 1095.0);
+            builders.emplace_back(L"PROD-4", 250.0, 375.0);
+            builders.back().shut_in().for_days(1095.0);
+            const double rates[] = {15, 22, 30, 18};
+            double cursor = 1095.0;
+            int idx = 0;
+            while (cursor < T) {
+                double dt = std::min(60.0, T - cursor);
+                if (idx % 5 == 4) {
+                    builders.back().shut_in().for_days(dt);
+                } else {
+                    builders.back().produce_oil(rates[idx % 4]).for_days(dt);
+                }
+                cursor += dt;
+                idx++;
+            }
+            builders.back().set_completions(c);
+        }
+
+        return builders;
+    };
+
+    simulation_cases::MultiLayerCase sc(
+        "3d_fine_10yr", Nx_fine, Ny_fine, Nz, Lx, Ly, hz,
+        T, 5.0,
+        make_builders,
+        seven_wells_info
+    );
+
+    auto result = run_case_3d(sc, true);
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
 }
