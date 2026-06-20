@@ -35,6 +35,14 @@ namespace reservoir_simulator
 {
 	namespace linear_problem
 	{
+		struct SolveResult
+		{
+			size_t iters;
+			double error;
+			bool converged;
+			double setup_ms;
+			double solve_ms;
+		};
 
 		template<unsigned char B>
 		using value_type = amgcl::static_matrix<double, B, B>;
@@ -92,7 +100,7 @@ namespace reservoir_simulator
 
 			void ResetProblem();
 
-			const std::tuple<int, double, bool> Solve(int maxIter);
+			SolveResult Solve(int maxIter);
 
 			void AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS);
 			void AddOffDiagBlock(size_t l, int neibIdx, std::vector<double>& data);

@@ -63,14 +63,14 @@ namespace reservoir_simulator
 			pattern{ std::make_unique<SparsityPattern>(eqNmbr_, cellNmbr, connectivityGraph, blPattern) },
 			nnz{ sparsity_pattern().TotalNmbrOfBlocks() * sparsity_pattern().NmbrOfNonzerosPerUnitBlock() }
 		{
-			ResetMatrix();
+			value.resize(nnz, 0.0);
 		}
 
 		MatrixCSR::~MatrixCSR() = default;
 
 		void MatrixCSR::ResetMatrix()
 		{
-			value = std::vector<double>(nnz, 0.0);
+			std::fill(value.begin(), value.end(), 0.0);
 		}
 
 		void MatrixCSR::PrintCRS() const

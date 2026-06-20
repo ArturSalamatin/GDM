@@ -1,6 +1,7 @@
 #include "../../stdafx.h"
 #include "LinearProblem.h"
 #include "MatrixCSR.h"
+#include <chrono>
 
 namespace reservoir_simulator
 {
@@ -98,39 +99,34 @@ namespace reservoir_simulator
 		void LinearProblem::ResetProblem()
 		{
 			matrix->ResetMatrix();
-			rhs = std::vector<double>(cellNmbr * B, 0.0);
-			solutionCorrections = std::vector<double>(cellNmbr * B, 0.0);
+			std::fill(rhs.begin(), rhs.end(), 0.0);
+			std::fill(solutionCorrections.begin(), solutionCorrections.end(), 0.0);
 		}
 
-		const std::tuple<int, double, bool> LinearProblem::Solve(int maxIter)
+		SolveResult LinearProblem::Solve(int maxIter)
 		{
+			using clock = std::chrono::steady_clock;
 			prm.solver.maxiter = maxIter;
-			prof.tic("AMGSolverInside");
 
-			Matrix().PrintCRS();
-			Matrix().PrintDiagBlocks();
-
-			prof.tic("setup");
+			auto t0 = clock::now();
 			auto A = amgcl::adapter::block_matrix<value_type<B>>(
 				std::tie(rhsSize, Matrix().Row(), Matrix().Col(), Matrix().Val()));
 			Solver_AMG<B> solve(A, prm);
-			prof.toc("setup");
+			auto t1 = clock::now();
 
-			prof.tic("RHS_copy");
 			rhs_type<B> const* fptr = reinterpret_cast<rhs_type<B> const*>(&rhs[0]);
 			rhs_type<B>* xptr = reinterpret_cast<rhs_type<B>*>(&solutionCorrections[0]);
 			amgcl::backend::numa_vector<rhs_type<B>> F(fptr, fptr + cellNmbr);
 			amgcl::backend::numa_vector<rhs_type<B>> X(xptr, xptr + cellNmbr);
-			prof.toc("RHS_copy");
 
-			prof.tic("solve");
 			auto [iters, error] = solve(F, X);
 			std::copy(X.data(), X.data() + X.size(), xptr);
-			prof.toc("solve");
+			auto t2 = clock::now();
 
-			prof.toc("AMGSolverInside");
+			double setup_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+			double solve_ms = std::chrono::duration<double, std::milli>(t2 - t1).count();
 
-			return { iters, error , true };
+			return { iters, error, true, setup_ms, solve_ms };
 		}
 
 		void LinearProblem::AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS)

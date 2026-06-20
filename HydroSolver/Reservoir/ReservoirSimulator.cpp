@@ -387,6 +387,9 @@ namespace reservoir_simulator
 	//////////// SOLVER SECTION
 	double ReservoirSimulator::Solve(const std::vector<double>& timeMoments)
 	{
+		using clock = std::chrono::steady_clock;
+		auto t_total_start = clock::now();
+
 #ifdef PRINT_DEBUG_INFO
 		std::ofstream myfile;
 		myfile.open("test_tau.txt", std::ios_base::out);
@@ -396,60 +399,54 @@ namespace reservoir_simulator
 		{
 			while (numPrm.CurrentTimeMoment() < timeMoments[i])
 			{
-				numPrm.update_maxTauAllowed(timeMoments[i], GetWells()); // the next currentMoment should not pass job moment and MER start date
-		//		if (numPrm.CurrentIntegrationStep() == numPrm.CurrentTimeStepTillNextSaveMomemnt())
-		//			PrintFluxFieldData(std::ios_base::app);
+				numPrm.update_maxTauAllowed(timeMoments[i], GetWells());
 #ifdef PRINT_DEBUG_INFO
 				myfile << numPrm.CurrentIntegrationStep() << "  " << numPrm.CurrentTimeMoment() << std::endl;
 #endif // PRINT_DEBUG_INFO
 
-				// trial integration with a given time step cur_tau
 				PerformNewtonLoop(numPrm.CurrentIntegrationStep(),
 					numPrm.NextTimeMoment());
 
-#ifdef DEBUG_SALAMATIN
-				std::cout << prof << std::flush;
-#endif // DEBUG_SALAMATIN
-
 				if (numPrm.IsSuccessfullNewtonTrial())
-				{// accept the result
+				{
 					MassBalance(numPrm.CurrentIntegrationStep());
 					Grid.AcceptState();
 					numPrm.update_currentMoment();
 					AddFlowFieldSnapShot();
+					solverProfile_.n_time_steps++;
 				}
 				else
-				{// decrease the cur_tau value
+				{
 					numPrm.decrease_schemeTau();
+					solverProfile_.n_wasted_trials++;
 					continue;
 				}
 			}
 		}
 #ifdef PRINT_DEBUG_INFO
 		myfile.close();
-#endif // DEBUG_SALAMATIN2
-#ifdef DEBUG_SALAMATIN
-		std::cout << "Total number of wasted trials: " << numPrm.WastedTrialsCount() << std::endl;
-#endif // DEBUG_SALAMATIN
+#endif // PRINT_DEBUG_INFO
 
+		solverProfile_.t_total_ms = std::chrono::duration<double, std::milli>(clock::now() - t_total_start).count();
 		return numPrm.CurrentSchemeTau();
 	}
 	void ReservoirSimulator::PerformNewtonLoop(double loc_tau, double nextTimeMoment)
 	{
+		using clock = std::chrono::steady_clock;
 		numPrm.set_currentNewtonIterationCount(0);
 		numPrm.update_isSuccesfullNewtonTrial(false);
 		numPrm.set_currentAMG_maxSolverIterationCount();
-		while (!numPrm.IsSuccessfullNewtonTrial())//consecutive_solutions_difference > eps * VectorXd(u_Next).lpNorm<Infinity>())
+		while (!numPrm.IsSuccessfullNewtonTrial())
 		{
-			SingleIteration(loc_tau, nextTimeMoment); // error may be "NaN", then numPrm.IsSuccessfullAMG_Iteration() returns false
+			SingleIteration(loc_tau, nextTimeMoment);
+			solverProfile_.n_newton_iters++;
 
 			if (numPrm.IsSuccessfullAMG_Iteration() && numPrm.IsNewtonIterationContinue())
 			{
-				prof.tic("updateGrid");
-				numPrm.update_isSuccesfullNewtonTrial(UpdateGrid()); // check whether the accuracy is reached
-				prof.toc("updateGrid");
-			//	MyProblem.Print();
-			//	PrintState();
+				auto t0 = clock::now();
+				numPrm.update_isSuccesfullNewtonTrial(UpdateGrid());
+				auto t1 = clock::now();
+				solverProfile_.t_update_grid_ms += std::chrono::duration<double, std::milli>(t1 - t0).count();
 			}
 			else
 			{
@@ -491,13 +488,20 @@ namespace reservoir_simulator
 
 	void ReservoirSimulator::SingleIteration(double loc_tau, double nextTimeMoment)
 	{
-		prof.tic("assemble_Eqs");
-		AssembleMyProblem(loc_tau, nextTimeMoment);
-		prof.toc("assemble_Eqs");
+		using clock = std::chrono::steady_clock;
 
-		prof.tic("AMGSolver");
-		numPrm.update_currentAMGState(MyProblem.Solve(numPrm.CurrentAMG_maxSolverIterationCount()));
-		prof.toc("AMGSolver");
+		auto t0 = clock::now();
+		AssembleMyProblem(loc_tau, nextTimeMoment);
+		auto t1 = clock::now();
+
+		auto res = MyProblem.Solve(numPrm.CurrentAMG_maxSolverIterationCount());
+		numPrm.update_currentAMGState({ static_cast<int>(res.iters), res.error, res.converged });
+
+		solverProfile_.n_amg_solves++;
+		solverProfile_.total_amg_iters += res.iters;
+		solverProfile_.t_assemble_ms += std::chrono::duration<double, std::milli>(t1 - t0).count();
+		solverProfile_.t_amg_setup_ms += res.setup_ms;
+		solverProfile_.t_amg_solve_ms += res.solve_ms;
 	}
 
 	void ReservoirSimulator::AssembleMyProblem(double loc_tau, double nextTimeMoment)
