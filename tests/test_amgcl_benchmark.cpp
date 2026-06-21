@@ -767,3 +767,68 @@ TEST_CASE("AMGCL benchmark: Series E — ILU family relaxation",
         CHECK(r.balance_ok);
     }
 }
+
+
+// ======================== Series H: iluk combinations ========================
+// Solver_AMG<B> is now iluk(k=1) + lgmres. Test best params from D/F with iluk.
+
+TEST_CASE("AMGCL benchmark: Series H — iluk combinations",
+          "[benchmark][amgcl][seriesH][.slow]")
+{
+    fs::create_directories("results");
+    using S = Solver_AMG<B>;
+
+    SECTION("H1: iluk(k=1) baseline") {
+        S::params prm;
+        auto r = run_benchmark<S>("H1_iluk1_baseline", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("H2: iluk(k=1) + npre=2") {
+        S::params prm;
+        prm.precond.npre = 2;
+        auto r = run_benchmark<S>("H2_iluk1_pre2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("H3: iluk(k=1) + W-cycle") {
+        S::params prm;
+        prm.precond.ncycle = 2;
+        auto r = run_benchmark<S>("H3_iluk1_Wcycle", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("H4: iluk(k=1) + npre=2, npost=2") {
+        S::params prm;
+        prm.precond.npre = 2;
+        prm.precond.npost = 2;
+        auto r = run_benchmark<S>("H4_iluk1_pre2_post2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("H5: iluk(k=1) + K=5") {
+        S::params prm;
+        prm.solver.K = 5;
+        auto r = run_benchmark<S>("H5_iluk1_K5", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("H6: iluk(k=2)") {
+        S::params prm;
+        prm.precond.relax.k = 2;
+        auto r = run_benchmark<S>("H6_iluk2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+}
