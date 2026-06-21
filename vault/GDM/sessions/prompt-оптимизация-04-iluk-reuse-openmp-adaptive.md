@@ -143,9 +143,17 @@ perf: оптимальные параметры AMG для iluk(k=1)
 
 ---
 
-## Шаг 3: Reuse AMG-иерархии между Newton-итерациями
+## Шаг 3: Reuse AMG-иерархии между Newton-итерациями — ❌ ЗАБЛОКИРОВАН
 
-### Проблема
+**Статус:** SIGSEGV. `make_solver::operator()(A, F, X)` передаёт `A` (block_matrix_adapter) в lgmres для SpMV, но lgmres вызывает `backend::spmv(A, ...)`, который не работает корректно с lazy adapter — ожидает `build_matrix`. Результат — segfault при первом вызове residual.
+
+**Альтернативы:**
+- Конвертировать adapter → build_matrix и хранить как member. Но build_matrix создаётся внутри make_solver конструктора и не экспортируется.
+- CPR.partial_update() — встроенная поддержка reuse, работает с скалярной CRS. См. сессию 6.
+
+Reuse AMG с блочным backend не стоит усилий (< 5% выигрыш). Переходить к CPR.
+
+### Проблема (оригинальная)
 
 `LinearProblem::Solve()` создаёт `Solver_AMG<B>` при каждом вызове. На fine grid setup ~4–7% от total. Внутри одного временного шага Якобиан меняется слабо — AMG hierarchy можно переиспользовать.
 
