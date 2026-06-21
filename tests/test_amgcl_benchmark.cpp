@@ -22,6 +22,8 @@
 #include <amgcl/relaxation/damped_jacobi.hpp>
 #include <amgcl/relaxation/spai0.hpp>
 #include <amgcl/relaxation/ilu0.hpp>
+#include <amgcl/relaxation/iluk.hpp>
+#include <amgcl/relaxation/ilut.hpp>
 #include <amgcl/relaxation/gauss_seidel.hpp>
 #include <amgcl/relaxation/chebyshev.hpp>
 #include <amgcl/relaxation/as_preconditioner.hpp>
@@ -38,8 +40,11 @@ SolveResult solve_with(LinearProblem& lp, int maxIter, typename SolverType::para
     prm.solver.maxiter = maxIter;
 
     prof.tic("setup");
-    auto A = amgcl::adapter::block_matrix<value_type<B>>(
-        std::tie(lp.RhsSize(), lp.Matrix().Row(), lp.Matrix().Col(), lp.Matrix().Val()));
+    auto n = lp.RhsSize();
+    auto const& row = lp.Matrix().Row();
+    auto const& col = lp.Matrix().Col();
+    auto const& val = lp.Matrix().Val();
+    auto A = amgcl::adapter::block_matrix<value_type<B>>(std::tie(n, row, col, val));
     SolverType solve(A, prm);
     prof.toc("setup");
 
@@ -516,3 +521,249 @@ TEST_CASE("AMGCL benchmark: Series C — Coarsening",
 }
 
 
+// ======================== Series D: AMG cycle parameters ========================
+// Fixed: amg<aggregation, ilu0> + lgmres (current optimum)
+
+TEST_CASE("AMGCL benchmark: Series D — AMG cycle parameters",
+          "[benchmark][amgcl][seriesD][.slow]")
+{
+    fs::create_directories("results");
+    using S = Solver_AMG<B>;
+
+    SECTION("D1: baseline (V-cycle, npre=1, npost=1)") {
+        S::params prm;
+        auto r = run_benchmark<S>("D1_V1_pre1_post1", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("D2: W-cycle (ncycle=2)") {
+        S::params prm;
+        prm.precond.ncycle = 2;
+        auto r = run_benchmark<S>("D2_W_pre1_post1", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("D3: npre=2, npost=1") {
+        S::params prm;
+        prm.precond.npre = 2;
+        auto r = run_benchmark<S>("D3_V1_pre2_post1", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("D4: npre=1, npost=2") {
+        S::params prm;
+        prm.precond.npost = 2;
+        auto r = run_benchmark<S>("D4_V1_pre1_post2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("D5: npre=2, npost=2") {
+        S::params prm;
+        prm.precond.npre = 2;
+        prm.precond.npost = 2;
+        auto r = run_benchmark<S>("D5_V1_pre2_post2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("D6: npre=0, npost=2") {
+        S::params prm;
+        prm.precond.npre = 0;
+        prm.precond.npost = 2;
+        auto r = run_benchmark<S>("D6_V1_pre0_post2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+}
+
+
+// ======================== Series F: lgmres parameters ========================
+// Fixed: amg<aggregation, ilu0> + lgmres
+
+TEST_CASE("AMGCL benchmark: Series F — lgmres parameters",
+          "[benchmark][amgcl][seriesF][.slow]")
+{
+    fs::create_directories("results");
+    using S = Solver_AMG<B>;
+
+    SECTION("F1: M=15, K=3 (baseline)") {
+        S::params prm;
+        prm.solver.M = 15;
+        prm.solver.K = 3;
+        auto r = run_benchmark<S>("F1_M15_K3", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("F2: M=5, K=3") {
+        S::params prm;
+        prm.solver.M = 5;
+        prm.solver.K = 3;
+        auto r = run_benchmark<S>("F2_M5_K3", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("F3: M=10, K=3") {
+        S::params prm;
+        prm.solver.M = 10;
+        prm.solver.K = 3;
+        auto r = run_benchmark<S>("F3_M10_K3", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("F4: M=30, K=3") {
+        S::params prm;
+        prm.solver.M = 30;
+        prm.solver.K = 3;
+        auto r = run_benchmark<S>("F4_M30_K3", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("F5: M=15, K=1") {
+        S::params prm;
+        prm.solver.M = 15;
+        prm.solver.K = 1;
+        auto r = run_benchmark<S>("F5_M15_K1", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("F6: M=15, K=5") {
+        S::params prm;
+        prm.solver.M = 15;
+        prm.solver.K = 5;
+        auto r = run_benchmark<S>("F6_M15_K5", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("F7: M=10, K=2") {
+        S::params prm;
+        prm.solver.M = 10;
+        prm.solver.K = 2;
+        auto r = run_benchmark<S>("F7_M10_K2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+}
+
+
+// ======================== Series G: aggregation over_interp ========================
+
+TEST_CASE("AMGCL benchmark: Series G — over_interp",
+          "[benchmark][amgcl][seriesG][.slow]")
+{
+    fs::create_directories("results");
+    using S = Solver_AMG<B>;
+
+    SECTION("G1: over_interp=2.0 (default for block)") {
+        S::params prm;
+        prm.precond.coarsening.over_interp = 2.0f;
+        auto r = run_benchmark<S>("G1_oi2.0", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("G2: over_interp=1.0") {
+        S::params prm;
+        prm.precond.coarsening.over_interp = 1.0f;
+        auto r = run_benchmark<S>("G2_oi1.0", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("G3: over_interp=1.5") {
+        S::params prm;
+        prm.precond.coarsening.over_interp = 1.5f;
+        auto r = run_benchmark<S>("G3_oi1.5", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("G4: over_interp=3.0") {
+        S::params prm;
+        prm.precond.coarsening.over_interp = 3.0f;
+        auto r = run_benchmark<S>("G4_oi3.0", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+}
+
+
+// ======================== Series E: ILU family relaxation ========================
+
+TEST_CASE("AMGCL benchmark: Series E — ILU family relaxation",
+          "[benchmark][amgcl][seriesE][.slow]")
+{
+    fs::create_directories("results");
+
+    SECTION("E1: ilu0, damping=1.0 (baseline)") {
+        using S = Solver_AMG<B>;
+        S::params prm;
+        auto r = run_benchmark<S>("E1_ilu0_d1.0", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("E2: ilu0, damping=0.8") {
+        using S = Solver_AMG<B>;
+        S::params prm;
+        prm.precond.relax.damping = 0.8;
+        auto r = run_benchmark<S>("E2_ilu0_d0.8", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("E3: iluk, k=1") {
+        using S = amgcl::make_solver<
+            amgcl::amg<BBackend<B>, amgcl::coarsening::aggregation, amgcl::relaxation::iluk>,
+            amgcl::solver::lgmres<BBackend<B>>
+        >;
+        S::params prm;
+        prm.precond.relax.k = 1;
+        auto r = run_benchmark<S>("E3_iluk_k1", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+
+    SECTION("E4: ilut, p=2, tau=1e-2") {
+        using S = amgcl::make_solver<
+            amgcl::amg<BBackend<B>, amgcl::coarsening::aggregation, amgcl::relaxation::ilut>,
+            amgcl::solver::lgmres<BBackend<B>>
+        >;
+        S::params prm;
+        prm.precond.relax.p = 2;
+        prm.precond.relax.tau = 1e-2;
+        auto r = run_benchmark<S>("E4_ilut_p2_tau1e-2", prm);
+        report(r);
+        append_csv(csv_path, r);
+        CHECK(r.balance_ok);
+    }
+}
