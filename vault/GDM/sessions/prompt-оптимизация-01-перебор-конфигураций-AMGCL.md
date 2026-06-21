@@ -14,11 +14,19 @@ updated: 2026-06-21
 
 Найти оптимальную комбинацию (Krylov solver, coarsening, relaxation, параметры AMG) для блочной СЛАУ 2×2 на 3D-сетке 51×51×4. Профилирование через `amgcl::profiler` (макрос `AMGCL_PROFILING` включён в CMake).
 
+## Предварительный шаг: очистка benchmark-артефактов
+
+Перед добавлением новых серий — выполнить [[prompt-очистка-benchmark-артефактов]]:
+- Убрать 11 лишних AMGCL includes из LinearProblem.h
+- Удалить SolveWith, SolverParams, explicit instantiations из production-кода
+- Удалить диагностический тест [diag]
+
 ## Текущее состояние
 
 Бенчмарк-инфраструктура готова: `tests/test_amgcl_benchmark.cpp`, таргет `gdm_benchmark`.
 
-- `run_benchmark<SolverType>()` — шаблонная функция, прогоняет 200-дневной сценарий на 51×51×4
+- `run_benchmark<SolverType>()` — шаблонная функция, прогоняет сценарий на 51×51×4
+- `Btotal_time` — **поменять на 730 дней** (сейчас 200, нужен полный production-сценарий)
 - `prof.reset()` перед каждым прогоном, `std::cout << prof` после — иерархический профиль amgcl
 - `BenchmarkResult` — счётчики (time_steps, newton, amg_solves, total_amg_iters, balance)
 - CSV-вывод в `results/amgcl_benchmark.csv`
@@ -136,16 +144,18 @@ prm.precond.coarsening.over_interp = 1.5f;
 
 Добавить серии D–G как новые SECTION-ы в `test_amgcl_benchmark.cpp`. Каждая серия — отдельный тег (`[seriesD]`, `[seriesE]`, `[seriesF]`, `[seriesG]`).
 
-Для iluk/ilut — добавить includes и explicit instantiations `SolveWith` в benchmark.
+Для iluk/ilut (Series E) — добавить includes и explicit instantiations `SolveWith` в benchmark.
 
 ## Порядок выполнения
 
-1. **Series D** (AMG params, ~20 мин): 6 конфигураций, тот же тип солвера
-2. **Series F** (lgmres params, ~25 мин): 7 конфигураций, тот же тип солвера
-3. **Series G** (over_interp, ~15 мин): 4 конфигурации, тот же тип солвера
-4. **Series E** (ilu-семейство, ~20 мин): 4 конфигурации, могут потребовать новые типы
+0. **Очистка** — выполнить [[prompt-очистка-benchmark-артефактов]]
+1. **Btotal_time = 730** — поменять в `test_amgcl_benchmark.cpp`
+2. **Series D** (AMG params): 6 конфигураций, тот же тип солвера — варьируем только `prm.precond.*`
+3. **Series F** (lgmres params): 7 конфигураций, тот же тип солвера — варьируем только `prm.solver.*`
+4. **Series G** (over_interp): 4 конфигурации, тот же тип солвера — варьируем `prm.precond.coarsening.*`
+5. **Series E** (ilu-семейство): 4 конфигурации, новые типы солверов (iluk, ilut) — **в конце**
 
-Series D/F/G варьируют только параметры текущего `Solver_AMG<B>`, не требуют новых типов. Series E требует новых typedef для iluk/ilut.
+Series D/F/G варьируют только параметры текущего `Solver_AMG<B>`, не требуют новых типов и новых instantiations. Series E требует новых typedef и может не скомпилироваться с блочным бэкендом.
 
 ## Критерий валидности
 
