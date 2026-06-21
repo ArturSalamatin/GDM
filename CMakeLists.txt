@@ -79,6 +79,10 @@ target_compile_definitions(gdm_core PUBLIC AMGCL_NO_BOOST)
 if(AMGCL_PROFILING)
     target_compile_definitions(gdm_core PUBLIC AMGCL_PROFILING)
 endif()
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(gdm_core PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 # =============================================================================
 # gdm — executable, инициализация через C++ API

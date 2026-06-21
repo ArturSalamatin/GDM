@@ -503,7 +503,7 @@ namespace reservoir_simulator
 #ifdef	USE_PARALLEL
 #pragma omp parallel for
 #endif
-		for (size_t l = 0; l < Grid.ActiveCellsNmbr(); l++)
+		for (int l = 0; l < static_cast<int>(Grid.ActiveCellsNmbr()); l++)
 		{
 			fillMatrixBlockRow(l, loc_tau);
 		}
