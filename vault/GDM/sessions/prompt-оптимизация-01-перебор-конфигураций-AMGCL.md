@@ -5,203 +5,147 @@ tags:
   - amgcl
   - перебор
 date: 2026-06-20
-updated: 2026-06-20
+updated: 2026-06-21
 ---
 
 # Фаза 1: Систематический перебор конфигураций AMGCL
 
 ## Цель
 
-Найти оптимальную комбинацию (Krylov solver, coarsening, relaxation, параметры) для блочной СЛАУ 2×2 на 3D-сетке 51×51×4.
+Найти оптимальную комбинацию (Krylov solver, coarsening, relaxation, параметры AMG) для блочной СЛАУ 2×2 на 3D-сетке 51×51×4. Профилирование через `amgcl::profiler` (макрос `AMGCL_PROFILING` включён в CMake).
 
-## Реализация: единый test_amgcl_benchmark.cpp с SECTION-ами
+## Текущее состояние
 
-Создать файл `tests/test_amgcl_benchmark.cpp` с одним TEST_CASE и множеством SECTION-ов. Каждая секция — одна конфигурация AMGCL. Все шаблоны инстанцируются в одном бинарнике (одна компиляция, ~60 сек на MSVC).
+Бенчмарк-инфраструктура готова: `tests/test_amgcl_benchmark.cpp`, таргет `gdm_benchmark`.
 
-### Архитектура бенчмарка
+- `run_benchmark<SolverType>()` — шаблонная функция, прогоняет 200-дневной сценарий на 51×51×4
+- `prof.reset()` перед каждым прогоном, `std::cout << prof` после — иерархический профиль amgcl
+- `BenchmarkResult` — счётчики (time_steps, newton, amg_solves, total_amg_iters, balance)
+- CSV-вывод в `results/amgcl_benchmark.csv`
+- Защита от бесконечных откатов: `MAX_CONSECUTIVE_ROLLBACKS = 15`
+- `prm.solver.tol` и `prm.solver.abstol` копируются из production `numPrm`
 
+### Уже выполненные серии (Phase 1, 2026-06-20)
+
+**Series A — Krylov solver** (AMG<aggregation, damped_jacobi>):
+- gmres M=5/15/30, bicgstab, bicgstabl L=2, lgmres M=15, fgmres M=15, idrs s=4
+- **Победитель: lgmres M=15** (5% быстрее gmres)
+
+**Series B — Relaxation** (lgmres + aggregation):
+- damped_jacobi, spai0, ilu0, gauss_seidel, chebyshev
+- **Победитель: ilu0** (37% быстрее, 2.3× меньше итераций)
+- spai0, chebyshev — не сходятся с блочным 2×2 бэкендом
+
+**Series C — Coarsening** (lgmres + ilu0):
+- aggregation vs smoothed_aggregation
+- **Победитель: aggregation** (10% быстрее)
+- ruge_stuben — несовместим (нет `operator<=` для `static_matrix<2,2>`)
+
+**Текущий оптимум: `amg<aggregation, ilu0> + lgmres`** → 2.5× ускорение солвера.
+
+## Новые серии для перебора
+
+### Series D — параметры AMG-цикла
+
+Зафиксировано: `amg<aggregation, ilu0> + lgmres`. Варьируем параметры AMG.
+
+| ID | Параметр | Значение | Примечание |
+|---|---|---|---|
+| D1 | ncycle=1, npre=1, npost=1 | default | baseline (текущий оптимум) |
+| D2 | ncycle=2 (W-цикл) | npre=1, npost=1 | двойной проход по грубым уровням |
+| D3 | npre=2, npost=1 | ncycle=1 | усиленное пре-сглаживание |
+| D4 | npre=1, npost=2 | ncycle=1 | усиленное пост-сглаживание |
+| D5 | npre=2, npost=2 | ncycle=1 | двойное сглаживание |
+| D6 | npre=0, npost=2 | ncycle=1 | только пост-сглаживание |
+
+Настройка:
 ```cpp
-#include <catch2/catch_test_macros.hpp>
-#include "simulation_cases/MultiLayerCase.h"
-#include <chrono>
-#include <fstream>
-
-// Все необходимые amgcl includes
-#include <amgcl/make_solver.hpp>
-#include <amgcl/amg.hpp>
-#include <amgcl/solver/gmres.hpp>
-#include <amgcl/solver/bicgstab.hpp>
-#include <amgcl/solver/bicgstabl.hpp>
-#include <amgcl/solver/lgmres.hpp>
-#include <amgcl/solver/fgmres.hpp>
-#include <amgcl/solver/idrs.hpp>
-#include <amgcl/solver/preonly.hpp>
-#include <amgcl/coarsening/aggregation.hpp>
-#include <amgcl/coarsening/smoothed_aggregation.hpp>
-#include <amgcl/coarsening/ruge_stuben.hpp>
-#include <amgcl/coarsening/smoothed_aggr_emin.hpp>
-#include <amgcl/relaxation/damped_jacobi.hpp>
-#include <amgcl/relaxation/spai0.hpp>
-#include <amgcl/relaxation/spai1.hpp>
-#include <amgcl/relaxation/ilu0.hpp>
-#include <amgcl/relaxation/iluk.hpp>
-#include <amgcl/relaxation/ilut.hpp>
-#include <amgcl/relaxation/chebyshev.hpp>
-#include <amgcl/relaxation/gauss_seidel.hpp>
-#include <amgcl/relaxation/as_preconditioner.hpp>
-#include <amgcl/preconditioner/cpr.hpp>
-#include <amgcl/preconditioner/cpr_drs.hpp>
-#include <amgcl/preconditioner/schur_pressure_correction.hpp>
-
-// Шаблонная функция бенчмарка — принимает тип солвера
-template<typename SolverType>
-BenchmarkResult run_benchmark(const std::string& config_name,
-                               typename SolverType::params& prm);
+using S = Solver_AMG<B>;  // amg<aggregation, ilu0> + lgmres
+S::params prm;
+prm.precond.ncycle = ...;
+prm.precond.npre = ...;
+prm.precond.npost = ...;
 ```
 
-Каждый SECTION задаёт конкретный typedef `SolverType`, настраивает `prm`, и вызывает `run_benchmark<SolverType>(name, prm)`.
+### Series E — ilu-семейство relaxation
 
-### Важно: LinearProblem нужно параметризовать
-
-Текущий `LinearProblem` жёстко задаёт тип `Solver_AMG<B>` в заголовке. Для бенчмарка нужно:
-
-**Вариант A**: Скопировать логику `LinearProblem::Solve()` в бенчмарк — работать напрямую с CRS-данными матрицы, создавать солверы разных типов. Это чище: бенчмарк не меняет production-код.
-
-**Вариант B**: Шаблонизировать `LinearProblem` по типу солвера — ломает API, слишком инвазивно.
-
-**Вариант C**: В бенчмарке получить CRS-данные через `Matrix().Row()`, `Matrix().Col()`, `Matrix().Val()` + RHS, и решать через amgcl напрямую, минуя `LinearProblem::Solve()`.
-
-→ **Выбрать Вариант A**: бенчмарк работает с сырыми CRS-данными из LinearProblem, вызывая amgcl напрямую. Для этого:
-
-1. Добавить в `LinearProblem` публичные accessor-ы для CRS-данных (если нет):
-   - `Matrix().Row()` — ptr (уже есть)
-   - `Matrix().Col()` — col (уже есть)
-   - `Matrix().Val()` — val (уже есть)
-   - `rhs` — правая часть (уже есть)
-   - `cellNmbr`, `rhsSize` — размеры (уже есть)
-
-2. В бенчмарке после `AssembleMyProblem` забрать данные и решать через произвольный amgcl-тип.
-
-3. Проверить, что решение совпадает с production-решателем (невязка < tol).
-
-## Матрица конфигураций для перебора
-
-### Серия A: Krylov-солверы (AMG<aggregation, damped_jacobi> зафиксирован)
-
-| ID | Солвер | maxiter | Примечание |
-|---|---|---|---|
-| A1 | gmres(M=5) | 5 | **baseline** |
-| A2 | gmres(M=15) | 15 | увеличенный Krylov-базис |
-| A3 | gmres(M=30) | 30 | щедрый |
-| A4 | bicgstab | 15 | без ортогонализации |
-| A5 | bicgstabl(l=2) | 15 | стабильнее BiCGStab |
-| A6 | lgmres | 15 | augmented GMRES |
-| A7 | fgmres | 15 | flexible — обязателен для переменного precond |
-| A8 | idrs(s=4) | 15 | IDR(s) — часто быстрее BiCGStab |
-
-### Серия B: Relaxation (AMG<aggregation, ?> + солвер-победитель из серии A)
+Зафиксировано: `lgmres + aggregation`. Варьируем relaxation из семейства ILU.
 
 | ID | Relaxation | Примечание |
 |---|---|---|
-| B1 | damped_jacobi | baseline |
-| B2 | spai0 | sparse approximate inverse — лучший кандидат для блочных |
-| B3 | spai1 | расширенный SPAI |
-| B4 | ilu0 | ILU(0) — мощнее, дороже setup |
-| B5 | iluk(k=1) | ILU(k) |
-| B6 | chebyshev | полиномиальный |
-| B7 | gauss_seidel | проверить поддержку для блочных типов |
+| E1 | ilu0 (damping=1.0) | baseline |
+| E2 | ilu0 (damping=0.8) | демпфированный ILU(0) |
+| E3 | iluk (k=1) | ILU с fill-in level 1 — дороже setup, лучше сглаживание |
+| E4 | ilut (p=2, tau=1e-2) | ILU с пороговым отбрасыванием |
 
-### Серия C: Coarsening (relaxation-победитель + солвер-победитель)
+Настройка damping:
+```cpp
+prm.precond.relax.damping = 0.8;
+```
 
-| ID | Coarsening | Примечание |
+Для iluk/ilut — новые типы:
+```cpp
+#include <amgcl/relaxation/iluk.hpp>
+#include <amgcl/relaxation/ilut.hpp>
+
+using Solver_ILUK = amgcl::make_solver<
+    amgcl::amg<BBackend<B>, amgcl::coarsening::aggregation, amgcl::relaxation::iluk>,
+    amgcl::solver::lgmres<BBackend<B>>
+>;
+```
+
+**Внимание:** iluk и ilut могут быть несовместимы с блочным бэкендом (как spai0/spai1). Если не компилируется или не сходится — пометить `failed`.
+
+### Series F — параметры lgmres
+
+Зафиксировано: `amg<aggregation, ilu0>`. Варьируем параметры lgmres.
+
+| ID | M (inner) | K (augmented) | always_reset | Примечание |
+|---|---|---|---|---|
+| F1 | 15 | 3 | true | baseline |
+| F2 | 5 | 3 | true | минимальный Krylov-базис (с ilu0 может хватить) |
+| F3 | 10 | 3 | true | промежуточный |
+| F4 | 30 | 3 | true | щедрый |
+| F5 | 15 | 1 | true | минимум augmented vectors |
+| F6 | 15 | 5 | true | больше augmented vectors |
+| F7 | 10 | 2 | true | компактный вариант |
+
+Настройка:
+```cpp
+prm.solver.M = 10;
+prm.solver.K = 2;
+```
+
+### Series G — over_interp для aggregation coarsening
+
+Зафиксировано: `amg<aggregation, ilu0> + lgmres`. Варьируем `over_interp`.
+
+| ID | over_interp | Примечание |
 |---|---|---|
-| C1 | aggregation | baseline |
-| C2 | smoothed_aggregation | сглаженная — лучшее качество V-cycle |
-| C3 | ruge_stuben | классический RS-AMG (может потребовать `as_scalar` обёртку для блочных) |
-| C4 | smoothed_aggr_emin | energy-minimizing prolongation |
+| G1 | 2.0 | default для блочного бэкенда |
+| G2 | 1.0 | без over-interpolation |
+| G3 | 1.5 | промежуточный |
+| G4 | 3.0 | агрессивный |
 
-### Серия D: Параметры AMG (тройка-победитель зафиксирована)
-
-| ID | Параметр | Значения |
-|---|---|---|
-| D1 | ncycle | 1 (V), 2 (W) |
-| D2 | npre / npost | 1/1, 2/1, 1/2, 2/2 |
-| D3 | coarse_enough | 100, 500, 1000, 2000 |
-| D4 | direct_coarse | false, true |
-| D5 | damping (если Jacobi) | 0.5, 2/3, 0.8, 1.0 |
-| D6 | aggr.eps_strong | 0.08, 0.25, 0.5 |
-| D7 | over_interp (если SA) | 1.0, 1.5, 2/3 |
-
-### Серия E: Специализированные предобуславливатели
-
-| ID | Предобуславливатель | Примечание |
-|---|---|---|
-| E1 | `as_preconditioner<ilu0>` (без AMG) | голый ILU(0) |
-| E2 | `as_preconditioner<spai0>` (без AMG) | голый SPAI0 |
-| E3 | `cpr<amg, ilu0>` | CPR: AMG для давления + ILU для полной |
-| E4 | `cpr_drs<amg, ilu0>` | CPR-DRS: с dynamic row summing |
-| E5 | `schur_pressure_correction<amg, ilu0>` | Шурово дополнение |
-
-## Особые указания по серии E (CPR/CPR-DRS/Schur)
-
-### API amgcl для CPR (из анализа cpr.hpp)
-
-CPR работает со **скалярной** (развёрнутой) матрицей, не с блочной:
-- `PPrecond` — скалярный бэкенд (`backend::builtin<double>`)
-- `SPrecond` — скалярный бэкенд (тот же)
-- Параметр `block_size = 2` указывает CPR, как разделять переменные
-
+Настройка:
 ```cpp
-// Скалярные типы для CPR
-using SBackend = amgcl::backend::builtin<double>;
-using PPrecond = amgcl::amg<SBackend, amgcl::coarsening::smoothed_aggregation,
-                             amgcl::relaxation::spai0>;
-using SPrecond = amgcl::relaxation::as_preconditioner<SBackend,
-                             amgcl::relaxation::ilu0>;
-using CPR = amgcl::preconditioner::cpr<PPrecond, SPrecond>;
-using CPRSolver = amgcl::make_solver<CPR, amgcl::solver::bicgstab<SBackend>>;
+prm.precond.coarsening.over_interp = 1.5f;
 ```
 
-Это значит: для CPR нужно передать матрицу в **скалярном** (не блочном) формате. Наш CRS уже хранит скалярные данные (`Matrix().Val()` — `std::vector<double>`), просто amgcl::adapter::block_matrix переупаковывает их в блоки. Для CPR — передать напрямую скалярный CRS.
+## Реализация
 
-Параметры CPR:
-```cpp
-prm.precond.block_size = 2;
-prm.precond.active_rows = 0;  // 0 = все строки
-// pprecond — параметры AMG для давления
-// sprecond — параметры ILU для полной системы
-```
+Добавить серии D–G как новые SECTION-ы в `test_amgcl_benchmark.cpp`. Каждая серия — отдельный тег (`[seriesD]`, `[seriesE]`, `[seriesF]`, `[seriesG]`).
 
-### CPR имеет partial_update()
+Для iluk/ilut — добавить includes и explicit instantiations `SolveWith` в benchmark.
 
-```cpp
-void partial_update(const Matrix &K, bool update_transfer_ops = true, ...);
-```
+## Порядок выполнения
 
-Оставляет AMG-иерархию нетронутой, обновляет только ILU + трансферный оператор. Это прямая поддержка reuse! (Используется в фазе 2, пункт 2.1.)
+1. **Series D** (AMG params, ~20 мин): 6 конфигураций, тот же тип солвера
+2. **Series F** (lgmres params, ~25 мин): 7 конфигураций, тот же тип солвера
+3. **Series G** (over_interp, ~15 мин): 4 конфигурации, тот же тип солвера
+4. **Series E** (ilu-семейство, ~20 мин): 4 конфигурации, могут потребовать новые типы
 
-### CPR-DRS — дополнительные параметры
-
-```cpp
-prm.precond.eps_dd = 0.2;   // порог для diagonal dominance
-prm.precond.eps_ps = 0.02;  // порог для pressure sum
-```
-
-## Формат результатов
-
-Файл `results/3d_fine_51x51/benchmark_summary.csv`:
-```
-config,solver,coarsening,relaxation,maxiter,total_s,setup_s,solve_s,avg_iters,max_iters,n_newton,n_wasted,amg_levels,op_complexity,balance_ok
-A1,gmres(5),aggregation,damped_jacobi,5,...,...,...,...,...,...,...,...,...,true
-```
-
-## Порядок перебора
-
-1. **Серия A** (~1 час): Krylov-солверы → лучший
-2. **Серия B** (~1 час): relaxation → лучший
-3. **Серия C** (~30 мин): coarsening → лучший
-4. **Серия D** (~1 час): параметры AMG → оптимальные
-5. **Серия E** (~1.5 часа): CPR/CPR-DRS/Schur/голый ILU
+Series D/F/G варьируют только параметры текущего `Solver_AMG<B>`, не требуют новых типов. Series E требует новых typedef для iluk/ilut.
 
 ## Критерий валидности
 
@@ -209,5 +153,15 @@ A1,gmres(5),aggregation,damped_jacobi,5,...,...,...,...,...,...,...,...,...,true
 - `max_oil_balance_rel < 1e-3`
 - `max_water_balance_rel < 1e-3`
 - `Sw ∈ [0, 1]`, `P > 0` на каждом шаге
+- Отсутствие `solver_failed` (< 15 consecutive rollbacks)
 
-Если не проходит — записать `balance_ok=false`, но сохранить в таблице.
+## Формат результатов
+
+`results/amgcl_benchmark.csv` — append. Профиль amgcl выводится в stdout через `std::cout << prof`.
+
+## Связанные заметки
+
+- [[amgcl конфигурация lgmres ilu0 aggregation]]
+- [[2026-06-20 оптимизация AMGCL солвера lgmres ilu0]]
+- [[2026-06-21 переход на amgcl profiler]]
+- [[возможности amgcl для блочных СЛАУ]]

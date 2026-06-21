@@ -89,7 +89,8 @@ date: 2026-06-15
     - [[план профилирования и оптимизации AMGCL]] — обзор проблем и решений
     - [[prompt-оптимизация-00-инструментирование]] — фаза 0: убрать PrintCRS + замеры + baseline
     - [[prompt-оптимизация-01-перебор-конфигураций-AMGCL]] — фаза 1: test_amgcl_benchmark.cpp с SECTION-ами
-    - [[prompt-оптимизация-02-структурные-оптимизации]] — фаза 2: reuse setup (unique_ptr), CPR partial_update, OpenMP
+    - [[prompt-оптимизация-02-структурные-оптимизации]] — фаза 2: reuse setup, OpenMP, PI-контроллер
+    - [[prompt-оптимизация-03-CPR-прекондиционер]] — фаза 3: CPR, CPR-DRS, Schur для двухфазной системы
     - [[prompt-очистка-benchmark-артефактов]] — очистка SolveWith, лишних includes, [diag] из production
     - [[возможности amgcl для блочных СЛАУ]] — справочник компонентов amgcl
   - [[2026-06-20 инструментация AMGCL и baseline профиль]]

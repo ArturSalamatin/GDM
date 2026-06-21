@@ -5,171 +5,88 @@ tags:
   - amgcl
   - архитектура
 date: 2026-06-20
-updated: 2026-06-20
+updated: 2026-06-21
 ---
 
-# Фаза 2: Структурные оптимизации (не параметрические)
+# Фаза 2: Структурные оптимизации
 
 ## Цель
 
-Архитектурные изменения, которые могут дать существенное ускорение помимо выбора конфигурации AMGCL.
+Архитектурные изменения, дающие ускорение помимо выбора конфигурации AMGCL. Профилирование через `amgcl::profiler` (`AMGCL_PROFILING` ON в CMake).
+
+## Текущий профиль (3D smoke, 11×11×4, 600 дней)
+
+```
+[Profile:                  0.943 s] (100.00%)
+[  total:                  0.806 s] ( 85.47%)
+[    assemble:             0.388 s] ( 41.15%)
+[    setup:                0.238 s] ( 25.24%)
+[      CSR copy:           0.054 s] (  5.73%)
+[      coarsest level:     0.140 s] ( 14.85%)
+[    solve:                0.088 s] (  9.33%)
+[    update:               0.045 s] (  4.77%)
+```
+
+На fine grid (51×51×4, 730 дней) solve доминирует (~80%), assemble ~14%, setup ~4%.
 
 ---
 
-## 2.1: Reuse AMG-иерархии — разделение preconditioner и solver
+## 2.1: Reuse AMG-иерархии — unique_ptr + rebuild по требованию
 
 ### Проблема
 
-Сейчас `Solver_AMG` (`make_solver<Precond, IterativeSolver>`) создаётся заново в каждом вызове `LinearProblem::Solve()`. Внутри `make_solver` хранит P (preconditioner) и S (iterative solver) как **значения** (не указатели). Setup AMG-иерархии — дорогая операция, которая не нужна при каждой Ньютоновской итерации.
+`Solver_AMG` создаётся заново в каждом `Solve()`. Setup AMG-иерархии — дорогая операция (coarsening + transfer operators), не нужна при каждой Newton-итерации.
 
-### Решение: unique_ptr + раздельные preconditioner и solver
-
-API amgcl позволяет вызывать Krylov-солвер с **другой матрицей** при фиксированном предобуславливателе:
-```cpp
-// make_solver::operator()(const Matrix &A, const Vec1 &rhs, Vec2 &&x)
-// — решает с матрицей A, но предобуславливателем, построенным при конструировании
-```
-
-Реализация в `LinearProblem`:
+### Решение
 
 ```cpp
-// Вместо локальной переменной в Solve():
-// Solver_AMG<B> solve(A, prm);  // ← каждый раз
-
-// Хранить как member:
 std::unique_ptr<Solver_AMG<B>> solver_;
 bool needs_rebuild_ = true;
 
-void InvalidateSetup() { needs_rebuild_ = true; }
-
-const std::tuple<int, double, bool> Solve(int maxIter) {
+SolveResult Solve(int maxIter) {
     auto A = amgcl::adapter::block_matrix<value_type<B>>(...);
-    
     if (needs_rebuild_ || !solver_) {
+        prof.tic("setup");
         solver_ = std::make_unique<Solver_AMG<B>>(A, prm);
+        prof.toc("setup");
         needs_rebuild_ = false;
     }
-    
-    // Решаем с ТЕКУЩЕЙ матрицей A, но КЕШИРОВАННЫМ preconditioner-ом:
+    prof.tic("solve");
     auto [iters, error] = (*solver_)(A, F, X);
-    // ↑ operator()(A, rhs, x) — использует A для SpMV, precond от конструирования
-    
+    prof.toc("solve");
     return { iters, error, true };
 }
 ```
 
-Вызов `InvalidateSetup()`:
-- В `ReservoirSimulator::Solve()` — при начале **нового временного шага** (после `Grid.AcceptState()`)
-- НЕ при каждой Ньютоновской итерации
+`operator()(A, rhs, x)` — использует A для SpMV, но прекондиционер от конструирования.
 
-### Стратегия частоты пересборки
+`InvalidateSetup()` вызывать при начале нового временного шага, не при каждой Newton-итерации.
 
-Три варианта для сравнения:
-1. **Каждый временной шаг** — пересоздавать solver_ при первой Newton-итерации каждого шага
-2. **Каждые N шагов** — N = 5, 10, 20 (frozen preconditioner)
-3. **Адаптивно** — пересоздавать, если число GMRES-итераций выросло > порога (например, > 2× avg)
+### Ожидаемый эффект
 
-### Для CPR: partial_update()
-
-CPR имеет встроенный `partial_update(K)` — обновляет ILU-часть, оставляя AMG-иерархию нетронутой. Это идеальный вариант для reuse:
-
-```cpp
-std::unique_ptr<CPRSolver> solver_;
-
-// При каждой Newton-итерации:
-solver_->precond().partial_update(K, /* update_transfer_ops = */ false);
-// При каждом новом временном шаге:
-solver_->precond().partial_update(K, /* update_transfer_ops = */ true);
-// Полная пересборка — только при деградации сходимости
-```
+На fine grid setup ~4% → экономия ~3.5% (все Newton-итерации кроме первой в каждом шаге). Небольшой абсолютный выигрыш, но архитектурно правильно для CPR (см. фаза 3).
 
 ---
 
-## 2.2: Начальное приближение для Krylov-солвера
+## 2.2: std::fill вместо аллокации в ResetProblem — ✅ частично сделано
 
-### Проблема
-
-В `ResetProblem()`:
-```cpp
-solutionCorrections = std::vector<double>(cellNmbr * B, 0.0); // аллокация + обнуление
-```
-
-Каждая Ньютоновская итерация начинает с нулевого начального приближения. Если поправки мало меняются между итерациями, можно передать предыдущие corrections как x0.
-
-### Решение
-
-1. НЕ обнулять `solutionCorrections` в `ResetProblem()` (оставлять значения от предыдущего solve)
-2. GMRES/BiCGStab принимают x0 как входной вектор — если он близок к решению, нужно меньше итераций
-3. Обнулять только при **первой** Newton-итерации нового временного шага
-
-### Риск
-
-Если предыдущая поправка — плохое начальное приближение, может увеличить число итераций. Нужно замерить оба варианта.
-
----
-
-## 2.3: std::fill вместо аллокации в ResetProblem
-
-### Проблема
+`MatrixCSR::ResetMatrix()` уже переведён на `std::fill`. Проверить `rhs` и `solutionCorrections`:
 
 ```cpp
 void LinearProblem::ResetProblem() {
-    matrix->ResetMatrix();
-    rhs = std::vector<double>(cellNmbr * B, 0.0);              // аллокация!
-    solutionCorrections = std::vector<double>(cellNmbr * B, 0.0); // аллокация!
+    matrix->ResetMatrix();                                          // ✅ std::fill
+    std::fill(rhs.begin(), rhs.end(), 0.0);                        // проверить
+    std::fill(solutionCorrections.begin(), solutionCorrections.end(), 0.0);  // проверить
 }
 ```
 
-Каждый вызов выделяет новый вектор (malloc + free). Для 20k элементов это ~160 KB — быстро, но бессмысленно.
-
-### Решение
-
-```cpp
-void LinearProblem::ResetProblem() {
-    matrix->ResetMatrix();
-    std::fill(rhs.begin(), rhs.end(), 0.0);
-    std::fill(solutionCorrections.begin(), solutionCorrections.end(), 0.0);
-}
-```
-
-То же для `MatrixCSR::ResetMatrix()` — проверить, делает ли он `value = std::vector<double>(nnz, 0.0)` (аллокация) или `std::fill` (in-place).
-
 ---
 
-## 2.4: Адаптивный шаг по времени — PI-контроллер
+## 2.3: OpenMP для assembly
 
-### Текущая стратегия
-
-```
-increase: tau *= (1 + factor)     // factor = 0.15 → ×1.15
-decrease: tau *= (1 - 2*factor)   // → ×0.70
-```
-
-Грубая эвристика. Если Newton сходится за 1 итерацию — шаг увеличивается слишком медленно.
-
-### PI-контроллер
-
-```
-tau_new = tau * (target_iters / actual_iters)^{k_P} * (prev_iters / actual_iters)^{k_I}
-```
-
-Типичные значения: k_P = 0.075, k_I = 0.175, target_iters = 3.
-
-### Шаги
-
-1. Из baseline определить число wasted trials
-2. Если > 5% шагов — реализовать PI-контроллер
-3. Если < 5% — эта оптимизация не приоритетна
-
----
-
-## 2.5: OpenMP-параллелизм в assembly
-
-### Текущее состояние
-
-В `AssembleMyProblem` есть `#pragma omp parallel for` под `#ifdef USE_PARALLEL`. Проверить:
-1. Определён ли `USE_PARALLEL` в `CMakeLists.txt`?
-2. Включён ли OpenMP в cmake?
+`AssembleMyProblem` имеет `#pragma omp parallel for` под `#ifdef USE_PARALLEL`. Проверить:
+1. `USE_PARALLEL` определён в CMake?
+2. OpenMP подключён?
 3. Если нет — добавить:
 ```cmake
 find_package(OpenMP)
@@ -179,35 +96,34 @@ if(OpenMP_CXX_FOUND)
 endif()
 ```
 
-### Ожидаемый эффект
-
-Assembly — embarrassingly parallel (каждая ячейка независима). На 4–8 ядрах ожидается ускорение 2–4× для assembly-части.
+Assembly — embarrassingly parallel. На fine grid assemble ~14% total → ускорение 2–4× на 4–8 ядрах → экономия ~7–10% total.
 
 ---
 
-## 2.6: Preonly-солвер (AMG как прямой метод)
+## 2.4: PI-контроллер адаптивного шага
 
-### Идея
+Текущая стратегия: `tau *= 1.15` при успехе, `tau *= 0.70` при откате. Грубая.
 
-Если AMG-предобуславливатель достаточно хорош, `solver::preonly` — один V-cycle без Krylov-обёртки. Экономит ортогонализацию и хранение.
+PI-контроллер: `tau_new = tau * (target/actual)^kP * (prev/actual)^kI`
 
-### Когда проверять
-
-После серий B–C: если с лучшим coarsening+relaxation avg_iters = 1, стоит попробовать preonly. Если avg_iters > 2 — preonly не подходит.
+Проверить долю wasted trials на fine grid. Если > 5% — реализовать.
 
 ---
 
-## Итоговый чеклист фазы 2
+## Итоговый чеклист
 
-- [ ] 2.1: Reuse AMG setup через unique_ptr (+ partial_update для CPR)
-- [ ] 2.2: Начальное приближение для Krylov (не обнулять corrections)
-- [ ] 2.3: std::fill вместо аллокации в ResetProblem
-- [ ] 2.4: PI-контроллер шага (если wasted trials > 5%)
-- [ ] 2.5: OpenMP для assembly (если assembly > 30% total)
-- [ ] 2.6: Preonly-солвер (если avg_iters = 1)
+- [ ] 2.1: Reuse AMG setup (unique_ptr + InvalidateSetup)
+- [x] 2.2: std::fill в MatrixCSR::ResetMatrix (сделано 2026-06-20)
+- [ ] 2.2b: Проверить rhs и solutionCorrections в ResetProblem
+- [ ] 2.3: OpenMP для assembly
+- [ ] 2.4: PI-контроллер (если wasted > 5%)
 
-## Порядок выполнения
+## Порядок
 
-2.3 → 2.1 → 2.2 → 2.5 → 2.6 → 2.4
+2.2b → 2.1 → 2.3 → 2.4
 
-Начать с самого дешёвого (std::fill), потом самое перспективное (reuse), потом остальное по убыванию ожидаемого эффекта.
+## Связанные заметки
+
+- [[2026-06-21 переход на amgcl profiler]]
+- [[amgcl конфигурация lgmres ilu0 aggregation]]
+- [[prompt-оптимизация-03-CPR-прекондиционер]]
