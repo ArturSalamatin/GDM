@@ -178,12 +178,10 @@ RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
            << "newton_iters,"      << profile.n_newton_iters    << "\n"
            << "amg_solves,"        << profile.n_amg_solves      << "\n"
            << "wasted_trials,"     << profile.n_wasted_trials   << "\n"
-           << "total_amg_iters,"   << profile.total_amg_iters   << "\n"
-           << "t_total_ms,"        << std::setprecision(1) << std::fixed << profile.t_total_ms     << "\n"
-           << "t_assemble_ms,"     << profile.t_assemble_ms   << "\n"
-           << "t_amg_setup_ms,"    << profile.t_amg_setup_ms  << "\n"
-           << "t_amg_solve_ms,"    << profile.t_amg_solve_ms  << "\n"
-           << "t_update_grid_ms,"  << profile.t_update_grid_ms << "\n";
+           << "total_amg_iters,"   << profile.total_amg_iters   << "\n";
+
+        std::ofstream tf(out_dir + "/amgcl_profile.txt");
+        tf << prof;
     }
 
     return {

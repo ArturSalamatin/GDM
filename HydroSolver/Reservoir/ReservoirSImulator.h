@@ -1,6 +1,5 @@
 #pragma once
 #include "../stdafx.h"
-#include <chrono>
 
 #include "NumericalParameters.h"
 
@@ -18,11 +17,6 @@ namespace reservoir_simulator
 		size_t n_newton_iters = 0;
 		size_t n_amg_solves = 0;
 		size_t n_wasted_trials = 0;
-		double t_assemble_ms = 0;
-		double t_amg_setup_ms = 0;
-		double t_amg_solve_ms = 0;
-		double t_update_grid_ms = 0;
-		double t_total_ms = 0;
 		size_t total_amg_iters = 0;
 	};
 

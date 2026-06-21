@@ -387,8 +387,7 @@ namespace reservoir_simulator
 	//////////// SOLVER SECTION
 	double ReservoirSimulator::Solve(const std::vector<double>& timeMoments)
 	{
-		using clock = std::chrono::steady_clock;
-		auto t_total_start = clock::now();
+		prof.tic("total");
 
 #ifdef PRINT_DEBUG_INFO
 		std::ofstream myfile;
@@ -427,12 +426,11 @@ namespace reservoir_simulator
 		myfile.close();
 #endif // PRINT_DEBUG_INFO
 
-		solverProfile_.t_total_ms = std::chrono::duration<double, std::milli>(clock::now() - t_total_start).count();
+		prof.toc("total");
 		return numPrm.CurrentSchemeTau();
 	}
 	void ReservoirSimulator::PerformNewtonLoop(double loc_tau, double nextTimeMoment)
 	{
-		using clock = std::chrono::steady_clock;
 		numPrm.set_currentNewtonIterationCount(0);
 		numPrm.update_isSuccesfullNewtonTrial(false);
 		numPrm.set_currentAMG_maxSolverIterationCount();
@@ -443,10 +441,9 @@ namespace reservoir_simulator
 
 			if (numPrm.IsSuccessfullAMG_Iteration() && numPrm.IsNewtonIterationContinue())
 			{
-				auto t0 = clock::now();
+				prof.tic("update");
 				numPrm.update_isSuccesfullNewtonTrial(UpdateGrid());
-				auto t1 = clock::now();
-				solverProfile_.t_update_grid_ms += std::chrono::duration<double, std::milli>(t1 - t0).count();
+				prof.toc("update");
 			}
 			else
 			{
@@ -488,20 +485,15 @@ namespace reservoir_simulator
 
 	void ReservoirSimulator::SingleIteration(double loc_tau, double nextTimeMoment)
 	{
-		using clock = std::chrono::steady_clock;
-
-		auto t0 = clock::now();
+		prof.tic("assemble");
 		AssembleMyProblem(loc_tau, nextTimeMoment);
-		auto t1 = clock::now();
+		prof.toc("assemble");
 
 		auto res = MyProblem.Solve(numPrm.CurrentAMG_maxSolverIterationCount());
 		numPrm.update_currentAMGState({ static_cast<int>(res.iters), res.error, res.converged });
 
 		solverProfile_.n_amg_solves++;
 		solverProfile_.total_amg_iters += res.iters;
-		solverProfile_.t_assemble_ms += std::chrono::duration<double, std::milli>(t1 - t0).count();
-		solverProfile_.t_amg_setup_ms += res.setup_ms;
-		solverProfile_.t_amg_solve_ms += res.solve_ms;
 	}
 
 	void ReservoirSimulator::AssembleMyProblem(double loc_tau, double nextTimeMoment)

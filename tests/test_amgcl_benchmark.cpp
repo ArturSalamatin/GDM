@@ -1,7 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "simulation_cases/MultiLayerCase.h"
 
-#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
@@ -103,11 +102,6 @@ struct BenchmarkResult {
     size_t n_amg_solves = 0;
     size_t n_wasted_trials = 0;
     size_t total_amg_iters = 0;
-    double t_total_ms = 0;
-    double t_assemble_ms = 0;
-    double t_amg_setup_ms = 0;
-    double t_amg_solve_ms = 0;
-    double t_update_grid_ms = 0;
     double max_oil_balance_rel = 0;
     double max_water_balance_rel = 0;
     bool balance_ok = false;
@@ -118,7 +112,7 @@ template<typename SolverType>
 BenchmarkResult run_benchmark(const std::string& config_name,
                                typename SolverType::params& prm)
 {
-    using clock = std::chrono::steady_clock;
+    prof.reset();
 
     simulation_cases::MultiLayerCase sc(
         "benchmark_" + config_name, BNx, BNy, BNz, BLx, BLy, Bhz,
@@ -145,7 +139,6 @@ BenchmarkResult run_benchmark(const std::string& config_name,
     size_t total_cells = BNx * BNy * BNz;
 
     SolverProfile profile{};
-    auto t_total_start = clock::now();
 
     constexpr size_t MAX_CONSECUTIVE_ROLLBACKS = 15;
     size_t consecutive_rollbacks = 0;
@@ -166,10 +159,9 @@ BenchmarkResult run_benchmark(const std::string& config_name,
             sim.numPrm.set_currentAMG_maxSolverIterationCount();
 
             while (!sim.numPrm.IsSuccessfullNewtonTrial()) {
-                // SingleIteration with custom solver
-                auto t0 = clock::now();
+                prof.tic("assemble");
                 sim.AssembleMyProblem(loc_tau, nextTime);
-                auto t1 = clock::now();
+                prof.toc("assemble");
 
                 auto res = sim.MyProblem.SolveWith<SolverType>(
                     sim.numPrm.CurrentAMG_maxSolverIterationCount(), prm);
@@ -178,18 +170,13 @@ BenchmarkResult run_benchmark(const std::string& config_name,
 
                 profile.n_amg_solves++;
                 profile.total_amg_iters += res.iters;
-                profile.t_assemble_ms += std::chrono::duration<double, std::milli>(t1 - t0).count();
-                profile.t_amg_setup_ms += res.setup_ms;
-                profile.t_amg_solve_ms += res.solve_ms;
                 profile.n_newton_iters++;
 
                 if (sim.numPrm.IsSuccessfullAMG_Iteration() &&
                     sim.numPrm.IsNewtonIterationContinue()) {
-                    auto tu0 = clock::now();
+                    prof.tic("update");
                     sim.numPrm.update_isSuccesfullNewtonTrial(sim.UpdateGrid());
-                    auto tu1 = clock::now();
-                    profile.t_update_grid_ms +=
-                        std::chrono::duration<double, std::milli>(tu1 - tu0).count();
+                    prof.toc("update");
                 } else {
                     sim.Grid.ReverseState();
                     break;
@@ -235,9 +222,6 @@ BenchmarkResult run_benchmark(const std::string& config_name,
         }
     }
 
-    profile.t_total_ms = std::chrono::duration<double, std::milli>(
-        clock::now() - t_total_start).count();
-
     BenchmarkResult r;
     r.config_name = config_name;
     r.n_time_steps = profile.n_time_steps;
@@ -245,11 +229,6 @@ BenchmarkResult run_benchmark(const std::string& config_name,
     r.n_amg_solves = profile.n_amg_solves;
     r.n_wasted_trials = profile.n_wasted_trials;
     r.total_amg_iters = profile.total_amg_iters;
-    r.t_total_ms = profile.t_total_ms;
-    r.t_assemble_ms = profile.t_assemble_ms;
-    r.t_amg_setup_ms = profile.t_amg_setup_ms;
-    r.t_amg_solve_ms = profile.t_amg_solve_ms;
-    r.t_update_grid_ms = profile.t_update_grid_ms;
     r.max_oil_balance_rel = max_oil_rel;
     r.max_water_balance_rel = max_water_rel;
     r.balance_ok = !solver_failed && (max_oil_rel < 1e-3) && (max_water_rel < 1e-3);
@@ -262,8 +241,7 @@ void append_csv(const std::string& path, const BenchmarkResult& r) {
     std::ofstream ofs(path, std::ios::app);
     if (!exists) {
         ofs << "config,time_steps,newton_iters,amg_solves,wasted_trials,"
-               "total_amg_iters,t_total_ms,t_assemble_ms,t_amg_setup_ms,"
-               "t_amg_solve_ms,t_update_grid_ms,avg_iters_per_solve,"
+               "total_amg_iters,avg_iters_per_solve,"
                "max_oil_bal_rel,max_water_bal_rel,balance_ok,failed\n";
     }
     double avg_iters = r.n_amg_solves > 0
@@ -275,11 +253,6 @@ void append_csv(const std::string& path, const BenchmarkResult& r) {
         << r.n_amg_solves << ","
         << r.n_wasted_trials << ","
         << r.total_amg_iters << ","
-        << r.t_total_ms << ","
-        << r.t_assemble_ms << ","
-        << r.t_amg_setup_ms << ","
-        << r.t_amg_solve_ms << ","
-        << r.t_update_grid_ms << ","
         << avg_iters << ","
         << r.max_oil_balance_rel << ","
         << r.max_water_balance_rel << ","
@@ -298,15 +271,11 @@ void report(const BenchmarkResult& r) {
               << (r.n_amg_solves > 0
                   ? static_cast<double>(r.total_amg_iters) / r.n_amg_solves : 0.0)
               << "\n"
-              << "  t_total=" << std::setprecision(1) << r.t_total_ms << " ms"
-              << "  t_setup=" << r.t_amg_setup_ms
-              << "  t_solve=" << r.t_amg_solve_ms
-              << "  t_asm=" << r.t_assemble_ms
-              << "  t_upd=" << r.t_update_grid_ms << "\n"
               << "  balance_ok=" << (r.balance_ok ? "YES" : "NO")
               << "  failed=" << (r.failed ? "YES" : "NO")
               << "  oil_rel=" << std::scientific << r.max_oil_balance_rel
-              << "  water_rel=" << r.max_water_balance_rel << "\n";
+              << "  water_rel=" << r.max_water_balance_rel << "\n"
+              << prof << "\n";
 }
 
 const std::string csv_path = "results/amgcl_benchmark.csv";
@@ -527,8 +496,8 @@ TEST_CASE("AMGCL benchmark: Series C — Coarsening",
 TEST_CASE("AMGCL benchmark: diagnostic — production Solve",
           "[benchmark][diag][.slow]")
 {
-    using clock = std::chrono::steady_clock;
     fs::create_directories("results");
+    prof.reset();
 
     simulation_cases::MultiLayerCase sc(
         "benchmark_diag_production", BNx, BNy, BNz, BLx, BLy, Bhz,
@@ -547,7 +516,6 @@ TEST_CASE("AMGCL benchmark: diagnostic — production Solve",
     sc.add_wells(sim, horizon);
 
     size_t time_steps = 0, wasted = 0;
-    auto t0 = clock::now();
 
     auto times = sc.save_times();
     for (size_t step = 1; step < times.size(); ++step) {
@@ -573,13 +541,10 @@ TEST_CASE("AMGCL benchmark: diagnostic — production Solve",
         }
     }
 
-    auto t1 = clock::now();
-    double total_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
-
     std::cout << "\n=== DIAG production Solve ===\n"
               << "  time_steps=" << time_steps
-              << "  wasted=" << wasted
-              << "  t_total=" << std::setprecision(1) << std::fixed << total_ms << " ms\n";
+              << "  wasted=" << wasted << "\n"
+              << prof << "\n";
 
     REQUIRE(time_steps > 0);
 }

@@ -74,7 +74,11 @@ add_library(gdm_core STATIC
     ${HYDRO}/Helpers/LogFile.cpp
 )
 target_include_directories(gdm_core PUBLIC ${HYDRO} ${HYDRO}/AMGSolver/amgcl)
+option(AMGCL_PROFILING "Enable AMGCL built-in profiling (prof.tic/toc)" ON)
 target_compile_definitions(gdm_core PUBLIC AMGCL_NO_BOOST)
+if(AMGCL_PROFILING)
+    target_compile_definitions(gdm_core PUBLIC AMGCL_PROFILING)
+endif()
 
 # =============================================================================
 # gdm — executable, инициализация через C++ API

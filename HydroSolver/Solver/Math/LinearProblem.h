@@ -1,7 +1,6 @@
 #pragma once
 #include "../../stdafx.h"
 #include "MatrixCSR.h"
-#include <chrono>
 
 #undef min
 #undef max
@@ -46,8 +45,6 @@ namespace reservoir_simulator
 			size_t iters;
 			double error;
 			bool converged;
-			double setup_ms;
-			double solve_ms;
 		};
 
 		template<unsigned char B>
