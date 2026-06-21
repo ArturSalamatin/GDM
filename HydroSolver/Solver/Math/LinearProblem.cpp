@@ -80,6 +80,7 @@ namespace reservoir_simulator
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
+			prm.solver.K = 5;
 			//	prm.precond.coarse_enough = 1000;
 			//	prm.precond.pre_cycles = 4;
 			//	prm.precond.ncycle = 4;
@@ -98,17 +99,13 @@ namespace reservoir_simulator
 		void LinearProblem::ResetProblem()
 		{
 			matrix->ResetMatrix();
-			rhs = std::vector<double>(cellNmbr * B, 0.0);
-			solutionCorrections = std::vector<double>(cellNmbr * B, 0.0);
+			std::fill(rhs.begin(), rhs.end(), 0.0);
+			std::fill(solutionCorrections.begin(), solutionCorrections.end(), 0.0);
 		}
 
-		const std::tuple<int, double, bool> LinearProblem::Solve(int maxIter)
+		SolveResult LinearProblem::Solve(int maxIter)
 		{
 			prm.solver.maxiter = maxIter;
-			prof.tic("AMGSolverInside");
-
-			Matrix().PrintCRS();
-			Matrix().PrintDiagBlocks();
 
 			prof.tic("setup");
 			auto A = amgcl::adapter::block_matrix<value_type<B>>(
@@ -116,21 +113,18 @@ namespace reservoir_simulator
 			Solver_AMG<B> solve(A, prm);
 			prof.toc("setup");
 
-			prof.tic("RHS_copy");
 			rhs_type<B> const* fptr = reinterpret_cast<rhs_type<B> const*>(&rhs[0]);
 			rhs_type<B>* xptr = reinterpret_cast<rhs_type<B>*>(&solutionCorrections[0]);
 			amgcl::backend::numa_vector<rhs_type<B>> F(fptr, fptr + cellNmbr);
 			amgcl::backend::numa_vector<rhs_type<B>> X(xptr, xptr + cellNmbr);
-			prof.toc("RHS_copy");
 
 			prof.tic("solve");
 			auto [iters, error] = solve(F, X);
-			std::copy(X.data(), X.data() + X.size(), xptr);
 			prof.toc("solve");
 
-			prof.toc("AMGSolverInside");
+			std::copy(X.data(), X.data() + X.size(), xptr);
 
-			return { iters, error , true };
+			return { iters, error, true };
 		}
 
 		void LinearProblem::AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS)

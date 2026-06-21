@@ -74,7 +74,15 @@ add_library(gdm_core STATIC
     ${HYDRO}/Helpers/LogFile.cpp
 )
 target_include_directories(gdm_core PUBLIC ${HYDRO} ${HYDRO}/AMGSolver/amgcl)
+option(AMGCL_PROFILING "Enable AMGCL built-in profiling (prof.tic/toc)" ON)
 target_compile_definitions(gdm_core PUBLIC AMGCL_NO_BOOST)
+if(AMGCL_PROFILING)
+    target_compile_definitions(gdm_core PUBLIC AMGCL_PROFILING)
+endif()
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(gdm_core PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 # =============================================================================
 # gdm — executable, инициализация через C++ API
@@ -99,11 +107,22 @@ add_executable(gdm_tests
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 
+# =============================================================================
+# gdm_benchmark — AMGCL configuration benchmark (separate binary)
+# =============================================================================
+add_executable(gdm_benchmark
+    tests/test_amgcl_benchmark.cpp
+)
+target_link_libraries(gdm_benchmark PRIVATE gdm_core Catch2::Catch2WithMain)
+
 include(CTest)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 catch_discover_tests(gdm_tests
     PROPERTIES TIMEOUT 600
+)
+catch_discover_tests(gdm_benchmark
+    PROPERTIES TIMEOUT 1800
 )
 
 # =============================================================================

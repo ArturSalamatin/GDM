@@ -70,6 +70,7 @@ struct RunResult {
     double max_water_balance_rel;
     std::vector<double> Sw;
     std::vector<double> P;
+    reservoir_simulator::SolverProfile profile;
 };
 
 RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
@@ -165,15 +166,29 @@ RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
         }
     }
 
+    auto profile = sim.GetSolverProfile();
+
     if (export_snapshots) {
         balance_log.close();
         write_metadata_json(out_dir, sc, times);
+
+        std::ofstream pf(out_dir + "/solver_profile.csv");
+        pf << "metric,value\n"
+           << "time_steps,"        << profile.n_time_steps      << "\n"
+           << "newton_iters,"      << profile.n_newton_iters    << "\n"
+           << "amg_solves,"        << profile.n_amg_solves      << "\n"
+           << "wasted_trials,"     << profile.n_wasted_trials   << "\n"
+           << "total_amg_iters,"   << profile.total_amg_iters   << "\n";
+
+        std::ofstream tf(out_dir + "/amgcl_profile.txt");
+        tf << prof;
     }
 
     return {
         sim.OilTotal(), sim.WaterTotal(),
         max_oil_rel, max_water_rel,
-        sim.GetWaterSaturationField(), sim.GetPressureField()
+        sim.GetWaterSaturationField(), sim.GetPressureField(),
+        profile
     };
 }
 

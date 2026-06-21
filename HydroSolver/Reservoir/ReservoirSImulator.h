@@ -11,6 +11,15 @@
 
 namespace reservoir_simulator
 {
+	struct SolverProfile
+	{
+		size_t n_time_steps = 0;
+		size_t n_newton_iters = 0;
+		size_t n_amg_solves = 0;
+		size_t n_wasted_trials = 0;
+		size_t total_amg_iters = 0;
+	};
+
 	class wells::SomeWell;
 //	class RawHorizon;
 	class DevelopedHorizon;
@@ -58,9 +67,13 @@ namespace reservoir_simulator
 		double curTime;
 
 		std::vector<phasePortrait::SomeFlowField> flowFields;
+
+		SolverProfile solverProfile_;
 	public:
-		phasePortrait::SomeFlowField::SequencePtr 
+		phasePortrait::SomeFlowField::SequencePtr
 			GetFlowFieldsPtr(double multiplier) const;
+
+		const SolverProfile& GetSolverProfile() const { return solverProfile_; }
 
 		// solves the problem sarting with the initial condition
 		double Solve(const std::vector<double>& timeMoments);
