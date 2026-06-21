@@ -80,6 +80,7 @@ namespace reservoir_simulator
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
+			prm.solver.K = 5;
 			//	prm.precond.coarse_enough = 1000;
 			//	prm.precond.pre_cycles = 4;
 			//	prm.precond.ncycle = 4;

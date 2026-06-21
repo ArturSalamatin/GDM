@@ -12,6 +12,7 @@
 #include <amgcl/amg.hpp>
 #include <amgcl/coarsening/aggregation.hpp>
 #include <amgcl/relaxation/ilu0.hpp>
+#include <amgcl/relaxation/iluk.hpp>
 #include <amgcl/solver/lgmres.hpp>
 #include <amgcl/io/mm.hpp>
 #include <amgcl/profiler.hpp>
@@ -43,7 +44,7 @@ namespace reservoir_simulator
 
 		template<unsigned char B>
 		using Solver_AMG = amgcl::make_solver<
-			amgcl::amg< BBackend<B>, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>
+			amgcl::amg< BBackend<B>, amgcl::coarsening::aggregation, amgcl::relaxation::iluk>
 			,
 			amgcl::solver::lgmres<BBackend<B>>
 		>;
