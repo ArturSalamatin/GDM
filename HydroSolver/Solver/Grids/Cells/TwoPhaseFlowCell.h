@@ -50,6 +50,7 @@ namespace reservoir_simulator
 		public:
 
 			const std::vector<double> PreviousState_Mass() const;
+			const std::vector<double>& PreviousState_Mass_ref() const;
 
 			// DependentFieldProperties
 			double PermeabilityOil() const; // overall permeability of oil

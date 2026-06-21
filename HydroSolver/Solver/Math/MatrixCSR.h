@@ -29,8 +29,12 @@ namespace reservoir_simulator
 
 			size_t nnz; // number of non-zero elements in the matrix
 			void CopyBlock(
-				size_t valueOffset, std::vector<double>& dest, 
-				const std::vector<double>& data, 
+				size_t valueOffset, std::vector<double>& dest,
+				const std::vector<double>& data,
+				const std::vector<size_t>& blockPosInValArray);
+			void CopyBlock(
+				size_t valueOffset, std::vector<double>& dest,
+				const double* data,
 				const std::vector<size_t>& blockPosInValArray);
 
 			unsigned char EqNmbr() const;
@@ -42,7 +46,9 @@ namespace reservoir_simulator
 			const std::vector<double>& Val()  const;
 
 			void AddDiagBlock(size_t l, const std::vector<double>& data);
+			void AddDiagBlock(size_t l, const double* data);
 			void AddOffDiagBlock(size_t l, size_t neibIdx, std::vector<double>& data);
+			void AddOffDiagBlock(size_t l, size_t neibIdx, const double* data);
 
 			MatrixCSR() noexcept;
 			MatrixCSR(const size_t eqNmbr_, const size_t cellNmbr,

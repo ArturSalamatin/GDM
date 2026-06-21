@@ -1,5 +1,4 @@
 #include <fstream>
-#include <mutex>
 #include "MatrixCSR.h"
 #include "SparsityPattern.h"
 
@@ -7,7 +6,7 @@ namespace reservoir_simulator
 {
 	namespace linear_problem
 	{
-		const SparsityPattern& MatrixCSR::sparsity_pattern() const
+			const SparsityPattern& MatrixCSR::sparsity_pattern() const
 		{
 			return *pattern.get();
 		}
@@ -17,8 +16,12 @@ namespace reservoir_simulator
 		/////////////////// MatrixCSR
 		void MatrixCSR::CopyBlock(size_t valueOffset, std::vector<double>& dest, const std::vector<double>& data, const std::vector<size_t>& blockPosInValArray)
 		{
-			static std::mutex CopyBlockMutex;
-			std::lock_guard<std::mutex> my_lock(CopyBlockMutex);
+			for (size_t i = 0; i < NmbrOfNonZerosPerUnitBlock(); i++)
+				dest[blockPosInValArray[valueOffset + i]] += data[i];
+		}
+
+		void MatrixCSR::CopyBlock(size_t valueOffset, std::vector<double>& dest, const double* data, const std::vector<size_t>& blockPosInValArray)
+		{
 			for (size_t i = 0; i < NmbrOfNonZerosPerUnitBlock(); i++)
 				dest[blockPosInValArray[valueOffset + i]] += data[i];
 		}
@@ -40,9 +43,18 @@ namespace reservoir_simulator
 
 		void MatrixCSR::AddOffDiagBlock(size_t l, size_t neibIdx, std::vector<double>& data)
 		{
-			// in (neibIdx - l)
-			// - l subtracts the diagonal blocks for the valueOffset. The diagonal blocks are stored separately
-			// +neibIdx puts the pointer to the correct neighbour first element
+			size_t valueOffset = sparsity_pattern().NmbrOfElementsAboveBlockRow()[l] + (neibIdx - l) * NmbrOfNonZerosPerUnitBlock();
+			CopyBlock(valueOffset, value, data, sparsity_pattern().OffDiagBlocks());
+		}
+
+		void MatrixCSR::AddDiagBlock(size_t l, const double* data)
+		{
+			size_t valueOffset = l * NmbrOfNonZerosPerUnitBlock();
+			CopyBlock(valueOffset, value, data, sparsity_pattern().DiagBlocks());
+		}
+
+		void MatrixCSR::AddOffDiagBlock(size_t l, size_t neibIdx, const double* data)
+		{
 			size_t valueOffset = sparsity_pattern().NmbrOfElementsAboveBlockRow()[l] + (neibIdx - l) * NmbrOfNonZerosPerUnitBlock();
 			CopyBlock(valueOffset, value, data, sparsity_pattern().OffDiagBlocks());
 		}

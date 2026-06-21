@@ -17,6 +17,7 @@ namespace reservoir_simulator
 			PreviousState_DependentFieldProperties[1] = WaterMass();  // previous water mass in the cell
 		}
 		 const std::vector<double> TwoPhaseFlowCell::PreviousState_Mass() const { return GetPreviousState_DependentFieldProperties(); }
+		 const std::vector<double>& TwoPhaseFlowCell::PreviousState_Mass_ref() const { return GetPreviousState_DependentFieldProperties(); }
 
 		// DependentFieldProperties
 
