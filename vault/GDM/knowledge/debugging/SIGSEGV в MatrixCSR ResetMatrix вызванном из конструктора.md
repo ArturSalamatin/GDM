@@ -2,43 +2,35 @@
 tags:
   - debugging
   - amgcl
-  - crash
 date: 2026-06-20
 ---
+# Промежуточный SIGSEGV при оптимизации MatrixCSR::ResetMatrix()
 
-# SIGSEGV в MatrixCSR::ResetMatrix(), вызванном из конструктора
+## Суть
 
-## Симптом
+Не баг legacy-кода, а артефакт промежуточного состояния при рефакторе.
 
-Нестабильный SIGSEGV при добавлении любых полей в `LinearProblem.h`. Проявляется при clean build, пропадает при инкрементальной сборке.
+## Что произошло
 
-## Причина
-
-`MatrixCSR` конструктор вызывал `ResetMatrix()`, который делал `value = std::vector<double>(nnz, 0.0)`. После рефактора `ResetMatrix()` стал делать `std::fill(value.begin(), value.end(), 0.0)` — на пустом `value` это корректно (no-op), но вектор остаётся пустым.
-
-Дополнительный фактор: в `MatrixCSR.h` поле `value` объявлено **до** `nnz`. По стандарту C++ члены инициализируются в порядке объявления, а не в порядке initializer-list. Поэтому `value(nnz, 0.0)` в member-init-list — UB: `nnz` ещё не инициализирован.
-
-## Исправление
-
+`ResetMatrix()` вызывался на каждом Newton step и пересоздавал вектор:
 ```cpp
-// Конструктор — value.resize() в теле, после инициализации nnz
-MatrixCSR::MatrixCSR(...) noexcept :
-    pattern{ ... },
-    nnz{ sparsity_pattern().TotalNmbrOfBlocks() * sparsity_pattern().NmbrOfNonzerosPerUnitBlock() }
-{
-    value.resize(nnz, 0.0);  // nnz уже валиден
+void MatrixCSR::ResetMatrix() {
+    value = std::vector<double>(nnz, 0.0);  // аллокация каждый раз
 }
+```
 
-// ResetMatrix() — std::fill, не аллокация
-void MatrixCSR::ResetMatrix()
-{
+При оптимизации заменён на `std::fill` (без аллокации):
+```cpp
+void MatrixCSR::ResetMatrix() {
     std::fill(value.begin(), value.end(), 0.0);
 }
 ```
 
-## Связь
+Но конструктор вызывал `ResetMatrix()` для начальной инициализации `value`. После замены на `std::fill` вектор оставался пуст → краш при первом обращении к `value[i]`.
 
-Ранее подозревались `virtual ~LinearProblem()`, move-конструктор, `noexcept` в `ReservoirSimulator` — всё это были ложные следы. Баг сидел в `MatrixCSR` и проявлялся при любом изменении, вызывающем full recompile.
+## Исправление
+
+Конструктор: `ResetMatrix()` → `value.resize(nnz, 0.0)`.
 
 ## Связанные заметки
 
