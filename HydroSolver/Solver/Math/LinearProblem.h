@@ -5,29 +5,16 @@
 #undef min
 #undef max
 
-//#include <amgcl/adapter/eigen.hpp>
 #include <amgcl/adapter/block_matrix.hpp>
 #include <amgcl/adapter/crs_tuple.hpp>
 #include <amgcl/value_type/static_matrix.hpp>
 #include <amgcl/make_solver.hpp>
-#include <amgcl/solver/gmres.hpp>
 #include <amgcl/amg.hpp>
-#include <amgcl/coarsening/smoothed_aggregation.hpp>
-#include <amgcl/relaxation/damped_jacobi.hpp>
-
+#include <amgcl/coarsening/aggregation.hpp>
+#include <amgcl/relaxation/ilu0.hpp>
+#include <amgcl/solver/lgmres.hpp>
 #include <amgcl/io/mm.hpp>
 #include <amgcl/profiler.hpp>
-#include <amgcl/coarsening/aggregation.hpp>
-#include <amgcl/relaxation/spai0.hpp>
-#include <amgcl/solver/bicgstab.hpp>
-#include <amgcl/solver/bicgstabl.hpp>
-#include <amgcl/solver/fgmres.hpp>
-#include <amgcl/solver/lgmres.hpp>
-#include <amgcl/solver/idrs.hpp>
-#include <amgcl/relaxation/ilu0.hpp>
-#include <amgcl/relaxation/chebyshev.hpp>
-#include <amgcl/relaxation/gauss_seidel.hpp>
-#include <amgcl/relaxation/as_preconditioner.hpp>
 
 
 #undef min
@@ -75,8 +62,6 @@ namespace reservoir_simulator
 			Solver_AMG<B>::params prm;
 
 		public:
-			Solver_AMG<B>::params& SolverParams() { return prm; }
-
 			const MatrixCSR& Matrix() const;
 			MatrixCSR& Matrix();
 			void Print() const;
@@ -105,10 +90,6 @@ namespace reservoir_simulator
 			size_t RhsSize() const { return rhsSize; }
 			const std::vector<double>& Rhs() const { return rhs; }
 			std::vector<double>& SolutionCorrections() { return solutionCorrections; }
-
-			template<typename SolverType>
-			SolveResult SolveWith(int maxIter, typename SolverType::params& custom_prm);
-
 
 			void AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS);
 			void AddOffDiagBlock(size_t l, int neibIdx, std::vector<double>& data);

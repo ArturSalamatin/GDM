@@ -32,10 +32,35 @@ using namespace reservoir_simulator::linear_problem;
 
 namespace {
 
+template<typename SolverType>
+SolveResult solve_with(LinearProblem& lp, int maxIter, typename SolverType::params& prm)
+{
+    prm.solver.maxiter = maxIter;
+
+    prof.tic("setup");
+    auto A = amgcl::adapter::block_matrix<value_type<B>>(
+        std::tie(lp.RhsSize(), lp.Matrix().Row(), lp.Matrix().Col(), lp.Matrix().Val()));
+    SolverType solve(A, prm);
+    prof.toc("setup");
+
+    rhs_type<B> const* fptr = reinterpret_cast<rhs_type<B> const*>(lp.Rhs().data());
+    rhs_type<B>* xptr = reinterpret_cast<rhs_type<B>*>(lp.SolutionCorrections().data());
+    amgcl::backend::numa_vector<rhs_type<B>> F(fptr, fptr + lp.CellCount());
+    amgcl::backend::numa_vector<rhs_type<B>> X(xptr, xptr + lp.CellCount());
+
+    prof.tic("solve");
+    auto [iters, error] = solve(F, X);
+    prof.toc("solve");
+
+    std::copy(X.data(), X.data() + X.size(), xptr);
+
+    return { iters, error, true };
+}
+
 constexpr size_t BNx = 51, BNy = 51, BNz = 4;
 constexpr double BLx = 500.0, BLy = 500.0, Bhz = 10.0;
 constexpr double Brho_oil = 800.0, Brho_water = 1000.0;
-constexpr double Btotal_time = 200.0;
+constexpr double Btotal_time = 730.0;
 constexpr double Brate_mult = 1.4;
 
 std::vector<test_helpers::WellScheduleBuilder>
@@ -163,7 +188,7 @@ BenchmarkResult run_benchmark(const std::string& config_name,
                 sim.AssembleMyProblem(loc_tau, nextTime);
                 prof.toc("assemble");
 
-                auto res = sim.MyProblem.SolveWith<SolverType>(
+                auto res = solve_with<SolverType>(sim.MyProblem,
                     sim.numPrm.CurrentAMG_maxSolverIterationCount(), prm);
                 sim.numPrm.update_currentAMGState(
                     {static_cast<int>(res.iters), res.error, res.converged});
@@ -491,60 +516,3 @@ TEST_CASE("AMGCL benchmark: Series C — Coarsening",
 }
 
 
-// ======================== Diagnostic: production Solve() ========================
-
-TEST_CASE("AMGCL benchmark: diagnostic — production Solve",
-          "[benchmark][diag][.slow]")
-{
-    fs::create_directories("results");
-    prof.reset();
-
-    simulation_cases::MultiLayerCase sc(
-        "benchmark_diag_production", BNx, BNy, BNz, BLx, BLy, Bhz,
-        Btotal_time, 5.0,
-        [](double, double) { return make_benchmark_wells(); },
-        bm_wells_info
-    );
-
-    auto horizon = sc.make_horizon();
-    auto numPrm = sc.make_num_params();
-
-    ReservoirSimulator sim{numPrm, horizon, horizon.oil, horizon.water, horizon.other};
-    sim.RefPressure = sc.ref_pressure_Pa();
-    sim.numPrm.set_initial_schemeTau(sc.initial_tau());
-    sim.numPrm.set_currentMoment(0.0);
-    sc.add_wells(sim, horizon);
-
-    size_t time_steps = 0, wasted = 0;
-
-    auto times = sc.save_times();
-    for (size_t step = 1; step < times.size(); ++step) {
-        double target = times[step];
-        while (sim.numPrm.CurrentTimeMoment() < target) {
-            sim.numPrm.update_maxTauAllowed(target, sim.GetWells());
-            double loc_tau = sim.numPrm.CurrentIntegrationStep();
-            double nextTime = sim.numPrm.NextTimeMoment();
-
-            sim.PerformNewtonLoop(loc_tau, nextTime);
-
-            if (sim.numPrm.IsSuccessfullNewtonTrial()) {
-                sim.MassBalance(loc_tau);
-                sim.Grid.AcceptState();
-                sim.numPrm.update_currentMoment();
-                sim.AddFlowFieldSnapShot();
-                time_steps++;
-            } else {
-                sim.numPrm.decrease_schemeTau();
-                wasted++;
-                REQUIRE(wasted < 100);
-            }
-        }
-    }
-
-    std::cout << "\n=== DIAG production Solve ===\n"
-              << "  time_steps=" << time_steps
-              << "  wasted=" << wasted << "\n"
-              << prof << "\n";
-
-    REQUIRE(time_steps > 0);
-}
