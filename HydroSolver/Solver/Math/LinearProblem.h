@@ -93,7 +93,9 @@ namespace reservoir_simulator
 			std::vector<double>& SolutionCorrections() { return solutionCorrections; }
 
 			void AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS);
+			void AddDiagBlock(size_t l, const double* data, const double* dataRHS);
 			void AddOffDiagBlock(size_t l, int neibIdx, std::vector<double>& data);
+			void AddOffDiagBlock(size_t l, int neibIdx, const double* data);
 		};
 	} // linear_problem
 } // reservoir_simulator

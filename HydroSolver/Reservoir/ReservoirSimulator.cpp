@@ -498,8 +498,11 @@ namespace reservoir_simulator
 
 	void ReservoirSimulator::AssembleMyProblem(double loc_tau, double nextTimeMoment)
 	{
+		prof.tic("reset");
 		MyProblem.ResetProblem();
-		// loop through every cell and fill the mass-balance equations
+		prof.toc("reset");
+
+		prof.tic("fill_rows");
 #ifdef	USE_PARALLEL
 #pragma omp parallel for
 #endif
@@ -507,20 +510,16 @@ namespace reservoir_simulator
 		{
 			fillMatrixBlockRow(l, loc_tau);
 		}
+		prof.toc("fill_rows");
 
-	//	matrix.PrintCRS();
-
-	//	MyProblem.Matrix().PrintCRS();
-
-		// loop through boundary cells
+		prof.tic("boundary");
 		AccountForBoundaryConditions();
-		// source terms
-		//std::cout
-		//	<< "Well debits" << '\n'
-		//	<< "Time: " << nextTimeMoment << '\n';
+		prof.toc("boundary");
+
+		prof.tic("wells");
 		for (auto& [name, well] : Wells)
 		{
-			auto [posLocal, matrixBlockPerPerforation, rhsPerPerforation] = 
+			auto [posLocal, matrixBlockPerPerforation, rhsPerPerforation] =
 				well->AddWellToMatrix(nextTimeMoment - loc_tau);
 			for (size_t l = 0; l < well->NmbrOfOpenedCells(); ++l)
 			{
@@ -531,121 +530,89 @@ namespace reservoir_simulator
 				MyProblem.AddDiagBlock(posLocal[l], matrixBlockPerPerforation[l], rhsPerPerforation[l]);
 			}
 		}
-		/*std::cout
-			<< '\n';*/
+		prof.toc("wells");
 	}
 	void ReservoirSimulator::fillMatrixBlockRow(size_t l, double loc_tau)
 	{
-		int blockSize = MyProblem.NmbrOfNonZerosPerUnitBlock();
+		constexpr int blockSize = B * B;
 		const TwoPhaseFlowCell& cell = Grid[l];
 		const std::vector<TwoPhaseFlowCell*> neighbourCells = Grid.GetNeighboursPointer(l);
 		const std::vector<double>& commonEdgeArea = Grid.CommonEdgeArea(l);
 
-		std::vector<double> blDiag = std::vector<double>(blockSize, 0);
-		std::vector<double> rhsBlock = cell.PreviousState_Mass();
-		// time-derivative term
-		rhsBlock[0] = (rhsBlock[0] - cell.OilMass()) / loc_tau;
-		rhsBlock[1] = (rhsBlock[1] - cell.WaterMass()) / loc_tau;
+		double blDiag[blockSize] = {};
+		const auto& prevMass = cell.PreviousState_Mass_ref();
+		double rhsBlock[B] = {
+			(prevMass[0] - cell.OilMass()) / loc_tau,
+			(prevMass[1] - cell.WaterMass()) / loc_tau
+		};
 
-		blDiag[0] += cell.DerivativeMassOilBySwater() / loc_tau; // previous state oil mass in the cell derived by Swater
-		blDiag[2] += cell.DerivativeMassWaterBySwater() / loc_tau; // previous state water mass in the cell derived by Swater
-		blDiag[1] += cell.DerivativeMassOilByP() / loc_tau; // previous state oil mass in the cell derived by P
-		blDiag[3] += cell.DerivativeMassWaterByP() / loc_tau; // previous state water mass in the cell derived by P
+		blDiag[0] += cell.DerivativeMassOilBySwater() / loc_tau;
+		blDiag[2] += cell.DerivativeMassWaterBySwater() / loc_tau;
+		blDiag[1] += cell.DerivativeMassOilByP() / loc_tau;
+		blDiag[3] += cell.DerivativeMassWaterByP() / loc_tau;
 
-// Laplace terms
 		double
-			OilMobilitySum = 0.0,   // sum of mobilities that multiply p(l) in oil equation
-			WaterMobilitySum = 0.0; // sum of mobilities that multiply p(l) in water equation
+			OilMobilitySum = 0.0,
+			WaterMobilitySum = 0.0;
 
-		// loop through neighbours
 		for (int neibCount = 0; neibCount < neighbourCells.size(); neibCount++)
 		{
 			const TwoPhaseFlowCell& neighbourCell = *neighbourCells[neibCount];
 
-			std::vector<double> blOffDiag = std::vector<double>(blockSize, 0);
+			double blOffDiag[blockSize] = {};
 
-			// factors multiplying dp in the Laplace terms
 			double c_oil = 0.0, c_water = 0.0;
-			// take local index of the current neighbour
-			// flow direction. Fluxes through the faces between adjacent cells
 			double dp = cell.P() - neighbourCell.P();
 			double p_grad = commonEdgeArea[neibCount] * dp;
-			// from which cell the flow comes /*bw ~ BackWards*/
 
 			const TwoPhaseFlowCell* bwCell;
-			std::vector<double>* bwBlock;
-			// sign decides which cell is used to approximate the mobility coefficient (upwind scheme)
-			if (dp < 0.0) {// backwards approximation uses the neighbour rather than the current cell
+			double* bwBlock;
+			if (dp < 0.0) {
 				bwCell = &neighbourCell;
-				bwBlock = &blOffDiag;
+				bwBlock = blOffDiag;
 			}
-			else {// backwards approximation uses the current cell rather than the neighbour
+			else {
 				bwCell = &cell;
-				bwBlock = &blDiag;
+				bwBlock = blDiag;
 			}
-			// index of the cell used for the backwards approximation at the cell-neighbour face
-			// calculate harmonic mean between the neighbour and the current cell
 
 			double OverallMobilityCell = cell.MobilityOverall(),
 				OverallMobilityNeighbour = neighbourCell.MobilityOverall();
-			//					OverallMobilityBackwards = bwCell->MobilityOverall();
 			double denom = OverallMobilityCell + OverallMobilityNeighbour;
 
 			double MeanOverallMobility = 2 * OverallMobilityNeighbour * OverallMobilityCell / denom;
-			// calculate coefficients for derivative of harmonic mean
-			/*(derivative of (harmonic mean = MeanOverallMobility)) */
-			// produces two correction terms
 			double
-				c1 = 2 * std::pow(OverallMobilityNeighbour / denom, 2) * (cell.DerivativeMobilityOil() + cell.DerivativeMobilityWater()), //d_cur_mobility_oil(l),
-				c3 = 2 * std::pow(OverallMobilityCell / denom, 2) * (neighbourCell.DerivativeMobilityOil() + neighbourCell.DerivativeMobilityWater()); //d_cur_mobility_oil(ii),
-			double f_oil = bwCell->F_Oil(), // cur_mobility_oil(bwIdx) / cur_mobility(bwIdx),
-				f_water = bwCell->F_Water(); // cur_mobility_water(bwIdx) / cur_mobility(bwIdx);
+				c1 = 2 * std::pow(OverallMobilityNeighbour / denom, 2) * (cell.DerivativeMobilityOil() + cell.DerivativeMobilityWater()),
+				c3 = 2 * std::pow(OverallMobilityCell / denom, 2) * (neighbourCell.DerivativeMobilityOil() + neighbourCell.DerivativeMobilityWater());
+			double f_oil = bwCell->F_Oil(),
+				f_water = bwCell->F_Water();
 
-			/*density x (derivative of the backwards coefficient = f_p) x (harmonic mean = MeanOverallMobility) x (pressure gradient -- includes faceArea)*/
 			double temp = p_grad * (bwCell->Derivative_F_Oil()) * MeanOverallMobility;
 
-			(*bwBlock)[0] += bwCell->DensityOil() * temp; // oil section
-			(*bwBlock)[2] -= bwCell->DensityWater() * temp; // water section
+			bwBlock[0] += bwCell->DensityOil() * temp;
+			bwBlock[2] -= bwCell->DensityWater() * temp;
 
-			/*density x (backwards coefficient) x (harmonic mean = MeanOverallMobility) x (faceArea/h) x (1 = derivative pressure difference)*/
-			// oil section
 			c_oil = -bwCell->DensityOil() * f_oil * MeanOverallMobility * commonEdgeArea[neibCount];
 			rhsBlock[0] += c_oil * dp;
 			blOffDiag[1] += c_oil;
-			// water section
 			c_water = -bwCell->DensityWater() * f_water * MeanOverallMobility * commonEdgeArea[neibCount];
 			rhsBlock[1] += c_water * dp;
 			blOffDiag[3] += c_water;
-			// accumulate coefficient at dp at the current cell l
 			OilMobilitySum += c_oil;
 			WaterMobilitySum += c_water;
 
-			/*density x (backwards approx) x derivative_(harmonic mean = MeanOverallMobility) x (pressure gradient)*/
-			//oil section
 			blDiag[0] += bwCell->DensityOil() * f_oil * c1 * p_grad;
 			blOffDiag[0] += bwCell->DensityOil() * f_oil * c3 * p_grad;
-			//water section
 			blDiag[2] += bwCell->DensityWater() * f_water * c1 * p_grad;
 			blOffDiag[2] += bwCell->DensityWater() * f_water * c3 * p_grad;
 
-			MyProblem.AddOffDiagBlock(l, neibCount, blOffDiag); // AddOffDiagBlock(l, neibCount, value_A, bl_A_OffDiag, pattern.offDiagBlocks_raw);
+			MyProblem.AddOffDiagBlock(l, neibCount, blOffDiag);
 		}
 
-		blDiag[1] -= OilMobilitySum; // !!!!!!!!!!!!!
-		blDiag[3] -= WaterMobilitySum; // !!!!!!!!!!!!!
+		blDiag[1] -= OilMobilitySum;
+		blDiag[3] -= WaterMobilitySum;
 
-#ifdef DEBUG_SALAMATIN
-		//	CheckForNAN(blDiag);
-		//	CheckForNAN(rhsBlock);
-		/*	for (int i = 0; i < blDiag.size(); i++)
-				if (!isfinite(blDiag[i]))
-					throw exception("bad problem matrix");
-			for (int i = 0; i < rhsBlock.size(); i++)
-				if (!isfinite(rhsBlock[i]))
-					throw exception("bad problem matrix");*/
-#endif // DEBUG_SALAMATIN
-
-		MyProblem.AddDiagBlock(l, blDiag, rhsBlock);  //	AddDiagBlock(l, value_A, bl_A_Diag, pattern.diagBlocks_raw);
+		MyProblem.AddDiagBlock(l, blDiag, rhsBlock);
 	}
 
 	void ReservoirSimulator::AddFlowFieldSnapShot()

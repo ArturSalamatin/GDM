@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "simulation_cases/MultiLayerCase.h"
 
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
@@ -136,6 +137,9 @@ struct BenchmarkResult {
     double max_water_balance_rel = 0;
     bool balance_ok = false;
     bool failed = false;
+    double t_total = 0;
+    double t_assembly = 0;
+    double t_solve = 0;
 };
 
 template<typename SolverType>
@@ -174,6 +178,10 @@ BenchmarkResult run_benchmark(const std::string& config_name,
     size_t consecutive_rollbacks = 0;
     bool solver_failed = false;
 
+    using clock = std::chrono::high_resolution_clock;
+    double chrono_assembly = 0, chrono_solve = 0;
+    auto t_start = clock::now();
+
     auto times = sc.save_times();
     for (size_t step = 1; step < times.size() && !solver_failed; ++step) {
         double target = times[step];
@@ -189,12 +197,16 @@ BenchmarkResult run_benchmark(const std::string& config_name,
             sim.numPrm.set_currentAMG_maxSolverIterationCount();
 
             while (!sim.numPrm.IsSuccessfullNewtonTrial()) {
+                auto ta0 = clock::now();
                 prof.tic("assemble");
                 sim.AssembleMyProblem(loc_tau, nextTime);
                 prof.toc("assemble");
+                chrono_assembly += std::chrono::duration<double>(clock::now() - ta0).count();
 
+                auto ts0 = clock::now();
                 auto res = solve_with<SolverType>(sim.MyProblem,
                     sim.numPrm.CurrentAMG_maxSolverIterationCount(), prm);
+                chrono_solve += std::chrono::duration<double>(clock::now() - ts0).count();
                 sim.numPrm.update_currentAMGState(
                     {static_cast<int>(res.iters), res.error, res.converged});
 
@@ -252,6 +264,8 @@ BenchmarkResult run_benchmark(const std::string& config_name,
         }
     }
 
+    double t_total_s = std::chrono::duration<double>(clock::now() - t_start).count();
+
     BenchmarkResult r;
     r.config_name = config_name;
     r.n_time_steps = profile.n_time_steps;
@@ -263,6 +277,9 @@ BenchmarkResult run_benchmark(const std::string& config_name,
     r.max_water_balance_rel = max_water_rel;
     r.balance_ok = !solver_failed && (max_oil_rel < 1e-3) && (max_water_rel < 1e-3);
     r.failed = solver_failed;
+    r.t_total = t_total_s;
+    r.t_assembly = chrono_assembly;
+    r.t_solve = chrono_solve;
     return r;
 }
 
@@ -305,7 +322,10 @@ void report(const BenchmarkResult& r) {
               << "  failed=" << (r.failed ? "YES" : "NO")
               << "  oil_rel=" << std::scientific << r.max_oil_balance_rel
               << "  water_rel=" << r.max_water_balance_rel << "\n"
-              << prof << "\n";
+              << std::fixed << std::setprecision(3)
+              << "  t_total=" << r.t_total << "s"
+              << "  t_assembly=" << r.t_assembly << "s (" << std::setprecision(1) << (r.t_assembly/r.t_total*100) << "%)"
+              << "  t_solve=" << std::setprecision(3) << r.t_solve << "s (" << std::setprecision(1) << (r.t_solve/r.t_total*100) << "%)\n";
 }
 
 const std::string csv_path = "results/amgcl_benchmark.csv";
