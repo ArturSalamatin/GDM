@@ -39,7 +39,7 @@ namespace reservoir_simulator
 		numPrm{ numPrm_ }, RefPressure{ other_properties.extPressure },
 		Grid{ OilField{horizon} },
 		ActiveCellsNmbr{ Grid.ActiveCellsNmbr() },
-		MyProblem{ LinearProblem{numPrm.AMG_AbsTol, numPrm.AMG_RelTol, Grid.GetConnectivityGraph()} }
+		MyProblem{ LinearProblem{Layout::InterleavedSwP, numPrm.AMG_AbsTol, numPrm.AMG_RelTol, Grid.GetConnectivityGraph()} }
 	{
 
 		flowFields = std::vector<phasePortrait::SomeFlowField>();
@@ -455,7 +455,6 @@ namespace reservoir_simulator
 	bool ReservoirSimulator::UpdateGrid()
 	{
 		const double tol = 3E-3;
-		Grid.UpdateState(MyProblem.Corrections(), B);
 		std::vector<bool> f = std::vector<bool>(B * Grid.ActiveCellsNmbr(), true);
 
 #ifdef	USE_PARALLEL
@@ -463,22 +462,20 @@ namespace reservoir_simulator
 #endif
 		for (int l = 0; l < Grid.ActiveCellsNmbr(); l++)
 		{
-			const TwoPhaseFlowCell& cell = Grid[l];
-			const std::vector<double>& stateVaiables = cell.GetVariableFieldProperties();
+			double corr[B];
+			MyProblem.UnpackCellCorrections(l, corr);
+			Grid[l].UpdateState(corr);
 
-			/*for (int i = 0; i < B; i++)
-				f[B * l + i] =
-				(abs(stateVaiables[i]) < numPrm.NewtonTol() * 1E-5) ||
-				(abs(MyProblem.Corrections()[B * l + i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));*/
+			const std::vector<double>& stateVaiables = Grid[l].GetVariableFieldProperties();
 
 			int i = 0; // saturation
 			f[B * l + i] =
 				(abs(stateVaiables[i]) < numPrm.NewtonTol() * tol) || (abs(1.0 - stateVaiables[i]) < numPrm.NewtonTol() * tol) ||
-				(abs(MyProblem.Corrections()[B * l + i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
+				(abs(corr[i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
 			i = 1; // pressure
 			f[B * l + i] =
 				(abs(stateVaiables[i]) < 1E6) ||
-				(abs(MyProblem.Corrections()[B * l + i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
+				(abs(corr[i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
 		}
 		return std::all_of(f.begin(), f.end(), [](bool x) { return x; });
 	}

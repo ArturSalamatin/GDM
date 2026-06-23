@@ -65,33 +65,33 @@ namespace reservoir_simulator
 
 		size_t LinearProblem::NmbrOfNonZerosPerUnitBlock() const { return Matrix().NmbrOfNonZerosPerUnitBlock(); }
 
+		const CRSStructure& LinearProblem::GetCRS() const
+		{
+			return Matrix().GetCRS();
+		}
+
+		void LinearProblem::UnpackCellCorrections(size_t cell, double* physical) const
+		{
+			GetCRS().UnpackCorrections(cell, solutionCorrections.data(), physical);
+		}
+
 		LinearProblem::LinearProblem() noexcept = default;
 
 		LinearProblem::LinearProblem(
-			double amg_AbsTol, double AMG_RelTol, 
-			const std::vector<std::vector<int>>& connectivityGraph, 
+			Layout layout,
+			double amg_AbsTol, double AMG_RelTol,
+			const std::vector<std::vector<int>>& connectivityGraph,
 			const std::vector<bool>& blPattern) noexcept :
 			cellNmbr {connectivityGraph.size()},
 			rhsSize{ cellNmbr * B },
 			rhs{ std::vector<double>(rhsSize, 0.0) },
 			solutionCorrections{ std::vector<double>(rhsSize, 0.0) },
-			matrix{ std::make_unique<MatrixCSR>(B, cellNmbr, connectivityGraph, blPattern) }
+			matrix{ std::make_unique<MatrixCSR>(layout, B, cellNmbr, connectivityGraph, blPattern) }
 		{
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
 			prm.solver.K = 5;
-			//	prm.precond.coarse_enough = 1000;
-			//	prm.precond.pre_cycles = 4;
-			//	prm.precond.ncycle = 4;
-			//	prm.precond.npost = 4;
-			//	prm.precond.npre = 4;
-			//	prm.precond.coarsening.estimate_spectral_radius = true;
-			//	prm.solver.M = 20;
-			//	prm.precond.direct_coarse = true;
-			//	prm.precond.relax.damping = 0.5;
-			//	prm.precond.coarsening.over_interp = 2.0 / 3.0;
-			//	prm.precond.coarsening.aggr.eps_strong = 10;
 		}
 
 		LinearProblem::~LinearProblem() = default;
@@ -129,14 +129,17 @@ namespace reservoir_simulator
 
 		void LinearProblem::AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS)
 		{
-			std::transform(dataRHS.begin(), dataRHS.end(), rhs.begin() + l * B, rhs.begin() + l * B, std::plus<double>());
+			const auto& crs = GetCRS();
+			for (size_t i = 0; i < B; i++)
+				rhs[crs.GlobalIndex(l, (unsigned char)i)] += dataRHS[i];
 			Matrix().AddDiagBlock(l, data);
 		}
 
 		void LinearProblem::AddDiagBlock(size_t l, const double* data, const double* dataRHS)
 		{
+			const auto& crs = GetCRS();
 			for (size_t i = 0; i < B; i++)
-				rhs[l * B + i] += dataRHS[i];
+				rhs[crs.GlobalIndex(l, (unsigned char)i)] += dataRHS[i];
 			Matrix().AddDiagBlock(l, data);
 		}
 

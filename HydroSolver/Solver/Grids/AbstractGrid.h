@@ -78,13 +78,17 @@ namespace reservoir_simulator
 			const ProcessCell& operator [] (int idx) const
 			{
 				if (idx < 0)
-				{
 					return CellsInactive[-(idx + 1)];
-				}
 				else
-				{
 					return Cells[idx];
-				}
+			}
+
+			ProcessCell& operator [] (int idx)
+			{
+				if (idx < 0)
+					return CellsInactive[-(idx + 1)];
+				else
+					return Cells[idx];
 			}
 
 			/*	const std::vector<ProcessCell>& GetActiveCells()

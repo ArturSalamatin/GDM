@@ -51,6 +51,7 @@ add_library(gdm_core STATIC
     ${HYDRO}/Solver/Math/LinearProblem.cpp
     ${HYDRO}/Solver/Math/MatrixCSR.cpp
     ${HYDRO}/Solver/Math/SparsityPattern.cpp
+    ${HYDRO}/Solver/Math/CRSStructure.cpp
     ${HYDRO}/Solver/Math/MathRoutines.cpp
 
     # Wells

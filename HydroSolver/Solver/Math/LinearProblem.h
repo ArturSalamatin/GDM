@@ -1,6 +1,7 @@
 #pragma once
 #include "../../stdafx.h"
 #include "MatrixCSR.h"
+#include "CRSStructure.h"
 
 #undef min
 #undef max
@@ -76,9 +77,13 @@ namespace reservoir_simulator
 
 			size_t NmbrOfNonZerosPerUnitBlock() const;
 
+			const CRSStructure& GetCRS() const;
+			void UnpackCellCorrections(size_t cell, double* physical) const;
+
 			LinearProblem() noexcept;
 
-			LinearProblem(double amg_AbsTol, double AMG_RelTol, const std::vector<std::vector<int>>& connectivityGraph,
+			LinearProblem(Layout layout, double amg_AbsTol, double AMG_RelTol,
+				const std::vector<std::vector<int>>& connectivityGraph,
 				const std::vector<bool>& blPattern = std::vector<bool>(B * B, true)) noexcept;
 
 			virtual ~LinearProblem();
