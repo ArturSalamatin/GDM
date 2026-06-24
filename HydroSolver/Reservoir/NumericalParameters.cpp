@@ -90,11 +90,24 @@ namespace reservoir_simulator
 	}
 
 	void NumericalParameters::increase_schemeTau() {
-		if (CurrentAMG_Error() > 0.0)
-			schemeTau = CurrentIntegrationStep() * (1 + 1 * factor);
+		if (CurrentAMG_Error() > 0.0) {
+			if (use_pi_controller_) {
+				double mult = pi_controller_.ComputeMultiplier(
+					CurrentNewtonIterationCount(), true);
+				schemeTau = CurrentIntegrationStep() * mult;
+			} else {
+				schemeTau = CurrentIntegrationStep() * (1 + 1 * factor);
+			}
+		}
 	}
 	void NumericalParameters::decrease_schemeTau() {
-		schemeTau = CurrentIntegrationStep() * (1 - 2 * factor);
+		if (use_pi_controller_) {
+			double mult = pi_controller_.ComputeMultiplier(
+				CurrentNewtonIterationCount(), false);
+			schemeTau = CurrentIntegrationStep() * mult;
+		} else {
+			schemeTau = CurrentIntegrationStep() * (1 - 2 * factor);
+		}
 #ifdef DEBUG_SALAMATIN
 		std::cout << ">>> RollBack with new cur_tau = " << CurrentSchemeTau() << " days" << std::endl;
 #endif // DEBUG_SALAMATIN

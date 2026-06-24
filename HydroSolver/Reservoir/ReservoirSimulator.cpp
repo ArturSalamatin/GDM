@@ -35,11 +35,12 @@ namespace reservoir_simulator
 		const NumericalParameters& numPrm_,
 		const DevelopedHorizon& horizon,
 		const OilPhaseProperty& oil, const WaterPhaseProperty& water,
-		const OtherProperties& other_properties) noexcept :
+		const OtherProperties& other_properties,
+		Layout layout) noexcept :
 		numPrm{ numPrm_ }, RefPressure{ other_properties.extPressure },
 		Grid{ OilField{horizon} },
 		ActiveCellsNmbr{ Grid.ActiveCellsNmbr() },
-		MyProblem{ LinearProblem{Layout::InterleavedSwP, numPrm.AMG_AbsTol, numPrm.AMG_RelTol, Grid.GetConnectivityGraph()} }
+		MyProblem{ LinearProblem{layout, numPrm.AMG_AbsTol, numPrm.AMG_RelTol, Grid.GetConnectivityGraph()} }
 	{
 
 		flowFields = std::vector<phasePortrait::SomeFlowField>();

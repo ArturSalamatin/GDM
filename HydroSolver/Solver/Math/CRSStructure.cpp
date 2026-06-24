@@ -85,11 +85,11 @@ namespace reservoir_simulator
 					{
 						if (f && curNeighbours[neighbourIdx] > (int)l)
 						{
-							for (unsigned char physCol = 0; physCol < B; physCol++)
+							for (unsigned char crsCol = 0; crsCol < B; crsCol++)
 							{
+								unsigned char physCol = permCRSToPhysical_[crsCol];
 								if (!blockPattern[B * physRow + physCol])
 									continue;
-								unsigned char crsCol = permPhysicalToCRS_[physCol];
 								size_t physBlockIdx = physRow * B + physCol;
 								diagTmp[physBlockIdx] = col_.size();
 								col_.push_back(l * B + crsCol);
@@ -97,33 +97,23 @@ namespace reservoir_simulator
 							f = false;
 						}
 
-						std::vector<size_t> ofDiagElemIdx;
-						for (unsigned char physCol = 0; physCol < B; physCol++)
+						for (unsigned char crsCol = 0; crsCol < B; crsCol++)
 						{
+							unsigned char physCol = permCRSToPhysical_[crsCol];
 							if (!blockPattern[B * physRow + physCol])
 								continue;
-							unsigned char crsCol = permPhysicalToCRS_[physCol];
-							ofDiagElemIdx.push_back(col_.size());
+							size_t physBlockIdx = physRow * B + physCol;
+							offDiagTmp[neighbourIdx][physBlockIdx] = col_.size();
 							col_.push_back(curNeighbours[neighbourIdx] * B + crsCol);
-						}
-
-						for (int j = 0, skip = 0; j < B; j++)
-						{
-							if (!blockPattern[B * physRow + j])
-							{
-								skip++;
-								continue;
-							}
-							offDiagTmp[neighbourIdx][physRow * B + j] = ofDiagElemIdx[j - skip];
 						}
 					}
 					if (f)
 					{
-						for (unsigned char physCol = 0; physCol < B; physCol++)
+						for (unsigned char crsCol = 0; crsCol < B; crsCol++)
 						{
+							unsigned char physCol = permCRSToPhysical_[crsCol];
 							if (!blockPattern[B * physRow + physCol])
 								continue;
-							unsigned char crsCol = permPhysicalToCRS_[physCol];
 							size_t physBlockIdx = physRow * B + physCol;
 							diagTmp[physBlockIdx] = col_.size();
 							col_.push_back(l * B + crsCol);

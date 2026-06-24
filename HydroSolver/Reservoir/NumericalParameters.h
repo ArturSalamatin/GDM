@@ -4,6 +4,7 @@
 #include <map>
 
 #include "../defines.h"
+#include "PIController.h"
 
 namespace reservoir_simulator
 {
@@ -37,6 +38,9 @@ namespace reservoir_simulator
 		double currentMoment = 0.0;
 
 		size_t wastedTrialsCount = 0;
+
+		PIController pi_controller_{PIControllerParams{.max_iters = 65}};
+		bool use_pi_controller_ = false;
 
 	public:
 		double AMG_RelTol = 1E-2;
@@ -103,6 +107,13 @@ namespace reservoir_simulator
 		void update_currentAMGState(const std::tuple<int, double, bool>& AMGstate);
 		void update_isSuccesfullNewtonTrial(bool f) { isSuccessfulTrial = f && CurrentANG_IsAccuracyReached(); update_currentNewtonIterationCount(); }
 		void update_isAMG_itertationSuccessfull(bool f) { AMG_isIterationSuccessfull = f; }
+
+		void SetPIControllerParams(PIControllerParams p) {
+			p.max_iters = newtonMaxIterNmbr;
+			pi_controller_ = PIController(p);
+		}
+		void SetUsePIController(bool f) { use_pi_controller_ = f; }
+		bool UsesPIController() const { return use_pi_controller_; }
 
 	public:
 

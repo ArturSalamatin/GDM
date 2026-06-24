@@ -41,6 +41,7 @@ add_library(gdm_core STATIC
     # Reservoir
     ${HYDRO}/Reservoir/ReservoirSimulator.cpp
     ${HYDRO}/Reservoir/NumericalParameters.cpp
+    ${HYDRO}/Reservoir/PIController.cpp
 
     # Grid / Cells
     ${HYDRO}/Solver/Grids/OilField.cpp
@@ -105,6 +106,7 @@ add_executable(gdm_tests
     tests/test_streamlines.cpp
     tests/test_variable_debit.cpp
     tests/test_3d_completions.cpp
+    tests/test_pi_controller.cpp
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 
