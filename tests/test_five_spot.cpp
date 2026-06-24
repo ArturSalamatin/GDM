@@ -28,7 +28,7 @@ struct WellSpec {
 
 TEST_CASE("Five-spot: runs without crash", "[five-spot][2d][benchmark]") {
     auto horizon = test_helpers::make_uniform_horizon(
-        Nx, Ny, Nz, Lx, Ly, hz, perm_mD, poro, P_init_atm, 1.0);
+        Nx, Ny, Nz, Lx, Ly, hz, perm_mD, poro, P_init_atm, 0.999);
     auto numPrm = test_helpers::default_num_params();
 
     reservoir_simulator::ReservoirSimulator sim{
@@ -107,7 +107,7 @@ TEST_CASE("Five-spot: runs without crash", "[five-spot][2d][benchmark]") {
 TEST_CASE("Five-spot: export results for MRST comparison",
           "[five-spot][benchmark][.export]") {
     auto horizon = test_helpers::make_uniform_horizon(
-        Nx, Ny, Nz, Lx, Ly, hz, perm_mD, poro, P_init_atm, 1.0);
+        Nx, Ny, Nz, Lx, Ly, hz, perm_mD, poro, P_init_atm, 0.999);
     auto numPrm = test_helpers::default_num_params();
 
     reservoir_simulator::ReservoirSimulator sim{
