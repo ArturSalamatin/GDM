@@ -99,6 +99,7 @@ date: 2026-06-15
     - [[prompt-оптимизация-06b-CPR-benchmark]] — сессия 6b: CPR benchmark с Layout::InterleavedPSw (детальный)
     - [[prompt-оптимизация-07-adaptive-timestep]] — сессия 7: PI-контроллер адаптивного шага (детальный)
     - [[prompt-оптимизация-08-matrix-format]] — сессия 8: блочный матричный формат, устранение копирования
+    - [[prompt-оптимизация-09-CPR-в-production]] — сессия 9: полный переход на CPR в production
   - [[2026-06-21 сессия 4 iluk openmp]]
   - [[2026-06-20 инструментация AMGCL и baseline профиль]]
   - [[2026-06-20 оптимизация AMGCL солвера lgmres ilu0]]
