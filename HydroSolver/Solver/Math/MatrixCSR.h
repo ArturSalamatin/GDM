@@ -43,6 +43,7 @@ namespace reservoir_simulator
 			const std::vector<size_t>& Row()  const;
 			const std::vector<size_t>& Col()  const;
 			const std::vector<double>& Val()  const;
+			std::vector<double>& Val();
 
 			const CRSStructure& GetCRS() const { return *crs_; }
 

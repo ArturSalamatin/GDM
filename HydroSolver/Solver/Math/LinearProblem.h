@@ -6,16 +6,14 @@
 #undef min
 #undef max
 
-#include <amgcl/adapter/block_matrix.hpp>
 #include <amgcl/adapter/crs_tuple.hpp>
-#include <amgcl/value_type/static_matrix.hpp>
 #include <amgcl/make_solver.hpp>
 #include <amgcl/amg.hpp>
 #include <amgcl/coarsening/aggregation.hpp>
 #include <amgcl/relaxation/ilu0.hpp>
-#include <amgcl/relaxation/iluk.hpp>
+#include <amgcl/relaxation/as_preconditioner.hpp>
+#include <amgcl/preconditioner/cpr.hpp>
 #include <amgcl/solver/lgmres.hpp>
-#include <amgcl/io/mm.hpp>
 #include <amgcl/profiler.hpp>
 
 
@@ -36,19 +34,14 @@ namespace reservoir_simulator
 			bool converged;
 		};
 
-		template<unsigned char B>
-		using value_type = amgcl::static_matrix<double, B, B>;
-		template<unsigned char B>
-		using rhs_type = amgcl::static_matrix<double, B, 1>;
-		template<unsigned char B>
-		using BBackend = amgcl::backend::builtin<value_type<B>>;
+		using ScalarBackend = amgcl::backend::builtin<double>;
 
-		template<unsigned char B>
-		using Solver_AMG = amgcl::make_solver<
-			amgcl::amg< BBackend<B>, amgcl::coarsening::aggregation, amgcl::relaxation::iluk>
-			,
-			amgcl::solver::lgmres<BBackend<B>>
+		using CPRPrecond = amgcl::preconditioner::cpr<
+			amgcl::amg<ScalarBackend, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>,
+			amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>
 		>;
+
+		using CPRSolver = amgcl::make_solver<CPRPrecond, amgcl::solver::lgmres<ScalarBackend>>;
 
 		constexpr unsigned char B = 2;
 		class LinearProblem
@@ -61,7 +54,7 @@ namespace reservoir_simulator
 			std::vector<double> solutionCorrections;
 			std::unique_ptr<MatrixCSR> matrix;
 
-			Solver_AMG<B>::params prm;
+			CPRSolver::params prm;
 
 		public:
 			const MatrixCSR& Matrix() const;

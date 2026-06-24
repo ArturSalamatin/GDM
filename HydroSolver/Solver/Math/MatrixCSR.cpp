@@ -29,6 +29,7 @@ namespace reservoir_simulator
 		const std::vector<size_t>& MatrixCSR::Col() const { return crs_->Col(); }
 
 		const std::vector<double>& MatrixCSR::Val() const { return value; }
+		std::vector<double>& MatrixCSR::Val() { return value; }
 
 		void MatrixCSR::AddDiagBlock(size_t l, const std::vector<double>& data)
 		{

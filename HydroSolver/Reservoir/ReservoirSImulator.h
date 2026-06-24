@@ -388,7 +388,7 @@ namespace reservoir_simulator
 			const DevelopedHorizon& horizon,
 			const OilPhaseProperty& oil, const WaterPhaseProperty& water,
 			const OtherProperties& other_properties,
-			Layout layout = Layout::InterleavedSwP) noexcept;
+			Layout layout = Layout::InterleavedPSw) noexcept;
 
 		bool is_flow_field_empty() const;
 

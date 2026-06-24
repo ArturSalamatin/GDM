@@ -88,6 +88,7 @@ namespace reservoir_simulator
 			solutionCorrections{ std::vector<double>(rhsSize, 0.0) },
 			matrix{ std::make_unique<MatrixCSR>(layout, B, cellNmbr, connectivityGraph, blPattern) }
 		{
+			prm.precond.block_size = B;
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
@@ -107,22 +108,37 @@ namespace reservoir_simulator
 		{
 			prm.solver.maxiter = maxIter;
 
+			// Regularize near-zero diagonals for saturation rows (odd rows in InterleavedPSw).
+			// At Sw≈0 the water equation Jacobian row is degenerate; scalar ILU needs nonzero pivots.
+			{
+				const auto& row = Matrix().Row();
+				const auto& col = Matrix().Col();
+				auto& val = Matrix().Val();
+				for (size_t i = 1; i < rhsSize; i += B) {
+					for (size_t k = row[i]; k < row[i + 1]; ++k) {
+						if (col[k] == i) {
+							if (std::abs(val[k]) < 1e-20)
+								val[k] = 1e-6;
+							break;
+						}
+					}
+				}
+			}
+
 			prof.tic("setup");
-			auto A = amgcl::adapter::block_matrix<value_type<B>>(
-				std::tie(rhsSize, Matrix().Row(), Matrix().Col(), Matrix().Val()));
-			Solver_AMG<B> solve(A, prm);
+			CPRSolver solve(
+				std::tie(rhsSize, Matrix().Row(), Matrix().Col(), Matrix().Val()),
+				prm);
 			prof.toc("setup");
 
-			rhs_type<B> const* fptr = reinterpret_cast<rhs_type<B> const*>(&rhs[0]);
-			rhs_type<B>* xptr = reinterpret_cast<rhs_type<B>*>(&solutionCorrections[0]);
-			amgcl::backend::numa_vector<rhs_type<B>> F(fptr, fptr + cellNmbr);
-			amgcl::backend::numa_vector<rhs_type<B>> X(xptr, xptr + cellNmbr);
+			std::vector<double> F(rhs);
+			std::vector<double> X(solutionCorrections);
 
 			prof.tic("solve");
 			auto [iters, error] = solve(F, X);
 			prof.toc("solve");
 
-			std::copy(X.data(), X.data() + X.size(), xptr);
+			solutionCorrections = std::move(X);
 
 			return { iters, error, true };
 		}
