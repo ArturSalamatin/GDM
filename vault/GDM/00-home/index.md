@@ -96,7 +96,8 @@ date: 2026-06-15
     - [[prompt-оптимизация-04-iluk-reuse-openmp-adaptive]] — сессия 4: iluk в production, комбинации, reuse AMG, OpenMP
     - [[prompt-оптимизация-05-profiling-assembly]] — сессия 5: профилирование и оптимизация assembly
     - [[prompt-оптимизация-06-CPR-прекондиционер]] — сессия 6: CPR benchmark + production + partial_update
-    - [[prompt-оптимизация-07-adaptive-timestep]] — сессия 7: PI-контроллер адаптивного шага
+    - [[prompt-оптимизация-06b-CPR-benchmark]] — сессия 6b: CPR benchmark с Layout::InterleavedPSw (детальный)
+    - [[prompt-оптимизация-07-adaptive-timestep]] — сессия 7: PI-контроллер адаптивного шага (детальный)
     - [[prompt-оптимизация-08-matrix-format]] — сессия 8: блочный матричный формат, устранение копирования
   - [[2026-06-21 сессия 4 iluk openmp]]
   - [[2026-06-20 инструментация AMGCL и baseline профиль]]
