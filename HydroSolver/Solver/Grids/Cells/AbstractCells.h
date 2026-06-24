@@ -203,13 +203,15 @@ namespace reservoir_simulator
 
 			void UpdateState(const std::vector<double>& corrections, int begin)
 			{
-				// only sets raw data.
-				// if projection is required to satisfy 
-				// additional constraints like 0 < S < 1
 				std::transform(VariableFieldProperties.begin(), VariableFieldProperties.end(), corrections.begin() + begin,
 					VariableFieldProperties.begin(), std::plus<double>());
+				UpdateDependentFieldProperties();
+			}
 
-				// then modify this VIRTUAL method below
+			void UpdateState(const double* corrections)
+			{
+				for (size_t i = 0; i < VariableFieldProperties.size(); i++)
+					VariableFieldProperties[i] += corrections[i];
 				UpdateDependentFieldProperties();
 			}
 		};

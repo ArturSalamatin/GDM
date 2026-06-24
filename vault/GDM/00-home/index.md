@@ -52,6 +52,10 @@ date: 2026-06-15
 #### Debugging (`knowledge/debugging/`)
 - [[Newton divergence при закачке воды через скважину]]
 - [[SIGSEGV в MatrixCSR ResetMatrix вызванном из конструктора]]
+- [[zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане]]
+
+#### Решения (`knowledge/decisions/`)
+- [[переход с блочного AMG на скалярный CPR в production]]
 
 #### Валидация (`knowledge/validation/`)
 - [[five-spot сравнение с MRST]]
@@ -96,20 +100,29 @@ date: 2026-06-15
     - [[prompt-оптимизация-04-iluk-reuse-openmp-adaptive]] — сессия 4: iluk в production, комбинации, reuse AMG, OpenMP
     - [[prompt-оптимизация-05-profiling-assembly]] — сессия 5: профилирование и оптимизация assembly
     - [[prompt-оптимизация-06-CPR-прекондиционер]] — сессия 6: CPR benchmark + production + partial_update
-    - [[prompt-оптимизация-07-adaptive-timestep]] — сессия 7: PI-контроллер адаптивного шага
+    - [[prompt-оптимизация-06b-CPR-benchmark]] — сессия 6b: CPR benchmark с Layout::InterleavedPSw (детальный)
+    - [[prompt-оптимизация-07-adaptive-timestep]] — сессия 7: PI-контроллер адаптивного шага (детальный)
     - [[prompt-оптимизация-08-matrix-format]] — сессия 8: блочный матричный формат, устранение копирования
+    - [[prompt-оптимизация-09-CPR-в-production]] — сессия 9: полный переход на CPR в production
   - [[2026-06-21 сессия 4 iluk openmp]]
   - [[2026-06-20 инструментация AMGCL и baseline профиль]]
   - [[2026-06-20 оптимизация AMGCL солвера lgmres ilu0]]
   - [[2026-06-21 переход на amgcl profiler]]
   - [[2026-06-21 серии DFGE перебор параметров AMGCL]]
   - [[2026-06-21 сессия 5 оптимизация assembly]]
+  - [[план-сессия-6-CPR-прекондиционер]] — детальный план с анализом порядка переменных
+  - [[2026-06-23 сессия 6a layout абстракция]] — CRSStructure + enum Layout, подготовка к CPR
+  - [[2026-06-24 сессия 6b-7 CPR benchmark и PI-контроллер]] — CPR -32%, PI-контроллер Soderlind
 
 #### Архитектурные решения (новые)
 - [[amgcl конфигурация lgmres ilu0 aggregation]]
 - [[amgcl конфигурация iluk k1 новый оптимум]]
+- [[CPR требует перестановки переменных или col percent B == 0 будет Sw]]
+- [[layout абстракция отделяет топологию сетки от CRS маппинга]]
+- [[PI-контроллер safety=1 и target=12 для Newton-based timestep control]]
 
 #### Debugging (новые)
 - [[CopyBlock mutex сериализовал OpenMP и убивал параллелизм]]
+- [[zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане]]
 
 - `inbox/` — необработанные идеи и заметки

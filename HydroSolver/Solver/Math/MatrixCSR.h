@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <iomanip>
+#include "CRSStructure.h"
 
 namespace reservoir_simulator
 {
@@ -19,15 +20,13 @@ namespace reservoir_simulator
 			printValue(o, 0.0);
 		}
 
-		class SparsityPattern;
-
 		class MatrixCSR
 		{
 		protected:
-			std::unique_ptr<SparsityPattern> pattern;
+			std::unique_ptr<CRSStructure> crs_;
 			std::vector<double> value;
 
-			size_t nnz; // number of non-zero elements in the matrix
+			size_t nnz;
 			void CopyBlock(
 				size_t valueOffset, std::vector<double>& dest,
 				const std::vector<double>& data,
@@ -44,6 +43,9 @@ namespace reservoir_simulator
 			const std::vector<size_t>& Row()  const;
 			const std::vector<size_t>& Col()  const;
 			const std::vector<double>& Val()  const;
+			std::vector<double>& Val();
+
+			const CRSStructure& GetCRS() const { return *crs_; }
 
 			void AddDiagBlock(size_t l, const std::vector<double>& data);
 			void AddDiagBlock(size_t l, const double* data);
@@ -51,10 +53,8 @@ namespace reservoir_simulator
 			void AddOffDiagBlock(size_t l, size_t neibIdx, const double* data);
 
 			MatrixCSR() noexcept;
-			MatrixCSR(const size_t eqNmbr_, const size_t cellNmbr,
-				const std::vector<std::vector<int>>& connectivityGraph) noexcept;
 
-			MatrixCSR(size_t eqNmbr_, size_t cellNmbr,
+			MatrixCSR(Layout layout, unsigned char eqNmbr_, size_t cellNmbr,
 				const std::vector<std::vector<int>>& connectivityGraph,
 				const std::vector<bool>& blPattern) noexcept;
 
@@ -66,8 +66,6 @@ namespace reservoir_simulator
 			void PrintDiagBlocks() const;
 
 		private:
-
-			const SparsityPattern& sparsity_pattern() const;
 
 			template<typename stream>
 			void sendCRS2Stream(stream& s, bool is_full = false) const
@@ -87,40 +85,31 @@ namespace reservoir_simulator
 
 				s << "Print matrix in CRS format as a " << mSize << "x" << mSize << " matrix" << std::endl;
 
-				//Scan the row_ptr array to find the beginning and end of row i
 				for (i = 0; i < mSize; ++i)
 				{
-					//the column index of the element to print
 					zeroIndex = 0;
 
-					// Print row i: index k goes from the beginning to the end of row i
 					for (k = Row()[i]; k < Row()[i + 1]; ++k) {
 						j = Col()[k];
 
-						// print entries of zero values that exist between consecutive
-						// non-zeroes
 						while (zeroIndex < j) {
 							if (is_full)
 								printZero(s);
 							++zeroIndex;
-						} // while
+						}
 
-						//print the nonzero value
 						printValue(s, value[k]);
-						// Prepare zeroIndex for the next sequence of zeroes
 						++zeroIndex;
-					} // for
+					}
 
-					  //print the trailing zeroes in this row
 					while (zeroIndex < mSize) {
 						if (is_full)
 							printZero(s);
 						++zeroIndex;
-					} // while
+					}
 
-					// Start the next line
 					s << std::endl;
-				} // for
+				}
 
 				s << std::endl;
 			}
@@ -133,7 +122,7 @@ namespace reservoir_simulator
 					{
 						for (size_t j = 0; j < EqNmbr(); ++j)
 						{
-							printValue(s, value[sparsity_pattern().DiagBlocks()[EqNmbr() * (l * EqNmbr() + i) + j]]);
+							printValue(s, value[crs_->DiagBlocks()[EqNmbr() * (l * EqNmbr() + i) + j]]);
 							s << "  ";
 						}
 						s << std::endl;
