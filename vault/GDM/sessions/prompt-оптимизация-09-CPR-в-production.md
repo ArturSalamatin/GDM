@@ -38,7 +38,7 @@ using ScalarBackend = amgcl::backend::builtin<double>;
 
 using CPRPrecond = amgcl::preconditioner::cpr<
     amgcl::amg<ScalarBackend, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>,
-    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>
+    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::iluk>
 >;
 
 using CPRSolver = amgcl::make_solver<CPRPrecond, amgcl::solver::lgmres<ScalarBackend>>;
@@ -319,9 +319,37 @@ ctest --test-dir build -C Release -R "CPR_BL" --output-on-failure
 ```
 Или один из TS тестов. Убедиться что время ~27 с (CPR), не ~40 с (block AMG).
 
+## Результаты (2026-06-24)
+
+### Что реализовано
+
+1. `LinearProblem.h/cpp` — блочный AMG заменён на CPR (`cpr<amg<aggregation,ilu0>, as_preconditioner<ilu0>>`)
+2. `MatrixCSR.h/cpp` — non-const `Val()` для регуляризации перед solve
+3. `ReservoirSimulator.h` — default layout = InterleavedPSw
+4. `ilu0.hpp` — fallback `D[i]=1` при zero pivot (вместо crash)
+5. `test_amgcl_benchmark.cpp` — удалены блочные бенчмарки, `run_benchmark` вызывает production solver
+6. `test_five_spot.cpp` — oil_saturation = 0.999 (Sw_init = 0.001 вместо 0)
+
+### Производительность (честное сравнение, одинаковые условия)
+
+| Тест | Блочный AMG | CPR | Ускорение |
+|---|---|---|---|
+| Variable debit (4 теста) | 1.55–3.22 с | 0.77–0.86 с | 1.9–4.2× |
+| 3D completions (4 теста) | 0.84–2.49 с | 0.45–1.30 с | 1.9–2.2× |
+
+### Ограничения
+
+CPR diverges при точно Sw=0: вся строка водной фазы Якобиана нулевая → CPR block inversion → near-singular pressure matrix → NaN. Работает при Sw ≥ 0.0001. В реальных пластах connate water > 0.
+
+### Верификация
+
+4 полных прогона (45 тестов) — стабильно. Проверено: массовый баланс, Sw bounds, четвертная симметрия five-spot (8 значащих цифр), Newton convergence (4–6 iter).
+
 ## Связанные заметки
 
 - [[2026-06-24 сессия 6b-7 CPR benchmark и PI-контроллер]]
 - [[layout абстракция отделяет топологию сетки от CRS маппинга]]
 - [[CPR требует перестановки переменных или col percent B == 0 будет Sw]]
 - [[prompt-оптимизация-06b-CPR-benchmark]]
+- [[переход с блочного AMG на скалярный CPR в production]]
+- [[zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане]]

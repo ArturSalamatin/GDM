@@ -52,6 +52,10 @@ date: 2026-06-15
 #### Debugging (`knowledge/debugging/`)
 - [[Newton divergence при закачке воды через скважину]]
 - [[SIGSEGV в MatrixCSR ResetMatrix вызванном из конструктора]]
+- [[zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане]]
+
+#### Решения (`knowledge/decisions/`)
+- [[переход с блочного AMG на скалярный CPR в production]]
 
 #### Валидация (`knowledge/validation/`)
 - [[five-spot сравнение с MRST]]
@@ -119,5 +123,6 @@ date: 2026-06-15
 
 #### Debugging (новые)
 - [[CopyBlock mutex сериализовал OpenMP и убивал параллелизм]]
+- [[zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане]]
 
 - `inbox/` — необработанные идеи и заметки
