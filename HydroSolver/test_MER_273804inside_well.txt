@@ -1,2 +1,0 @@
-Well 273804 MER data:
-time    oil_v     water_v   oil_m       water_m     pump_water  idle_time  type is_work 
