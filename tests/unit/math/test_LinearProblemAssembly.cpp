@@ -7,29 +7,115 @@ using namespace reservoir_simulator::linear_problem;
 using namespace assembly_helpers;
 using Catch::Approx;
 
-TEST_CASE("LinearProblemAssembly: 2x1x1 InterleavedSwP matrix and rhs",
-          "[unit][level4][math][LinearProblemAssembly]") {
-    auto graph = make_grid_graph(2, 1);
-    LinearProblem lp(Layout::InterleavedSwP, 1e-6, 1e-6, graph, fullBlock2());
+// Fill LinearProblem with known diag+offdiag blocks and RHS,
+// verify matrix toDense() == reference, RHS placement correct.
+static void run_lp_test(int nx, int ny, int nz, Layout layout)
+{
+    auto graph = make_grid_graph(nx, ny, nz);
+    int ncells = static_cast<int>(graph.size());
+    constexpr int B = 2;
 
-    std::array<double,4> d0 = {1, 2, 3, 4};
-    std::array<double,2> r0 = {10, 20};
-    std::array<double,4> d1 = {5, 6, 7, 8};
-    std::array<double,2> r1 = {30, 40};
+    LinearProblem lp(layout, 1e-6, 1e-6, graph, fullBlock2());
 
-    lp.AddDiagBlock(0, d0.data(), r0.data());
-    lp.AddDiagBlock(1, d1.data(), r1.data());
+    std::map<std::pair<int,int>, std::array<double,4>> blocks;
+    std::vector<double> expected_rhs(ncells * B, 0.0);
+
+    auto gi = [&](int cell, int var) -> size_t {
+        if (layout == Layout::Blocked)
+            return (size_t)var * ncells + cell;
+        else if (layout == Layout::InterleavedPSw) {
+            unsigned char perm[] = {1, 0};
+            return cell * B + perm[var];
+        }
+        else
+            return cell * B + var;
+    };
+
+    for (int l = 0; l < ncells; l++) {
+        double base = (l + 1) * 10.0;
+        std::array<double,4> diag = {base+1, base+2, base+3, base+4};
+        std::array<double,2> rhs = {base+5, base+6};
+
+        lp.AddDiagBlock(l, diag.data(), rhs.data());
+        blocks[{l, l}] = diag;
+
+        expected_rhs[gi(l, 0)] += rhs[0];
+        expected_rhs[gi(l, 1)] += rhs[1];
+
+        for (int ni = 0; ni < static_cast<int>(graph[l].size()); ni++) {
+            int neib = graph[l][ni];
+            double obase = (l + 1) * 100.0 + (neib + 1) * 10.0;
+            std::array<double,4> off = {obase+1, obase+2, obase+3, obase+4};
+
+            lp.AddOffDiagBlock(l, ni, off.data());
+            blocks[{l, neib}] = off;
+        }
+    }
 
     auto dense = lp.Matrix().toDense();
-    auto expected = build_dense_from_blocks(2, Layout::InterleavedSwP, graph,
-        {{{0,0}, d0}, {{1,1}, d1}});
-    check_dense_equal(dense, expected);
+    auto expected_mat = build_dense_from_blocks(ncells, layout, graph, blocks);
 
-    // RHS: GlobalIndex(cell, var) = cell*2 + var for InterleavedSwP
+    check_dense_equal(dense, expected_mat);
+    check_zeros_are_zero(dense, lp.Matrix().Row(), lp.Matrix().Col());
+    check_sparsity_symmetric(lp.Matrix());
+    check_nnz_count(lp.Matrix(), ncells, graph);
+
     auto& rhs = lp.Rhs();
-    CHECK(rhs[0] == Approx(10.0));
-    CHECK(rhs[1] == Approx(20.0));
-    CHECK(rhs[2] == Approx(30.0));
-    CHECK(rhs[3] == Approx(40.0));
+    REQUIRE(rhs.size() == expected_rhs.size());
+    for (size_t i = 0; i < rhs.size(); i++) {
+        INFO("rhs[" << i << "]: actual=" << rhs[i] << " expected=" << expected_rhs[i]);
+        CHECK(rhs[i] == Approx(expected_rhs[i]));
+    }
     check_finite(rhs, "rhs");
+}
+
+// --- 2x1x1 ---
+
+TEST_CASE("LinearProblemAssembly: 2x1x1 InterleavedSwP",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(2, 1, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("LinearProblemAssembly: 2x1x1 InterleavedPSw",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(2, 1, 1, Layout::InterleavedPSw);
+}
+
+TEST_CASE("LinearProblemAssembly: 2x1x1 Blocked",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(2, 1, 1, Layout::Blocked);
+}
+
+// --- 3x1x1 ---
+
+TEST_CASE("LinearProblemAssembly: 3x1x1 InterleavedSwP",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(3, 1, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("LinearProblemAssembly: 3x1x1 InterleavedPSw",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(3, 1, 1, Layout::InterleavedPSw);
+}
+
+TEST_CASE("LinearProblemAssembly: 3x1x1 Blocked",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(3, 1, 1, Layout::Blocked);
+}
+
+// --- 2x2x1 ---
+
+TEST_CASE("LinearProblemAssembly: 2x2x1 InterleavedSwP",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(2, 2, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("LinearProblemAssembly: 2x2x1 InterleavedPSw",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(2, 2, 1, Layout::InterleavedPSw);
+}
+
+TEST_CASE("LinearProblemAssembly: 2x2x1 Blocked",
+          "[unit][level4][math][LinearProblemAssembly]") {
+    run_lp_test(2, 2, 1, Layout::Blocked);
 }
