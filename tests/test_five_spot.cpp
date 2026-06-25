@@ -62,19 +62,7 @@ TEST_CASE("Five-spot: runs without crash", "[five-spot][2d][benchmark]") {
     for (double t = 50.0; t <= T_end; t += 50.0)
         timeMoments.push_back(t);
 
-    bool solve_ok = true;
-    try {
-        sim.Solve(timeMoments);
-    } catch (const std::exception& e) {
-        WARN("Solve threw: " << e.what());
-        WARN("Known issue: Newton divergence with wells — see vault debugging note");
-        solve_ok = false;
-    }
-
-    if (!solve_ok) {
-        // Тест выявляет известный баг, не фейлим CI
-        return;
-    }
+    sim.Solve(timeMoments);
 
     CHECK(sim.numPrm.WastedTrialsCount() < 50);
 
