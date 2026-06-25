@@ -491,7 +491,7 @@ const std::string csv_path = "results/amgcl_benchmark.csv";
 
 // ======================== Series CPR: experimental configs ========================
 
-TEST_CASE("AMGCL benchmark: Series CPR — CPR preconditioner",
+TEST_CASE("AMGCL benchmark: Series CPR - CPR preconditioner",
           "[benchmark][amgcl][seriesCPR][.slow]")
 {
     fs::create_directories("results");
@@ -544,7 +544,7 @@ TEST_CASE("AMGCL benchmark: Series CPR — CPR preconditioner",
 
 // ======================== Series TS: timestep control ========================
 
-TEST_CASE("AMGCL benchmark: Series TS — timestep control",
+TEST_CASE("AMGCL benchmark: Series TS - timestep control",
           "[benchmark][amgcl][seriesTS][.slow]")
 {
     fs::create_directories("results");
