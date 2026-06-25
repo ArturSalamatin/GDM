@@ -118,6 +118,19 @@ add_executable(gdm_benchmark
 )
 target_link_libraries(gdm_benchmark PRIVATE gdm_core Catch2::Catch2WithMain)
 
+# =============================================================================
+# gdm_unit_level0 — unit tests, zero internal dependencies (STL only)
+# =============================================================================
+add_executable(gdm_unit_level0
+    tests/unit/reservoir/test_PIController.cpp
+    tests/unit/geometry/test_GridDescriptors.cpp
+    tests/unit/geometry/test_Point.cpp
+    tests/unit/physics/test_PropertyDescriptor.cpp
+    tests/unit/wells/test_GeosPoint.cpp
+    tests/unit/wells/test_Segment.cpp
+)
+target_link_libraries(gdm_unit_level0 PRIVATE gdm_core Catch2::Catch2WithMain)
+
 include(CTest)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
@@ -126,6 +139,10 @@ catch_discover_tests(gdm_tests
 )
 catch_discover_tests(gdm_benchmark
     PROPERTIES TIMEOUT 1800
+)
+catch_discover_tests(gdm_unit_level0
+    TEST_PREFIX "unit.level0."
+    PROPERTIES TIMEOUT 30
 )
 
 # =============================================================================
