@@ -179,6 +179,20 @@ catch_discover_tests(gdm_unit_level2
 )
 
 # =============================================================================
+# gdm_unit_level3 — unit tests, composite classes
+# =============================================================================
+add_executable(gdm_unit_level3
+    tests/unit/math/test_MatrixCSR.cpp
+    tests/unit/physics/test_TwoPhaseFlowCell.cpp
+    tests/unit/wells/test_WellJobs.cpp
+)
+target_link_libraries(gdm_unit_level3 PRIVATE gdm_core Catch2::Catch2WithMain)
+catch_discover_tests(gdm_unit_level3
+    TEST_PREFIX "unit.level3."
+    PROPERTIES TIMEOUT 60
+)
+
+# =============================================================================
 # gdm_data + gdm_app — Data-слой (PostgreSQL + GEOS)
 # =============================================================================
 find_package(PostgreSQL QUIET)
