@@ -197,13 +197,13 @@ namespace reservoir_simulator
 					}
 				}
 			// loop through the boundaries parallel to XZ-plane
-			if(ny>1)
+			if(ny>1ll)
 //#ifdef	USE_PARALLEL
 //#pragma omp parallel for
 //#endif
 				for (int i = 0; i < nx; i++)
 				{
-					for (int j = 0; j < ny; j += ny - 1)
+					for (int j = 0; j < ny; j += ny - 1ll)
 					{
 						for (int k = 0; k < nz; k++)
 						{

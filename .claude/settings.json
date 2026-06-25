@@ -10,7 +10,11 @@
       "Write(*)",
       "Edit(*)",
       "Glob(*)",
-      "Grep(*)"
+      "Grep(*)",
+      "Bash(cd \"d:\\\\Lessons\\\\Grants\\\\2027\\\\GDM\" && mkdir -p tests/unit/geometry tests/unit/physics tests/unit/math tests/unit/wells tests/unit/reservoir tests/unit/descriptors)"
+    ],
+    "additionalDirectories": [
+      "d:\\Lessons\\Grants\\2027\\GDM\\tests\\unit"
     ]
   },
   "autoCompact": true,

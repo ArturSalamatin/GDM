@@ -10,6 +10,11 @@
 #undef min
 #undef max
 
+// TODO:
+/*
+
+*/
+
 namespace reservoir_simulator
 {
 	namespace phasePortrait
@@ -19,35 +24,35 @@ namespace reservoir_simulator
 		class Point
 		{
 		public:
-			double x() const { return X; }
-			double y() const { return Y; }
+			const double x() const { return X; }
+			const double y() const { return Y; }
 
-			std::wstring print_json() const
+			const std::wstring print_json() const
 			{
 				return L"[" + std::to_wstring((int)x()) + L"," + std::to_wstring((int)y()) + L"]";
 			}
 
-			double Area(const phasePortrait::Point& P) const
+			const double Area(const phasePortrait::Point& P) const
 			{
 				return abs(P.x() - x()) * (P.y() - y());
 			}
-			static double Area(const Point& P, const Point& Q)
+			static const double Area(const Point& P, const Point& Q)
 			{
 				return abs((P.x() - Q.x()) * (P.y() - Q.y()));
 			}
 			static std::array<double, 4> Area(const Point& P, const std::array<Point, 4>& Q)
 			{
 				std::array<double, 4> result;
-				for (int i = 0; i < 4; i++)
+				for (size_t i{0ll}; i < 4ll; ++i)
 					result[i] = Point::Area(P, Q[i]);
 				return result;
 			}
 
 		public:
-			Point(double x_, double y_) { X = x_; Y = y_; }
-			double distance(const Point& p) const
+			Point(double x, double y) : X{x}, Y{y} {}
+			const double distance(const Point& p) const
 			{
-				return sqrt(pow((p.x() - this->x()), 2) + pow((p.y() - this->y()), 2));
+				return std::sqrt(std::pow((p.x() - this->x()), 2) + std::pow((p.y() - this->y()), 2));
 			}
 
 		private:
@@ -61,7 +66,7 @@ namespace reservoir_simulator
 			double distance;
 		public:
 			trPoint(double t, double s_, const Point& p_) :p{ p_ }, time{ t }, distance{ s_ }{};
-			trPoint(double t, double s_, double x, double y) :trPoint{ t, s_, Point(x, y) } {};
+			trPoint(double t, double s_, double x, double y) :trPoint{ t, s_, Point{x, y} } {};
 
 			trPoint operator +(const trPoint& P1)
 			{
@@ -107,7 +112,7 @@ namespace reservoir_simulator
 				if (size() == 0)
 					return L"[]";
 				std::wstring result = L"[";
-				for (size_t i = 0; i < size(); i++)
+				for (size_t i{0ll}; i < size(); ++i)
 				{
 					if (i > 0) result += L",";
 					result += Point(X[i], Y[i]).print_json();
