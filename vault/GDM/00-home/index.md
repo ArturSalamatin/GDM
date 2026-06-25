@@ -121,6 +121,7 @@ date: 2026-06-15
   - [[2026-06-23 сессия 6a layout абстракция]] — CRSStructure + enum Layout, подготовка к CPR
   - [[2026-06-24 сессия 6b-7 CPR benchmark и PI-контроллер]] — CPR -32%, PI-контроллер Soderlind
   - [[2026-06-24 сессия 9 CPR в production]] — полный переход, 2–4× ускорение
+  - [[2026-06-25 тесты сборки матрицы Якобиана]] — level4: MatrixAssembly, LinearProblemAssembly, JacobianAssembly
 
 #### Архитектурные решения (новые)
 - [[amgcl конфигурация lgmres ilu0 aggregation]]
