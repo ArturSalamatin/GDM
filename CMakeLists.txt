@@ -162,6 +162,23 @@ catch_discover_tests(gdm_unit_level1
 )
 
 # =============================================================================
+# gdm_unit_level2 — unit tests, medium dependency depth
+# =============================================================================
+add_executable(gdm_unit_level2
+    tests/unit/math/test_CRSStructure.cpp
+    tests/unit/math/test_SparsityPattern.cpp
+    tests/unit/physics/test_AbstractCells.cpp
+    tests/unit/wells/test_AccumulatedPerforations.cpp
+    tests/unit/descriptors/test_MER_Data.cpp
+    tests/unit/reservoir/test_NumericalParameters.cpp
+)
+target_link_libraries(gdm_unit_level2 PRIVATE gdm_core Catch2::Catch2WithMain)
+catch_discover_tests(gdm_unit_level2
+    TEST_PREFIX "unit.level2."
+    PROPERTIES TIMEOUT 60
+)
+
+# =============================================================================
 # gdm_data + gdm_app — Data-слой (PostgreSQL + GEOS)
 # =============================================================================
 find_package(PostgreSQL QUIET)
