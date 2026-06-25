@@ -1,68 +1,109 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include "test_helpers.h"
+#include "Solver/Grids/Cells/TwoPhaseFlowCell.h"
 #include <cmath>
 
+using Catch::Approx;
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
+using namespace reservoir_simulator::cell;
 
-// --- Relperm (Corey n=3) ---
+// --- Relperm via TwoPhaseFlowCell (Corey n=3) ---
 
-TEST_CASE("Corey relperm: boundary values", "[components][relperm]") {
-    // k_rw(0) = 0, k_ro(0) = 1
-    // k_rw(1) = 1, k_ro(1) = 0
-    REQUIRE(std::pow(0.0, 3) == 0.0);
-    REQUIRE(std::pow(1.0, 3) == 1.0);
+namespace {
+
+void init_constant_point_properties() {
+    std::array<double, 8> props = {
+        2.0, 1.0, 800.0, 1000.0, 9.81, 1e-9, 5e-10, 1e7
+    };
+    PhysPropCell::set_constantPointProperties(props);
 }
 
-TEST_CASE("Corey relperm: intermediate values match formula",
+TwoPhaseFlowCell make_relperm_cell(double Sw, double So_res = 0.1, double Sw_res = 0.2) {
+    init_constant_point_properties();
+    std::vector<double> center = {50.0, 50.0, 0.0};
+    std::vector<double> size = {10.0, 10.0, 5.0};
+    std::vector<double> constProp = {1e-13, 0.2, So_res, Sw_res, 0, 0, 0, 0, 0};
+    std::vector<double> varProp = {Sw, 1e7};
+    return TwoPhaseFlowCell(center, size, constProp, varProp);
+}
+
+} // namespace
+
+TEST_CASE("Corey relperm: boundary values via TwoPhaseFlowCell",
           "[components][relperm]") {
-    auto Sw = GENERATE(0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0);
-    double krw = std::pow(Sw, 3);
-    double kro = std::pow(1.0 - Sw, 3);
+    constexpr double So_res = 0.1, Sw_res = 0.2;
+
+    auto cell_low = make_relperm_cell(Sw_res, So_res, Sw_res);
+    CHECK(cell_low.RelativePermeabilityWater() == Approx(0.0).margin(1e-12));
+    CHECK(cell_low.RelativePermeabilityOil() == Approx(1.0));
+
+    auto cell_high = make_relperm_cell(1.0 - So_res, So_res, Sw_res);
+    CHECK(cell_high.RelativePermeabilityWater() == Approx(1.0));
+    CHECK(cell_high.RelativePermeabilityOil() == Approx(0.0).margin(1e-12));
+}
+
+TEST_CASE("Corey relperm: values in [0,1] via TwoPhaseFlowCell",
+          "[components][relperm]") {
+    constexpr double So_res = 0.1, Sw_res = 0.2;
+    auto Sw_frac = GENERATE(0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0);
+    double Sw = Sw_res + Sw_frac * (1.0 - Sw_res - So_res);
 
     CAPTURE(Sw);
+    auto cell = make_relperm_cell(Sw, So_res, Sw_res);
+    double krw = cell.RelativePermeabilityWater();
+    double kro = cell.RelativePermeabilityOil();
+
     CHECK(krw >= 0.0);
     CHECK(krw <= 1.0);
     CHECK(kro >= 0.0);
     CHECK(kro <= 1.0);
-    REQUIRE_THAT(krw + kro, WithinAbs(
-        std::pow(Sw, 3) + std::pow(1.0 - Sw, 3), 1e-15));
 }
 
-TEST_CASE("Corey relperm: monotonicity", "[components][relperm]") {
+TEST_CASE("Corey relperm: monotonicity via TwoPhaseFlowCell",
+          "[components][relperm]") {
+    constexpr double So_res = 0.1, Sw_res = 0.2;
     double prev_krw = 0.0, prev_kro = 1.0;
-    for (int i = 1; i <= 100; ++i) {
-        double Sw = i / 100.0;
-        double krw = std::pow(Sw, 3);
-        double kro = std::pow(1.0 - Sw, 3);
-        CHECK(krw >= prev_krw);
-        CHECK(kro <= prev_kro);
+
+    for (int i = 0; i <= 100; ++i) {
+        double Sw = Sw_res + i / 100.0 * (1.0 - Sw_res - So_res);
+        auto cell = make_relperm_cell(Sw, So_res, Sw_res);
+        double krw = cell.RelativePermeabilityWater();
+        double kro = cell.RelativePermeabilityOil();
+
+        CHECK(krw >= prev_krw - 1e-12);
+        CHECK(kro <= prev_kro + 1e-12);
         prev_krw = krw;
         prev_kro = kro;
     }
 }
 
-TEST_CASE("Corey relperm: derivative vs finite difference",
+TEST_CASE("Corey relperm: mobility derivative vs finite difference",
           "[components][relperm]") {
-    auto Sw = GENERATE(0.1, 0.3, 0.5, 0.7, 0.9);
+    constexpr double So_res = 0.1, Sw_res = 0.2;
+    constexpr double dSw_scaled = 0.7; // 1 - Sw_res - So_res
     constexpr double eps = 1e-7;
-
-    double krw_plus = std::pow(Sw + eps, 3);
-    double krw_minus = std::pow(Sw - eps, 3);
-    double dkrw_numerical = (krw_plus - krw_minus) / (2 * eps);
-    double dkrw_analytical = 3.0 * Sw * Sw;
+    auto Sw_frac = GENERATE(0.1, 0.3, 0.5, 0.7, 0.9);
+    double Sw = Sw_res + Sw_frac * dSw_scaled;
 
     CAPTURE(Sw);
-    REQUIRE_THAT(dkrw_analytical, WithinRel(dkrw_numerical, 1e-5));
+    auto cell = make_relperm_cell(Sw, So_res, Sw_res);
+    // DerivativeMobilityOil/Water are d/d(Sw_scaled), not d/d(Sw_physical)
+    // Convert to physical: d/dSw = d/dSw_scaled * (1 / dSw_scaled)
+    double dMobOil_analytical = cell.DerivativeMobilityOil() / dSw_scaled;
+    double dMobWater_analytical = cell.DerivativeMobilityWater() / dSw_scaled;
 
-    double kro_plus = std::pow(1.0 - (Sw + eps), 3);
-    double kro_minus = std::pow(1.0 - (Sw - eps), 3);
-    double dkro_numerical = (kro_plus - kro_minus) / (2 * eps);
-    double dkro_analytical = -3.0 * (1.0 - Sw) * (1.0 - Sw);
+    auto cell_plus = make_relperm_cell(Sw + eps, So_res, Sw_res);
+    auto cell_minus = make_relperm_cell(Sw - eps, So_res, Sw_res);
 
-    REQUIRE_THAT(dkro_analytical, WithinRel(dkro_numerical, 1e-5));
+    double dMobOil_numerical = (cell_plus.MobilityOil() - cell_minus.MobilityOil()) / (2 * eps);
+    double dMobWater_numerical = (cell_plus.MobilityWater() - cell_minus.MobilityWater()) / (2 * eps);
+
+    REQUIRE_THAT(dMobOil_analytical, WithinRel(dMobOil_numerical, 1e-4));
+    REQUIRE_THAT(dMobWater_analytical, WithinRel(dMobWater_numerical, 1e-4));
 }
 
 // --- Fractional flow ---
