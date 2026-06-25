@@ -57,3 +57,25 @@ TEST_CASE("RawHorizon: GridSize for single-cell grid",
     CHECK(h.GridSize() == 1);
     CHECK(h.GridPlanarSize() == 1);
 }
+
+TEST_CASE("RawHorizon: initial_water_saturation with full oil gives Sw=0",
+          "[unit][level1][reservoir][RawHorizon]") {
+    RawHorizon h;
+    h.grid_size = {2, 1, 1};
+    h.initial_oil_saturation = {1.0, 1.0};
+    auto Sw = h.initial_water_saturation();
+    CHECK(Sw[0] == Approx(0.0));
+    CHECK(Sw[1] == Approx(0.0));
+}
+
+TEST_CASE("RawHorizon: heterogeneous oil saturation",
+          "[unit][level1][reservoir][RawHorizon]") {
+    RawHorizon h;
+    h.grid_size = {3, 1, 1};
+    h.initial_oil_saturation = {0.9, 0.5, 0.1};
+    auto Sw = h.initial_water_saturation();
+    REQUIRE(Sw.size() == 3);
+    CHECK(Sw[0] == Approx(0.1));
+    CHECK(Sw[1] == Approx(0.5));
+    CHECK(Sw[2] == Approx(0.9));
+}

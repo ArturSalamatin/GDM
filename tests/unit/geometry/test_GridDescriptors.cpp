@@ -55,3 +55,18 @@ TEST_CASE("BlockSize: aggregate initialization",
     CHECK(bs.step_x == 25.0);
     CHECK(bs.step_y == 50.0);
 }
+
+TEST_CASE("GridBounds: zero-size domain gives zero lengths",
+          "[unit][level0][geometry][GridBounds]") {
+    GridBounds gb(5.0, 5.0, 5.0, 5.0);
+    CHECK(gb.x_length == Approx(0.0));
+    CHECK(gb.y_length == Approx(0.0));
+}
+
+TEST_CASE("GridBounds: inverted uses abs so x_min/x_max stay as given",
+          "[unit][level0][geometry][GridBounds]") {
+    GridBounds gb(500.0, 600.0, 100.0, 200.0);
+    CHECK(gb.x_min == 500.0);
+    CHECK(gb.x_max == 100.0);
+    CHECK(gb.x_length == Approx(400.0));
+}

@@ -56,3 +56,15 @@ TEST_CASE("SparsityPattern: single cell has 1 block",
     CHECK(sp.TotalNmbrOfBlocks() == 1);
     CHECK(sp.Row().size() == 3);
 }
+
+TEST_CASE("SparsityPattern: partial block pattern (diagonal only)",
+          "[unit][level2][math][SparsityPattern]") {
+    std::vector<std::vector<int>> graph = {{1}, {0}};
+    std::vector<bool> blockPattern = {true, false, false, true};
+    SparsityPattern sp(2, 2, graph, blockPattern);
+
+    CHECK(sp.NmbrOfNonzerosPerUnitBlock() == 2);
+    CHECK(sp.TotalNmbrOfBlocks() == 4);
+    size_t expected_nnz = 2 * 4;
+    CHECK(sp.Row().back() == expected_nnz);
+}

@@ -41,3 +41,17 @@ TEST_CASE("GeosPoint: copy shares underlying SimplePoint",
     CHECK(gp2.get()->getX() == 5.0);
     CHECK(gp2.get()->getY() == 15.0);
 }
+
+TEST_CASE("SimplePoint: negative coordinates",
+          "[unit][level0][wells][GeosPoint]") {
+    SimplePoint sp(-100.5, -200.3);
+    CHECK(sp.getX() == -100.5);
+    CHECK(sp.getY() == -200.3);
+}
+
+TEST_CASE("GeosPoint: shared_ptr mutation visible through copies",
+          "[unit][level0][wells][GeosPoint]") {
+    GeosPoint gp1(1.0, 2.0);
+    GeosPoint gp2 = gp1;
+    CHECK(gp1.get().get() == gp2.get().get());
+}

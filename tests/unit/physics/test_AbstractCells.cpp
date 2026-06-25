@@ -71,3 +71,15 @@ TEST_CASE("PhysPropCell: set and get ConstantPointProperties",
     for (int i = 0; i < 8; i++)
         CHECK(got[i] == Approx(props[i]));
 }
+
+TEST_CASE("Dim3Cell: negative step gives negative volume",
+          "[unit][level2][physics][Dim3Cell]") {
+    Dim3Cell c({1.0, 2.0, 3.0}, {-4.0, 5.0, 6.0});
+    CHECK(c.Volume() == Approx(-120.0));
+}
+
+TEST_CASE("SomeDimCell: single-dimension volume equals step",
+          "[unit][level2][physics][SomeDimCell]") {
+    SomeDimCell c({0.0}, {7.5});
+    CHECK(c.Volume() == Approx(7.5));
+}

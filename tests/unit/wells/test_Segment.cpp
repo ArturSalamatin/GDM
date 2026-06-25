@@ -45,6 +45,21 @@ TEST_CASE("Segment: operator== for different segments",
     CHECK_FALSE(s1 == s2);
 }
 
+TEST_CASE("Segment: inverted endpoints get normalized",
+          "[unit][level0][wells][Segment]") {
+    Segment s(30.0, 10.0);
+    CHECK(s.start == 10.0);
+    CHECK(s.end == 30.0);
+    CHECK(s.length() == Approx(20.0));
+}
+
+TEST_CASE("Segment: zero-length segment",
+          "[unit][level0][wells][Segment]") {
+    Segment s(10.0, 10.0);
+    CHECK(s.length() == Approx(0.0));
+    CHECK(s.start == s.end);
+}
+
 // --- WellJob ---
 
 TEST_CASE("WellJob: open job",

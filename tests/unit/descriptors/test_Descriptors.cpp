@@ -33,6 +33,16 @@ TEST_CASE("SchemeParamaters: parameterized constructor stores all values",
 
 // --- AnomalyDetectionProperties ---
 
+TEST_CASE("SchemeParamaters: default values are legacy placeholders (not physical)",
+          "[unit][level1][descriptors][SchemeParamaters]") {
+    SchemeParamaters sp;
+    // MinPorosity=1000 and AMG_RelTol=3.15 are legacy defaults with wrong units.
+    // Real usage always constructs via parameterized constructor.
+    CHECK(sp.MinPorosity() == Approx(1000.0));
+    CHECK(sp.AMG_RelTol() == Approx(3.15));
+    CHECK(sp.NewtonMaxIterCount() == 0);
+}
+
 TEST_CASE("AnomalyDetectionProperties: parameterized constructor and getters",
           "[unit][level1][descriptors][AnomalyDetectionProperties]") {
     AnomalyDetectionProperties adp(
