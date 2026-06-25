@@ -196,6 +196,20 @@ catch_discover_tests(gdm_unit_level3
 )
 
 # =============================================================================
+# gdm_unit_level4 — unit tests, matrix assembly verification
+# =============================================================================
+add_executable(gdm_unit_level4
+    tests/unit/math/test_MatrixAssembly.cpp
+    tests/unit/math/test_LinearProblemAssembly.cpp
+    tests/unit/math/test_JacobianAssembly.cpp
+)
+target_link_libraries(gdm_unit_level4 PRIVATE gdm_core Catch2::Catch2WithMain)
+catch_discover_tests(gdm_unit_level4
+    TEST_PREFIX "unit.level4."
+    PROPERTIES TIMEOUT 120
+)
+
+# =============================================================================
 # gdm_data + gdm_app — Data-слой (PostgreSQL + GEOS)
 # =============================================================================
 find_package(PostgreSQL QUIET)
