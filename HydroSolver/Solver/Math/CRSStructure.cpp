@@ -163,71 +163,40 @@ namespace reservoir_simulator
 			row_.reserve(cellNmbr * B + 1);
 			row_.push_back(0);
 			diagBlocks_.reserve(cellNmbr * nnzPerBlock_);
-			offDiagBlocks_.reserve(cellNmbr * 6 * nnzPerBlock_);
 			col_.reserve(connectivityGraph.size() * 7 * nnzPerBlock_);
 
-			std::vector<size_t> diagTmp(nnzPerBlock_);
-			std::vector<std::vector<size_t>> offDiagTmp;
-
-			// Blocked: CRS rows sorted by variable, then by cell.
-			// We iterate cells in outer loop for block consistency,
-			// but build row_ entries for variable groups.
-			// Actually, for blocked layout, rows are [var0_cell0, var0_cell1, ..., var1_cell0, ...]
-			// So we need to iterate: for physRow in 0..B-1, for cell in 0..N-1
-			// But diagBlocks_ must be indexed per cell block, same as interleaved.
-
-			// Two-pass approach:
-			// 1. Count nnz per row for all B*N rows
-			// 2. Fill col_ in blocked-row order, build diagBlocks_ per cell
-
-			// Actually, let's iterate by variable-group, cell:
-			// This changes the outer loop from "cell, then varsInBlock" to "var, then cell"
-
-			// For compatibility with CopyBlock which expects diagBlocks_ per cell:
-			// diagBlocks_ has cellNmbr * nnzPerBlock entries, structured as:
-			// [cell0: physIdx0..physIdxK, cell1: physIdx0..physIdxK, ...]
-			// diagBlocks_[cell * nnzPerBlock + physRow * B + physCol] = val[] position
-
 			diagBlocks_.resize(cellNmbr * nnzPerBlock_, 0);
-			offDiagBlocks_.clear();
 
-			// First pass: build row_/col_ in blocked row order (physRow, cell)
-			// For each (physRow, cell, physCol) we know the val[] position = col_.size() at push time
+			// Pre-compute neighbour counts and offDiagStart per cell
+			std::vector<size_t> nNeib(cellNmbr);
+			std::vector<size_t> offDiagStart(cellNmbr, 0);
+			size_t totalOffDiag = 0;
+			for (size_t l = 0; l < cellNmbr; l++)
+			{
+				nNeib[l] = connectivityGraph[l].size();
+				blocksPerRow[l] = nNeib[l] + 1;
+				offDiagStart[l] = totalOffDiag;
+				totalOffDiag += nNeib[l] * nnzPerBlock_;
+			}
+			offDiagBlocks_.resize(totalOffDiag, 0);
 
 			for (unsigned char physRow = 0; physRow < B; physRow++)
 			{
 				for (size_t l = 0; l < cellNmbr; l++)
 				{
 					const std::vector<int>& curNeighbours = connectivityGraph[l];
-					size_t nmbrNeighours = curNeighbours.size();
-					if (physRow == 0)
-						blocksPerRow[l] = nmbrNeighours + 1;
+					size_t nmbrNeighours = nNeib[l];
 
-					// nnz in this row: for each physCol that has blockPattern entry,
-					// there are (1 + nmbrNeighours) entries
 					size_t nnzThisRow = 0;
 					for (unsigned char physCol = 0; physCol < B; physCol++)
 						if (blockPattern[B * physRow + physCol])
 							nnzThisRow += 1 + nmbrNeighours;
 					row_.push_back(row_.back() + nnzThisRow);
 
-					// CRS columns must be sorted. In blocked layout:
-					// for physCol, diagonal col = physCol * N + l, neighbour col = physCol * N + neib
-					// Column groups: physCol=0 gives cols in [0, N), physCol=1 gives [N, 2N)
-					// Within a group, diagonal < all neighbours with idx > l
-					// Across groups, physCol=0 < physCol=1 (since 0*N+x < 1*N+x for x < N)
-					// So iterate physCol in order, within each: sorted by cell index
-
 					for (unsigned char physCol = 0; physCol < B; physCol++)
 					{
 						if (!blockPattern[B * physRow + physCol])
 							continue;
-
-						// Collect (colIndex, isDiag, neighbourIdx) for this physCol
-						// Diagonal: physCol * N + l
-						// Neighbours: physCol * N + neib[j]
-						// These are already sorted if connectivityGraph is sorted
-						// and l is inserted in sorted position among neighbours
 
 						bool diagInserted = false;
 						size_t diagCol = physCol * cellNmbr + l;
@@ -242,8 +211,8 @@ namespace reservoir_simulator
 								col_.push_back(diagCol);
 								diagInserted = true;
 							}
-							// off-diagonal
-							offDiagBlocks_.push_back(col_.size());
+							size_t offIdx = offDiagStart[l] + ni * nnzPerBlock_ + physRow * B + physCol;
+							offDiagBlocks_[offIdx] = col_.size();
 							col_.push_back(neibCol);
 						}
 						if (!diagInserted)
@@ -255,14 +224,6 @@ namespace reservoir_simulator
 					}
 				}
 			}
-
-			// offDiagBlocks_ for blocked layout is structured differently:
-			// it's built during iteration (physRow, cell, physCol, neighbour)
-			// but CopyBlock expects: offDiagBlocks_[elementsAboveBlockRow[l] + neibIdx * nnzPerBlock + physIdx]
-			// This needs rethinking for blocked layout...
-
-			// For now, blocked layout is a placeholder — the immediate need is InterleavedPSw.
-			// TODO: proper offDiagBlocks_ for blocked layout
 
 			elementsAboveBlockRow_.resize(cellNmbr, 0);
 			for (size_t l = 1; l < cellNmbr; l++)
