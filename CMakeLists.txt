@@ -146,6 +146,22 @@ catch_discover_tests(gdm_unit_level0
 )
 
 # =============================================================================
+# gdm_unit_level1 — unit tests, depend on level-0 classes
+# =============================================================================
+add_executable(gdm_unit_level1
+    tests/unit/wells/test_SetOfPoints.cpp
+    tests/unit/wells/test_SetOfPerforations.cpp
+    tests/unit/reservoir/test_RawHorizon.cpp
+    tests/unit/descriptors/test_Descriptors.cpp
+    tests/unit/geometry/test_MathRoutines.cpp
+)
+target_link_libraries(gdm_unit_level1 PRIVATE gdm_core Catch2::Catch2WithMain)
+catch_discover_tests(gdm_unit_level1
+    TEST_PREFIX "unit.level1."
+    PROPERTIES TIMEOUT 30
+)
+
+# =============================================================================
 # gdm_data + gdm_app — Data-слой (PostgreSQL + GEOS)
 # =============================================================================
 find_package(PostgreSQL QUIET)
