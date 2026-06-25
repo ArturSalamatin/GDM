@@ -72,7 +72,9 @@ dist/
 
 # IDE / editor
 .vs/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.suo
 *.user

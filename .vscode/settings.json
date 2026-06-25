@@ -1,0 +1,25 @@
+{
+    "cmake.ctest.testExplorerIntegrationEnabled": false,
+    "testMate.cpp.test.advancedExecutables": [
+        {
+            "pattern": "build/Release/gdm_unit_level*.exe",
+            "testGrouping": {
+                "groupByExecutable": {
+                    "label": "${filename}",
+                    "groupByRegex": {
+                        "regexes": ["^(.*?): "],
+                        "label": "${match}"
+                    }
+                }
+            }
+        },
+        {
+            "pattern": "build/Release/gdm_tests.exe",
+            "testGrouping": {
+                "groupByExecutable": {
+                    "label": "integration"
+                }
+            }
+        }
+    ]
+}
