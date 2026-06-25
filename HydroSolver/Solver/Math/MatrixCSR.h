@@ -62,6 +62,8 @@ namespace reservoir_simulator
 
 			void ResetMatrix();
 
+			std::vector<std::vector<double>> toDense() const;
+
 			void PrintCRS() const;
 			void PrintDiagBlocks() const;
 

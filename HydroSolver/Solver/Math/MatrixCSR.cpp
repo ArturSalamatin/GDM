@@ -74,6 +74,16 @@ namespace reservoir_simulator
 			std::fill(value.begin(), value.end(), 0.0);
 		}
 
+		std::vector<std::vector<double>> MatrixCSR::toDense() const
+		{
+			size_t N = Row().size() - 1;
+			std::vector<std::vector<double>> dense(N, std::vector<double>(N, 0.0));
+			for (size_t i = 0; i < N; i++)
+				for (size_t k = Row()[i]; k < Row()[i + 1]; k++)
+					dense[i][Col()[k]] = Val()[k];
+			return dense;
+		}
+
 		void MatrixCSR::PrintCRS() const
 		{
 			std::ofstream myfile;
