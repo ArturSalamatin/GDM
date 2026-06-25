@@ -285,6 +285,23 @@ TEST_CASE("3D completions: 7-well 4-layer smoke",
 
     CHECK(result.max_oil_balance_rel < 1e-3);
     CHECK(result.max_water_balance_rel < 1e-3);
+
+    size_t total_cells = Nx * Ny * Nz;
+    double P_mean = 0.0;
+    for (size_t i = 0; i < total_cells; i++)
+        P_mean += result.P[i];
+    P_mean /= total_cells;
+
+    double hx = Lx / Nx, hy = Ly / Ny;
+    size_t inj1_i = static_cast<size_t>(125.0 / hx);
+    size_t inj1_j = static_cast<size_t>(125.0 / hy);
+    size_t inj1_cell = inj1_j * Nx + inj1_i;
+    CHECK(result.P[inj1_cell] > P_mean);
+
+    size_t prod1_i = static_cast<size_t>(375.0 / hx);
+    size_t prod1_j = static_cast<size_t>(125.0 / hy);
+    size_t prod1_cell = prod1_j * Nx + prod1_i;
+    CHECK(result.P[prod1_cell] < P_mean);
 }
 
 
@@ -411,6 +428,12 @@ TEST_CASE("3D completions: partial perforation",
     CHECK(result_partial.max_oil_balance_rel < 1e-3);
     CHECK(result_full.max_water_balance_rel < 1e-3);
     CHECK(result_partial.max_water_balance_rel < 1e-3);
+
+    double hx = Lx / Nx, hy = Ly / Ny;
+    size_t inj_i = static_cast<size_t>(250.0 / hx);
+    size_t inj_j = static_cast<size_t>(250.0 / hy);
+    size_t inj_cell = inj_j * Nx + inj_i;
+    CHECK(result_full.Sw[inj_cell] > result_partial.Sw[inj_cell]);
 }
 
 

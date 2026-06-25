@@ -197,6 +197,10 @@ TEST_CASE("Variable debit: two injection rates",
 
     CHECK(result.max_oil_balance_rel < 1e-3);
     CHECK(result.max_water_balance_rel < 1e-3);
+
+    size_t inj_cell = (Ny / 2) * Nx + Nx / 2;
+    constexpr double initial_Sw = 1.0 - 0.8;
+    CHECK(result.Sw[inj_cell] > initial_Sw);
 }
 
 
@@ -230,6 +234,10 @@ TEST_CASE("Variable debit: injection with shut-in",
 
     CHECK(result.max_oil_balance_rel < 1e-3);
     CHECK(result.max_water_balance_rel < 1e-3);
+
+    size_t inj_cell = (Ny / 2) * Nx + Nx / 2;
+    constexpr double initial_Sw = 1.0 - 0.8;
+    CHECK(result.Sw[inj_cell] > initial_Sw);
 }
 
 

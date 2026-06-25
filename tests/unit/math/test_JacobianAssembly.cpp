@@ -467,6 +467,81 @@ TEST_CASE("JacobianAssembly: uniform grid identical interior diag blocks",
 // J * dx ≈ ΔF (Jacobian consistency)
 // ============================================================
 
+// ============================================================
+// Perturbed state: dp != 0 triggers upwind branching
+// ============================================================
+
+static void run_perturbed_jacobian_test(int nx, int ny, int nz, Layout layout)
+{
+    auto sim = make_sim(nx, ny, nz, layout);
+    int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
+
+    // Accept initial state as previous
+    sim.Grid.AcceptState();
+
+    // Perturb: create pressure gradient across x-direction
+    int nx_grid = static_cast<int>(sim.Grid.Nx());
+    for (int l = 0; l < ncells; l++) {
+        int i = l % nx_grid;
+        double dSw = 0.02 * (i - nx_grid / 2.0) / nx_grid;
+        double dP = 1e5 * (i - nx_grid / 2.0) / nx_grid;
+        double corr[] = {dSw, dP};
+        sim.Grid[l].UpdateState(corr);
+    }
+
+    double tau = 86400.0;
+    sim.AssembleMyProblem(tau, tau);
+
+    auto actualDense = sim.MyProblem.Matrix().toDense();
+    auto& actualRhs = sim.MyProblem.Rhs();
+
+    std::vector<std::vector<double>> refDense;
+    std::vector<double> refRhs;
+    build_reference(sim, tau, layout, refDense, refRhs);
+
+    check_dense_equal(actualDense, refDense, 1e-8);
+
+    REQUIRE(actualRhs.size() == refRhs.size());
+    for (size_t i = 0; i < actualRhs.size(); i++) {
+        INFO("rhs[" << i << "]: actual=" << actualRhs[i] << " expected=" << refRhs[i]);
+        CHECK(actualRhs[i] == Approx(refRhs[i]).margin(1e-8));
+    }
+
+    // RHS should NOT be zero anymore (state changed from previous)
+    double rhs_norm = 0.0;
+    for (auto v : actualRhs) rhs_norm += v * v;
+    CHECK(rhs_norm > 1e-10);
+}
+
+TEST_CASE("JacobianAssembly: perturbed 3x3x1 InterleavedSwP",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_perturbed_jacobian_test(3, 3, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("JacobianAssembly: perturbed 3x3x1 InterleavedPSw",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_perturbed_jacobian_test(3, 3, 1, Layout::InterleavedPSw);
+}
+
+TEST_CASE("JacobianAssembly: perturbed 3x3x1 Blocked",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_perturbed_jacobian_test(3, 3, 1, Layout::Blocked);
+}
+
+TEST_CASE("JacobianAssembly: perturbed 5x5x1 InterleavedSwP",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_perturbed_jacobian_test(5, 5, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("JacobianAssembly: perturbed 2x2x2 InterleavedPSw",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_perturbed_jacobian_test(2, 2, 2, Layout::InterleavedPSw);
+}
+
+// ============================================================
+// J * dx ≈ ΔF (Jacobian consistency)
+// ============================================================
+
 TEST_CASE("JacobianAssembly: J*0 = -F = 0 at initial state",
           "[unit][level4][math][JacobianAssembly]") {
     auto sim = make_sim(3, 3, 1, Layout::InterleavedSwP);
