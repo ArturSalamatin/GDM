@@ -122,6 +122,7 @@ date: 2026-06-15
   - [[2026-06-24 сессия 6b-7 CPR benchmark и PI-контроллер]] — CPR -32%, PI-контроллер Soderlind
   - [[2026-06-24 сессия 9 CPR в production]] — полный переход, 2–4× ускорение
   - [[2026-06-25 тесты сборки матрицы Якобиана]] — level4: MatrixAssembly, LinearProblemAssembly, JacobianAssembly
+  - [[2026-06-26 standalone examples бенчмарк и snapshot dt 5]] — ex_benchmark_51x51x4 + snapshot_dt=5 во всех примерах
 
 #### Архитектурные решения (новые)
 - [[amgcl конфигурация lgmres ilu0 aggregation]]
