@@ -4,8 +4,13 @@
   },
   "permissions": {
     "allow": [
+      "Bash(cd * && cmake *)",
+      "Bash(cd * && git add *)",
+      "Bash(git add *)",
+      "Bash(cd * && *)",
       "Bash(cmake *)",
       "Bash(*)",
+      "PowerShell(git add *)",
       "PowerShell(cmake *)",
       "PowerShell(ctest *)",
       "PowerShell(*)",
