@@ -6,6 +6,8 @@
     "allow": [
       "Bash(cmake *)",
       "Bash(*)",
+      "PowerShell(cmake *)",
+      "PowerShell(ctest *)",
       "PowerShell(*)",
       "Read(*)",
       "Write(*)",
