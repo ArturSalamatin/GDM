@@ -36,7 +36,7 @@ public:
 
     std::vector<double> save_times() const override {
         std::vector<double> times;
-        for (double t = 0.0; t <= 200.0; t += 10.0)
+        for (double t = 0.0; t <= 200.0; t += 5.0)
             times.push_back(t);
         return times;
     }

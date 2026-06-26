@@ -16,7 +16,7 @@ void run_two_rates() {
 
     simulation_cases::VariableDebitCase sc(
         "vardebit_two_rates", Nx, Ny, Lx, Ly,
-        t1 + t2, 10.0,
+        t1 + t2, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
             builders.emplace_back(L"INJ", cx, cy);
@@ -39,7 +39,7 @@ void run_shut_in() {
 
     simulation_cases::VariableDebitCase sc(
         "vardebit_shut_in", Nx, Ny, Lx, Ly,
-        t_work + t_shut + t_work, 10.0,
+        t_work + t_shut + t_work, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
             builders.emplace_back(L"INJ", cx, cy);
@@ -66,7 +66,7 @@ void run_increasing_inj() {
 
     simulation_cases::VariableDebitCase sc(
         "vardebit_increasing_inj", Nx, Ny, Lx, Ly,
-        t1 + t2, 10.0,
+        t1 + t2, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
             builders.emplace_back(L"INJ", inj_x, inj_y);
@@ -94,7 +94,7 @@ void run_alternating() {
 
     simulation_cases::VariableDebitCase sc(
         "vardebit_alternating", Nx, Ny, Lx, Ly,
-        2 * t_phase, 10.0,
+        2 * t_phase, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
             builders.emplace_back(L"INJ_A", x_a, cy);

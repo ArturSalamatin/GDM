@@ -38,7 +38,7 @@ int main() {
         L"P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_oil, 0.0);
 
     std::vector<double> timeMoments = {0.0};
-    for (double t = 50.0; t <= 500.0; t += 50.0)
+    for (double t = 5.0; t <= 500.0; t += 5.0)
         timeMoments.push_back(t);
 
     std::string out_dir = "results/five_spot";

@@ -217,6 +217,7 @@ set(EXAMPLE_NAMES
     ex_five_spot
     ex_variable_debit
     ex_3d_completions
+    ex_benchmark_51x51x4
 )
 
 foreach(ex IN LISTS EXAMPLE_NAMES)
@@ -242,14 +243,16 @@ foreach(ex IN ITEMS ex_single_injector ex_two_well ex_five_spot ex_variable_debi
     add_dependencies(run_examples run_${ex})
 endforeach()
 
-# 3D example
-add_custom_target(run_ex_3d_completions
-    COMMAND ex_3d_completions
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Running ex_3d_completions"
-)
-add_dependencies(run_ex_3d_completions ex_3d_completions)
-add_dependencies(run_examples run_ex_3d_completions)
+# 3D examples
+foreach(ex3d IN ITEMS ex_3d_completions ex_benchmark_51x51x4)
+    add_custom_target(run_${ex3d}
+        COMMAND ${ex3d}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running ${ex3d}"
+    )
+    add_dependencies(run_${ex3d} ${ex3d})
+    add_dependencies(run_examples run_${ex3d})
+endforeach()
 
 # Animation target — runs after all examples
 add_custom_target(animate
@@ -279,6 +282,7 @@ foreach(case_dir IN ITEMS
     3d_smoke
     3d_delayed_start
     3d_layer_closure
+    benchmark_51x51x4
 )
     add_custom_command(TARGET animate POST_BUILD
         COMMAND python ${ANIMATE_3D} --results-dir results/${case_dir}

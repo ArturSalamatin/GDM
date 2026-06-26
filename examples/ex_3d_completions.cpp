@@ -87,7 +87,7 @@ void run_smoke() {
 
     simulation_cases::MultiLayerCase sc(
         "3d_smoke", Nx, Ny, Nz, Lx, Ly, hz,
-        total_time, 30.0,
+        total_time, 5.0,
         [](double, double) { return make_7well_builders(4, hz, 600.0); },
         seven_wells_info
     );
@@ -99,7 +99,7 @@ void run_delayed_start() {
 
     simulation_cases::MultiLayerCase sc(
         "3d_delayed_start", Nx, Ny, Nz, Lx, Ly, hz,
-        400.0, 20.0,
+        400.0, 5.0,
         [](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
 
@@ -131,7 +131,7 @@ void run_layer_closure() {
 
     simulation_cases::MultiLayerCase sc(
         "3d_layer_closure", Nx, Ny, Nz, Lx, Ly, hz,
-        400.0, 20.0,
+        400.0, 5.0,
         [](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
 
