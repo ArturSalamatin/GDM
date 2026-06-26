@@ -564,3 +564,169 @@ TEST_CASE("JacobianAssembly: J*0 = -F = 0 at initial state",
         CHECK(rhs[i] == Approx(0.0).margin(1e-10));
     }
 }
+
+// J·δx ≈ F(x₀+δx) - F(x₀) with O(|δx|²) accuracy.
+// Verifies that the Jacobian is a consistent linearization of the residual.
+// Base state x₀ must have dp≠0 at boundaries to avoid the discontinuity
+// in AccountForBoundaryConditions (sign of dp switches branch).
+static void run_jacobian_consistency_test(int nx, int ny, int nz, Layout layout)
+{
+    constexpr int B = 2;
+    double tau = 86400.0;
+
+    auto sim = make_sim(nx, ny, nz, layout);
+    int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
+    size_t N = ncells * B;
+
+    sim.Grid.AcceptState();
+
+    // Perturb to a non-trivial base state x₀ where dp > 0 at boundaries
+    int nx_grid = static_cast<int>(sim.Grid.Nx());
+    for (int l = 0; l < ncells; l++) {
+        int i = l % nx_grid;
+        double dSw_base = 0.01 * (i + 1.0) / nx_grid;
+        double dP_base  = 5e4 * (i + 1.0) / nx_grid;
+        double corr[] = {dSw_base, dP_base};
+        sim.Grid[l].UpdateState(corr);
+    }
+
+    // Assemble J and F₀ at x₀
+    sim.AssembleMyProblem(tau, tau);
+    auto J = sim.MyProblem.Matrix().toDense();
+    std::vector<double> F0(sim.MyProblem.Rhs().begin(), sim.MyProblem.Rhs().end());
+
+    // Small perturbation δx around x₀
+    double dSw = 1e-7;
+    double dP  = 1e-1;
+
+    const auto& crs = sim.MyProblem.GetCRS();
+    std::vector<double> dx(N, 0.0);
+    for (int l = 0; l < ncells; l++) {
+        dx[crs.GlobalIndex(l, 0)] = dSw;
+        dx[crs.GlobalIndex(l, 1)] = dP;
+        double corr[] = {dSw, dP};
+        sim.Grid[l].UpdateState(corr);
+    }
+
+    // Assemble F₁ = F(x₀ + δx)
+    sim.AssembleMyProblem(tau, tau);
+    std::vector<double> F1(sim.MyProblem.Rhs().begin(), sim.MyProblem.Rhs().end());
+
+    // J = dF/dx, rhs = -F → J·δx ≈ -(rhs₁ - rhs₀)
+    std::vector<double> deltaF(N);
+    for (size_t i = 0; i < N; i++)
+        deltaF[i] = -(F1[i] - F0[i]);
+
+    auto Jdx = matvec(J, dx);
+
+    double err_norm = 0.0, deltaF_norm = 0.0;
+    for (size_t i = 0; i < N; i++) {
+        double diff = Jdx[i] - deltaF[i];
+        err_norm += diff * diff;
+        deltaF_norm += deltaF[i] * deltaF[i];
+    }
+    err_norm = std::sqrt(err_norm);
+    deltaF_norm = std::sqrt(deltaF_norm);
+
+    double rel_err = err_norm / (deltaF_norm + 1e-30);
+    INFO("||J*dx - dF|| = " << err_norm
+         << ", ||dF|| = " << deltaF_norm
+         << ", relative = " << rel_err);
+    CHECK(rel_err < 1e-2);
+    CHECK(deltaF_norm > 1e-15);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF consistency 3x3x1 SwP",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_jacobian_consistency_test(3, 3, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF consistency 3x3x1 PSw",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_jacobian_consistency_test(3, 3, 1, Layout::InterleavedPSw);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF consistency 3x3x1 Blocked",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_jacobian_consistency_test(3, 3, 1, Layout::Blocked);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF consistency 5x5x1 SwP",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_jacobian_consistency_test(5, 5, 1, Layout::InterleavedSwP);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF consistency 2x2x2 PSw",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_jacobian_consistency_test(2, 2, 2, Layout::InterleavedPSw);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF consistency 10x10x1 Blocked",
+          "[unit][level4][math][JacobianAssembly]") {
+    run_jacobian_consistency_test(10, 10, 1, Layout::Blocked);
+}
+
+TEST_CASE("JacobianAssembly: J*dx approx dF second order convergence",
+          "[unit][level4][math][JacobianAssembly]") {
+    constexpr int B = 2;
+    double tau = 86400.0;
+    int nx = 3, ny = 3, nz = 1;
+    Layout layout = Layout::InterleavedSwP;
+
+    double rel_errors[2] = {};
+
+    for (int trial = 0; trial < 2; trial++) {
+        double eps = (trial == 0) ? 1e-4 : 1e-5;
+        double dSw = eps;
+        double dP  = eps * 1e4;
+
+        auto sim = make_sim(nx, ny, nz, layout);
+        int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
+        int nx_grid = static_cast<int>(sim.Grid.Nx());
+        size_t N = ncells * B;
+
+        sim.Grid.AcceptState();
+
+        // Non-trivial base state (dp > 0 at boundaries)
+        for (int l = 0; l < ncells; l++) {
+            int i = l % nx_grid;
+            double corr_base[] = {0.01 * (i + 1.0) / nx_grid,
+                                  5e4 * (i + 1.0) / nx_grid};
+            sim.Grid[l].UpdateState(corr_base);
+        }
+
+        sim.AssembleMyProblem(tau, tau);
+        auto J = sim.MyProblem.Matrix().toDense();
+        std::vector<double> F0(sim.MyProblem.Rhs().begin(), sim.MyProblem.Rhs().end());
+
+        const auto& crs = sim.MyProblem.GetCRS();
+        std::vector<double> dx(N, 0.0);
+        for (int l = 0; l < ncells; l++) {
+            dx[crs.GlobalIndex(l, 0)] = dSw;
+            dx[crs.GlobalIndex(l, 1)] = dP;
+            double corr[] = {dSw, dP};
+            sim.Grid[l].UpdateState(corr);
+        }
+
+        sim.AssembleMyProblem(tau, tau);
+        std::vector<double> F1(sim.MyProblem.Rhs().begin(), sim.MyProblem.Rhs().end());
+
+        double err2 = 0.0, dF2 = 0.0;
+        auto Jdx = matvec(J, dx);
+        for (size_t i = 0; i < N; i++) {
+            double dF_i = -(F1[i] - F0[i]);
+            double diff = Jdx[i] - dF_i;
+            err2 += diff * diff;
+            dF2 += dF_i * dF_i;
+        }
+        rel_errors[trial] = std::sqrt(err2) / (std::sqrt(dF2) + 1e-30);
+    }
+
+    // eps shrinks by 10 → O(eps^2)/O(eps) error ratio ~ 10
+    double ratio = rel_errors[0] / (rel_errors[1] + 1e-30);
+    INFO("rel_err[eps] = " << rel_errors[0]
+         << ", rel_err[eps/10] = " << rel_errors[1]
+         << ", ratio = " << ratio);
+    CHECK(ratio > 5.0);
+    CHECK(ratio < 20.0);
+}
