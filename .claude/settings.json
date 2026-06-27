@@ -24,6 +24,52 @@
       "d:\\Lessons\\Grants\\2027\\GDM\\tests\\unit"
     ]
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git add .)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git add -A*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(git add .)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(git add -A*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(cmake --build*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/warn-on-compiler-warnings.sh"
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(cmake --build*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/warn-on-compiler-warnings.sh"
+          }
+        ]
+      }
+    ]
+  },
   "autoCompact": true,
   "readOnlyCommands": [
     "ls",
