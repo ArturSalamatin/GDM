@@ -7,6 +7,8 @@ tags:
 date: 2026-06-17
 ---
 
+**GitHub issue:** [#1](https://github.com/ArturSalamatin/GDM/issues/1)
+
 # Newton divergence при закачке воды через скважину
 
 ## Проявление
