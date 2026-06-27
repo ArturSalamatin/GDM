@@ -37,30 +37,47 @@ ls vault/GDM/plans/<id-lowercase>*
 1. Прочитай связанные vault-заметки (ссылки в плане)
 2. Если есть GitHub issue — прочитай: `gh issue view <N> --repo ArturSalamatin/GDM` (там могут быть комментарии с уточнениями)
 
-### 1.4. Подготовить ветку
+### 1.4. Синхронизировать experimental с main
+
+Перед созданием рабочей ветки — убедись, что experimental содержит все изменения из main:
+
+```powershell
+git checkout experimental
+git merge main
+```
+
+- Если merge прошёл без конфликтов — продолжай
+- Если конфликты — **СТОП**, сообщи пользователю: «Конфликт при merge main → experimental. Разреши конфликты, закоммить merge и перезапусти `/implement`.» Не пытайся разрешать конфликты самостоятельно
+
+### 1.5. Подготовить рабочую ветку
 
 1. Извлеки имя ветки из frontmatter плана (`branch:`)
-2. Проверь текущую ветку: `git branch --show-current`
-3. Проверь чистоту: `git status`
+2. Проверь чистоту: `git status`
    - Если есть незакоммиченные изменения — **СТОП**, сообщи пользователю
-4. Проверь существование ветки: `git branch --list "<branch>"`
-   - Ветка существует → `git checkout <branch>`
-   - Ветки нет → `git checkout -b <branch>`
-5. Обнови frontmatter плана: `status: в процессе`
+3. Проверь существование ветки: `git branch --list "<branch>"`
+   - Ветка существует → `git checkout <branch>` (возобновление работы — см. 2.6)
+   - Ветки нет → `git checkout -b <branch> experimental` (от свежего merge-коммита)
+4. Обнови frontmatter плана: `status: в процессе`
+5. Коммит: `vault: <ID> начало реализации`
 
-### 1.5. Зафиксировать baseline
+### 1.6. Зафиксировать baseline
 
 ```powershell
 cmake -B build -S . -G "Visual Studio 17 2022"
 cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
+cmake --build build --config Debug
+ctest --test-dir build -C Debug --output-on-failure
 ```
 
-Запомни:
+Запомни **для каждого конфига (Release + Debug)**:
 - Количество тестов
 - Количество passed / failed / skipped
 - Время выполнения
+- Количество warnings в выводе сборки
 - Если есть failing тесты — это известные проблемы или новые? Проверь по `[.]` тегам и vault
+
+Также зафиксируй base-branch: `git merge-base HEAD experimental` — точку ответвления для `git diff` и `git log` в фазе 3.
 
 ---
 
@@ -71,11 +88,13 @@ ctest --test-dir build -C Release --output-on-failure
 Выполняй шаги плана **строго последовательно**. Для каждого шага:
 
 1. **Перечитай шаг** — цель, файлы, контекст, что сделать, подводные камни
-2. **Проверь актуальность** — grep упомянутые методы/поля, убедись что номера строк не съехали
+2. **Проверь актуальность** — grep упомянутые методы/поля, убедись что номера строк не съехали. Если код существенно изменился с момента написания плана (метод удалён, API изменился) — адаптируй шаг в рамках его цели, зафиксируй расхождение в сообщении коммита
 3. **Реализуй** — минимально необходимые изменения
 4. **Собери** — `cmake --build build --config Release`
    - Если не компилируется — исправь немедленно, до любых других действий
+   - **Warnings = ошибки.** Проверь вывод на наличие warning. Если есть — исправь по существу (причину, не симптом). Не подавлять через `#pragma warning(disable:...)`, `(void)var`, `-Wno-*` и т.п. Если warning невозможно устранить по существу (например, из внешней библиотеки) — сообщи пользователю с объяснением почему
 5. **Прогони тесты** — `ctest --test-dir build -C Release --output-on-failure`
+   - Debug между шагами не обязателен (экономия времени). Debug — на финальной верификации (фаза 3.2)
 6. **Проверь результат шага** — выполни «Проверка после этого шага» из плана
 7. **Коммит** — если шаг завершён и всё зелёное (см. 2.2)
 
@@ -83,7 +102,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 Каждый коммит — самодостаточный блок. Критерии:
 
-- [ ] Код компилируется (`cmake --build build --config Release` — без ошибок)
+- [ ] Код компилируется без ошибок **и без warnings** (оба конфига на финальной верификации)
 - [ ] Все таргеты собираются (основной + тесты + examples)
 - [ ] Все тесты проходят (или failing тесты явно задокументированы — см. 2.4)
 - [ ] Изменения логически связаны (один шаг плана = один или несколько коммитов)
@@ -132,7 +151,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 2. **Тест упал по не связанной причине** (flaky, известный баг):
    - Проверь — есть ли это в vault (`knowledge/debugging/`, реестр багов)
-   - Если известный — продолжай, укажи в коммите: `fix: <описание> (тест X flaky, см. BUG-NNN)`
+   - Если известный — продолжай, в сообщении коммита текущего шага добавь примечание: `(тест X flaky, см. BUG-NNN)`
 
 3. **Не удаётся починить:**
    - `git stash` текущие изменения
@@ -152,6 +171,17 @@ ctest --test-dir build -C Release --output-on-failure
 
 Если шаг занимает много изменений — сообщай промежуточный статус.
 
+### 2.6. Возобновление после прерывания
+
+Если сессия оборвалась (контекст потерян, пользователь вернулся позже):
+
+1. Прочитай план — frontmatter покажет `status: в процессе`
+2. `git log --oneline experimental..HEAD` — какие шаги уже закоммичены
+3. Сопоставь коммиты с шагами плана — определи последний завершённый шаг
+4. Проверь `git status` — есть ли незакоммиченные изменения (прерванный шаг)
+5. Собери и прогони тесты — убедись что текущее состояние зелёное
+6. Продолжи со следующего шага
+
 ---
 
 ## Фаза 3: Верификация
@@ -164,15 +194,25 @@ ctest --test-dir build -C Release --output-on-failure
 
 ### 3.2. Финальная сборка и тесты
 
+Оба конфига — Release и Debug:
+
 ```powershell
-cmake --build build --config Release 2>&1 | Select-Object -Last 5
+cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
+cmake --build build --config Debug
+ctest --test-dir build -C Debug --output-on-failure
 ```
 
-Сравни с baseline:
+Если тестов > 5 — фильтруй вывод ctest: `| Select-Object -Last 30` или grep по FAILED.
+
+Проверь вывод сборки на warnings (оба конфига). Ноль warnings — критерий успеха. Если warning из внешней библиотеки (amgcl, Eigen, Catch2) — допустимо, но отметь в отчёте.
+
+Сравни с baseline **для каждого конфига**:
 - Количество тестов: было → стало
 - Время: было → стало
 - Новые тесты: какие добавлены
+- Warnings: было → стало (новые warnings недопустимы)
+- Различия Debug vs Release (если есть — это сигнал о UB или неинициализированной памяти)
 
 ### 3.3. Визуальная верификация
 
@@ -183,6 +223,8 @@ ctest --test-dir build -C Release --output-on-failure
 
 ### 3.4. Обзор изменений
 
+Используй base-branch, зафиксированный в фазе 1.6:
+
 ```powershell
 git log --oneline <base-branch>..HEAD
 git diff --stat <base-branch>..HEAD
@@ -190,8 +232,8 @@ git diff --stat <base-branch>..HEAD
 
 Проверь:
 - [ ] Нет случайных файлов (build артефакты, логи, .vs/)
-- [ ] Нет отладочного кода (printf, std::cout, #if 0)
-- [ ] Нет закомментированного старого кода
+- [ ] Нет отладочного кода (printf, std::cout для отладки, временные хаки)
+- [ ] Нет закомментированного старого кода (легитимный `#ifdef` для экспериментов — допустим, если обоснован в плане)
 - [ ] Vault-изменения в отдельных коммитах от кода
 
 ---
@@ -220,21 +262,21 @@ git diff --stat <base-branch>..HEAD
 
 6. **Коммит vault-изменений** — отдельно: `vault: результаты <ID> <краткое описание>`
 
-### 4.2. Закрыть GitHub issue
+### 4.2. Прокомментировать GitHub issue
 
 Если есть GitHub issue (поле `github` в frontmatter плана):
 
 ```powershell
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-gh issue close <N> --repo ArturSalamatin/GDM --comment "<комментарий>"
+gh issue comment <N> --repo ArturSalamatin/GDM --body "<комментарий>"
 ```
 
-Комментарий зависит от типа:
-- BUG: `Исправлено в ветке <branch>. Причина: <причина>. Тесты: <N> passed.`
-- DEBT: `Реализовано в ветке <branch>. Тесты: <N> passed.`
-- FEAT: `Реализовано в ветке <branch>. Новые тесты: <список>. Всего тестов: <N>.`
-- VAL: `Пройден. Метрика: <значение> < <tolerance>. Результаты: vault/GDM/knowledge/validation/<файл>.`
-- RES: `Завершён. Вывод: <гипотеза подтверждена/отвергнута>. Результаты: vault/GDM/knowledge/<файл>.`
+**Не закрывай issue** — issue закрывается при merge ветки в основную. Оставь комментарий с результатом:
+- BUG: `Реализовано в ветке <branch>. Причина: <причина>. Тесты: <N> passed. Готово к merge.`
+- DEBT: `Реализовано в ветке <branch>. Тесты: <N> passed. Готово к merge.`
+- FEAT: `Реализовано в ветке <branch>. Новые тесты: <список>. Всего тестов: <N>. Готово к merge.`
+- VAL: `Реализовано в ветке <branch>. Метрика: <значение> < <tolerance>. Готово к merge.`
+- RES: `Реализовано в ветке <branch>. Вывод: <гипотеза подтверждена/отвергнута>. Готово к merge.`
 
 ### 4.3. Обработать inbox
 
@@ -253,7 +295,9 @@ gh issue close <N> --repo ArturSalamatin/GDM --comment "<комментарий>
 
 **Ветка:** <branch>
 **Коммиты:** <N> (<список хешей>)
-**Тесты:** <baseline> → <итог> (+<новых>)
+**Тесты (Release):** <baseline> → <итог> (+<новых>)
+**Тесты (Debug):** <baseline> → <итог>
+**Warnings:** <baseline> → <итог> (ноль — цель)
 
 **Что сделано:**
 - <пункт 1>
@@ -290,5 +334,6 @@ gh issue close <N> --repo ArturSalamatin/GDM --comment "<комментарий>
 - Vault-изменения отдельным коммитом от кода
 - Stage по имени файла, не `git add .`
 - Не упоминай Claude в коммитах
+- Merge ветки в experimental — ответственность пользователя. Далее пользователь мёржит experimental → dev → main. Команда готовит ветку, не мёржит
 - При ошибке сборки — исправляй и пересобирай автоматически, без запроса подтверждения
 - PATH для gh: `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`
