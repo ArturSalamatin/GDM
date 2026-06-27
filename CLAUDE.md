@@ -60,9 +60,8 @@ GDM — наукоёмкий гидродинамический симулято
 - Типы: `feat`, `fix`, `refactor`, `test`, `docs`, `vault`
 - В сообщениях коммитов не упоминай себя (без "Co-Authored-By", без "Claude")
 - Vault-изменения — отдельным коммитом от кода
-- Stage по имени файла, не `git add .` или `git add -A`
 - Не пропускай хуки (`--no-verify`) без явной просьбы
-- Ветка по умолчанию: `main`
+- Ветка по умолчанию: `experimental` (все рабочие ветки стартуют от неё и мёржатся в неё; merge в `dev` и `main` — вручную пользователем)
 
 ## Файлы и код
 
@@ -104,6 +103,8 @@ ctest --test-dir build -C Release --output-on-failure
 | `knowledge/debugging/` | Баги, расхождения с аналитикой, фиксы |
 | `knowledge/validation/` | Тест-кейсы, сравнение с Buckley–Leverett, ECLIPSE |
 | `knowledge/literature/` | Ссылки на статьи и книги с аннотациями |
+| `plans/` | Детализированные планы: `<id> <slug>.md`. Создаются `/plan-fix`, `/plan-improve`, `/plan-feature`, `/plan-validate`, `/plan-research` |
+| `roadmap/` | Долгосрочное планирование, техдолг, фичи, валидация, эксперименты, стратегии |
 | `sessions/` | Логи сессий: `YYYY-MM-DD <slug>.md` |
 | `inbox/` | Необработанные идеи и заметки |
 

@@ -4,18 +4,70 @@
   },
   "permissions": {
     "allow": [
+      "Bash(cd * && cmake *)",
+      "Bash(cd * && git add *)",
+      "Bash(git add *)",
+      "Bash(cd * && *)",
+      "Bash(cmake *)",
       "Bash(*)",
+      "PowerShell(git add *)",
+      "PowerShell(cmake *)",
+      "PowerShell(ctest *)",
       "PowerShell(*)",
       "Read(*)",
       "Write(*)",
       "Edit(*)",
       "Glob(*)",
-      "Grep(*)",
-      "Bash(cd \"d:\\\\Lessons\\\\Grants\\\\2027\\\\GDM\" && mkdir -p tests/unit/geometry tests/unit/physics tests/unit/math tests/unit/wells tests/unit/reservoir tests/unit/descriptors)",
-      "Bash(cmake -B build -S . -G \"Visual Studio 17 2022\")"
+      "Grep(*)"
     ],
     "additionalDirectories": [
       "d:\\Lessons\\Grants\\2027\\GDM\\tests\\unit"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git add .)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git add -A*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(git add .)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(git add -A*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(cmake --build*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/warn-on-compiler-warnings.sh"
+          },
+          {
+            "type": "command",
+            "if": "PowerShell(cmake --build*)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/warn-on-compiler-warnings.sh"
+          }
+        ]
+      }
     ]
   },
   "autoCompact": true,

@@ -209,6 +209,89 @@ catch_discover_tests(gdm_unit_level4
 )
 
 # =============================================================================
+# Examples — standalone simulation scenarios with CSV export
+# =============================================================================
+set(EXAMPLE_NAMES
+    ex_single_injector
+    ex_two_well
+    ex_five_spot
+    ex_variable_debit
+    ex_3d_completions
+    ex_benchmark_51x51x4
+)
+
+foreach(ex IN LISTS EXAMPLE_NAMES)
+    add_executable(${ex} examples/${ex}.cpp)
+    target_link_libraries(${ex} PRIVATE gdm_core)
+endforeach()
+
+add_custom_target(run_examples
+    COMMENT "Running all example scenarios and generating animations"
+)
+
+set(ANIMATE_2D ${CMAKE_SOURCE_DIR}/scripts/animate_fields.py)
+set(ANIMATE_3D ${CMAKE_SOURCE_DIR}/scripts/animate_3d_fields.py)
+
+# 2D examples: run binary, then animate
+foreach(ex IN ITEMS ex_single_injector ex_two_well ex_five_spot ex_variable_debit)
+    add_custom_target(run_${ex}
+        COMMAND ${ex}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running ${ex}"
+    )
+    add_dependencies(run_${ex} ${ex})
+    add_dependencies(run_examples run_${ex})
+endforeach()
+
+# 3D examples
+foreach(ex3d IN ITEMS ex_3d_completions ex_benchmark_51x51x4)
+    add_custom_target(run_${ex3d}
+        COMMAND ${ex3d}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running ${ex3d}"
+    )
+    add_dependencies(run_${ex3d} ${ex3d})
+    add_dependencies(run_examples run_${ex3d})
+endforeach()
+
+# Animation target — runs after all examples
+add_custom_target(animate
+    COMMENT "Generating animations from results/"
+    DEPENDS run_examples
+)
+
+# 2D animations
+foreach(case_dir IN ITEMS
+    single_injector_21x21
+    two_well_31x31
+    five_spot
+    vardebit_two_rates
+    vardebit_shut_in
+    vardebit_increasing_inj
+    vardebit_alternating
+)
+    add_custom_command(TARGET animate POST_BUILD
+        COMMAND python ${ANIMATE_2D} --results-dir results/${case_dir}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Animating ${case_dir}"
+    )
+endforeach()
+
+# 3D animations
+foreach(case_dir IN ITEMS
+    3d_smoke
+    3d_delayed_start
+    3d_layer_closure
+    benchmark_51x51x4
+)
+    add_custom_command(TARGET animate POST_BUILD
+        COMMAND python ${ANIMATE_3D} --results-dir results/${case_dir}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Animating ${case_dir} (3D)"
+    )
+endforeach()
+
+# =============================================================================
 # gdm_data + gdm_app — Data-слой (PostgreSQL + GEOS)
 # =============================================================================
 find_package(PostgreSQL QUIET)
