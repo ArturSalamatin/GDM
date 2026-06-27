@@ -104,6 +104,8 @@ ctest --test-dir build -C Release --output-on-failure
 | `knowledge/debugging/` | Баги, расхождения с аналитикой, фиксы |
 | `knowledge/validation/` | Тест-кейсы, сравнение с Buckley–Leverett, ECLIPSE |
 | `knowledge/literature/` | Ссылки на статьи и книги с аннотациями |
+| `plans/` | Детализированные планы: `<id-lowercase> <slug>.md`. Создаются `/plan` |
+| `roadmap/` | Долгосрочное планирование, техдолг, стратегии |
 | `sessions/` | Логи сессий: `YYYY-MM-DD <slug>.md` |
 | `inbox/` | Необработанные идеи и заметки |
 
