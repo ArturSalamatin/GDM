@@ -77,10 +77,7 @@ TEST_CASE("BL analytical: shock front Welge construction",
 }
 
 TEST_CASE("Well injection: basic well works without crash",
-          "[.buckley-leverett][.wells]") {
-    // Тег с точкой = скрытый тест, запускается только явно.
-    // Известная проблема: Ньютон не сходится при закачке воды,
-    // т.к. ReverseState не откатывает P_Well скважины → NaN propagation.
+          "[buckley-leverett][wells]") {
     constexpr size_t Nx = 10;
     constexpr double L = 500.0, hy_cell = 50.0, hz = 10.0;
     constexpr double P_init_atm = 200.0;
@@ -101,25 +98,44 @@ TEST_CASE("Well injection: basic well works without crash",
         L"INJ", hx * 0.5, hy_cell * 0.5,
         0.0, -1000.0);  // -1000 кг/день закачки
 
-    // Один маленький шаг — проверяем что скважина подключена
-    bool solve_ok = true;
-    try {
-        sim.Solve({0.0, 1.0});
-    } catch (const std::exception& e) {
-        INFO("Solve exception: " << e.what());
-        solve_ok = false;
-    }
+    sim.Solve({0.0, 1.0});
 
-    if (solve_ok) {
-        auto Sw = sim.GetWaterSaturationField();
-        // Ячейка с инжектором должна иметь повышенную S_w
-        CHECK(Sw[0] >= 0.2);  // начальная S_w = 0.2
-        for (size_t i = 0; i < Sw.size(); ++i) {
-            CHECK(Sw[i] >= -1e-6);
-            CHECK(Sw[i] <= 1.0 + 1e-6);
-        }
-    } else {
-        // Документируем баг: Ньютон diverges при закачке
-        WARN("Newton divergence with well injection — needs debugging");
+    auto Sw = sim.GetWaterSaturationField();
+    CHECK(Sw[0] >= 0.2);
+    for (size_t i = 0; i < Sw.size(); ++i) {
+        CHECK(Sw[i] >= -1e-6);
+        CHECK(Sw[i] <= 1.0 + 1e-6);
+    }
+}
+
+TEST_CASE("Well injection: Sw increases with water injection",
+          "[buckley-leverett][wells]") {
+    constexpr size_t Nx = 10;
+    constexpr double L = 500.0, hy_cell = 50.0, hz = 10.0;
+    constexpr double P_init_atm = 200.0;
+    constexpr double Sw_init = 0.2;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, 1, 1, L, hy_cell, hz, 100.0, 0.2, P_init_atm, 1.0 - Sw_init);
+    auto numPrm = test_helpers::default_num_params();
+
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+    sim.RefPressure = P_init_atm * 101325.0;
+    sim.numPrm.set_initial_schemeTau(1.0);
+    sim.numPrm.set_currentMoment(0.0);
+
+    double hx = L / Nx;
+    test_helpers::add_simple_well(sim, horizon,
+        L"INJ", hx * 0.5, hy_cell * 0.5,
+        0.0, -1000.0);
+
+    sim.Solve({0.0, 10.0});
+
+    auto Sw = sim.GetWaterSaturationField();
+    CHECK(Sw[0] > Sw_init);
+    for (size_t i = 0; i < Sw.size(); ++i) {
+        CHECK(Sw[i] >= -1e-6);
+        CHECK(Sw[i] <= 1.0 + 1e-6);
     }
 }
