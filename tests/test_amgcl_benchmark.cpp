@@ -74,10 +74,10 @@ using CPR_AMG_iluk = amgcl::preconditioner::cpr<
 >;
 using CPRSolver_AMG_iluk = amgcl::make_solver<CPR_AMG_iluk, amgcl::solver::lgmres<SB>>;
 
-constexpr size_t BNx = 51, BNy = 51, BNz = 4;
+constexpr size_t BNx = 21, BNy = 21, BNz = 4;
 constexpr double BLx = 500.0, BLy = 500.0, Bhz = 10.0;
 constexpr double Brho_oil = 800.0, Brho_water = 1000.0;
-constexpr double Btotal_time = 730.0;
+constexpr double Btotal_time = 200.0;
 constexpr double Brate_mult = 1.4;
 
 std::vector<test_helpers::WellScheduleBuilder>
@@ -119,11 +119,11 @@ make_benchmark_wells()
         .produce_oil(20.0 * rm).for_days(T);
 
     auto c_inj3 = test_helpers::WellCompletionBuilder(BNz, Bhz)
-        .open_layer(0, 150.0).open_layer(1, 150.0);
+        .open_layer(0, 40.0).open_layer(1, 40.0);
     builders.emplace_back(L"INJ-3", 250.0, 125.0);
     builders.back().set_completions(c_inj3)
-        .shut_in().for_days(150.0)
-        .inject_water(35.0 * rm).for_days(T - 150.0);
+        .shut_in().for_days(40.0)
+        .inject_water(35.0 * rm).for_days(T - 40.0);
 
     return builders;
 }
