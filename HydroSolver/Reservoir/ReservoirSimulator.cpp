@@ -742,11 +742,11 @@ namespace reservoir_simulator
 		wstream.read(reinterpret_cast<char*>(&frameCount), sizeof(int));
 
 		// grid dimensions
-		std::array<int, 3> grid_dim;
-		wstream.read(reinterpret_cast<char*>(&grid_dim), 3 * sizeof(int));
-		int nx = grid_dim[0], ny = grid_dim[1], nz = 4;// grid_dim[2];
+		std::array<size_t, 3> grid_dim;
+		wstream.read(reinterpret_cast<char*>(grid_dim.data()), 3 * sizeof(size_t));
+		size_t nx = grid_dim[0], ny = grid_dim[1], nz = grid_dim[2];
 
-		for (int k = 0; k < nz; k++)
+		for (size_t k = 0; k < nz && k < flowFields.size(); k++)
 		{
 			flowFields[k].clear();
 			int nt; // number of time frames saved
