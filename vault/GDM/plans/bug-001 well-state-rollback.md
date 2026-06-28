@@ -6,7 +6,7 @@ date: 2026-06-28
 issue: BUG-001
 github: 1
 branch: fix/bug-001/well-state-rollback
-status: в процессе
+status: реализован
 ---
 
 # BUG-001: SIGSEGV при закачке воды — out-of-bounds в AddFlowFieldSnapShot при ny=1
