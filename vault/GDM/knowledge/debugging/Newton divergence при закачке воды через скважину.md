@@ -1,38 +1,52 @@
 ---
 tags:
   - баг
-  - Newton
+  - SIGSEGV
   - скважины
-  - divergence
+  - OverallFluxes
 date: 2026-06-17
+updated: 2026-06-28
 ---
 
 **GitHub issue:** [#1](https://github.com/ArturSalamatin/GDM/issues/1)
 
-# Newton divergence при закачке воды через скважину
+# SIGSEGV при закачке воды через скважину (BUG-001)
 
 ## Проявление
 
-При добавлении нагнетательной скважины (закачка воды, `water_mass_rate < 0`) Ньютон перестаёт сходиться после нескольких шагов. Симулятор входит в бесконечный цикл `decrease_tau → retry`.
+При добавлении нагнетательной скважины (закачка воды, `water_mass_rate < 0`) в сетку с `ny=1` (или `nx=1`) симулятор падает с SIGSEGV после первого успешного временного шага. Ньютон сходится нормально (4 итерации), crash происходит в post-processing.
 
-## Причина (гипотеза)
+## Причина (подтверждённая, 2026-06-28)
 
-В `PerformNewtonLoop` при несходимости вызывается `Grid.ReverseState()`, который откатывает S_w и P в ячейках. Однако состояние скважины (`P_Well`, `productions`, `factor`) **не откатывается**. При следующей попытке `AddWellToMatrix` → `SetRefWellPressure` считает `P_Well` от предыдущего (неоткаченного) состояния скважины → получает NaN → `productions = NaN` → exception.
+`AddFlowFieldSnapShot()` [ReservoirSimulator.cpp:616-628] безусловно обращается к `j_Y[k]`, но `OverallFluxes()` [строка 804] заполняет `j_Y` только при `ny > 1`. При `ny=1` вектор `j_Y` остаётся пустым → `j_Y[0]` = out-of-bounds → SIGSEGV.
+
+Аналогично `j_X` не заполняется при `nx <= 1`.
+
+## Опровергнутая гипотеза
+
+Ранее считалось, что причина — «denom=0 в SetRefWellPressure → NaN → Newton divergence». Это **опровергнуто**:
+
+- Для модели Кори: `k_ro = (1-S)^3`, `k_rw = S^3`. При `S ∈ [0, 1]`: `(1-S)^3 + S^3 ≥ 1/4 > 0`.
+- Следовательно, `MobilityOverall > 0` всегда, и `denom > 0`.
+- Экспериментально: Newton сходится за 4 итерации, NaN не возникает.
 
 ## Воспроизведение
 
 ```cpp
+// 10×1×1 сетка, Sw=0.2, P=200atm
 test_helpers::add_simple_well(sim, horizon, L"INJ", x, y, 0.0, -1000.0);
-sim.Solve({0.0, 1.0});  // exception после ~4-8 шагов
+sim.Solve({0.0, 1.0});  // SIGSEGV в AddFlowFieldSnapShot
 ```
 
-## Связанные файлы
+## Исправление
 
-- `Wells.cpp:19` — `AddWellToMatrix`, строка 28-29 бросает exception
-- `SomeWell.cpp:345` — `UpdateWellState` вычисляет `factor` и `P_Well`
-- `Wells.cpp:80` — `SetRefWellPressure`: `P = numer/denom`, `denom` может быть 0
-- `ReservoirSimulator.cpp:416-420` — `Grid.ReverseState()` + `decrease_schemeTau`
+В `OverallFluxes()` добавить `else`-блоки для `ny <= 1` и `nx <= 1`, заполняющие `j_Y` / `j_X` пустыми слоями нужного размера (`nz` элементов).
 
-## Возможное исправление
+## Связь с другими багами
 
-Добавить `ReverseWellState()` в `SomeWell`, вызывать из `Solve()` при `!IsSuccessfullNewtonTrial`. Или пересчитывать `UpdateWellState` заново при каждом вызове `AssembleMyProblem`.
+- **BUG-004** (throw string) — исправляется попутно
+- **BUG-008** (denom=0 в SetRefWellPressure) — invalid при `Sw ∈ [0,1]`, пересмотреть
+
+## План
+
+[[bug-001 well-state-rollback]]

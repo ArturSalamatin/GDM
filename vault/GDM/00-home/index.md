@@ -31,6 +31,7 @@ date: 2026-06-27
 Создаются командами `/plan-fix`, `/plan-improve`, `/plan-feature`, `/plan-validate`, `/plan-research`.
 Реализуются командой `/implement`.
 
+- [[bug-001 well-state-rollback]] — BUG-001: SIGSEGV при закачке воды — out-of-bounds в AddFlowFieldSnapShot при ny=1
 - [[bug-012 binary-grid-dim-type-mismatch]] — BUG-012: несовпадение типов size_t/int при бинарном I/O grid_dim
 
 ### 00-home — статус и навигация
