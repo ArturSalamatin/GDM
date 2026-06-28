@@ -89,6 +89,27 @@ Build a detailed plan for a numerical experiment.
 - If confirmed → create FEAT or VAL; if rejected → close with explanation
 - Output: `vault/GDM/plans/<id> <slug>.md`
 
+### `/implement <ID | path>`
+
+Execute a plan from vault step by step.
+
+- Syncs `experimental` with `main`, creates working branch from `experimental`
+- Each step: code → build (Release, zero warnings) → tests → commit
+- Warnings treated as errors — fixed at root cause, never suppressed
+- Final verification: Release + Debug build, test comparison with baseline
+- New problems discovered mid-work → `vault/GDM/inbox/`, not fixed in-scope
+- Rollback protocol if blocked: `git stash`, document blocker, notify user
+- Issues not closed — commented "ready to merge"; user merges manually
+
+### Workflow
+
+```
+/issue BUG-001  →  GitHub issue + vault entry + branch name
+/plan-fix BUG-001  →  detailed plan in vault/GDM/plans/
+/implement BUG-001  →  code + tests + vault updates + commits
+user: merge → experimental → dev → main
+```
+
 ## Knowledge Vault
 
 The `vault/GDM/` directory is an Obsidian vault containing project knowledge: architecture decisions, debugging logs, validation results, session logs, and roadmap. See `vault/GDM/00-home/index.md` for navigation.
