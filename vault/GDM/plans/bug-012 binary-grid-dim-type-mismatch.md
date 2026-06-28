@@ -6,7 +6,7 @@ date: 2026-06-28
 issue: BUG-012
 github: 2
 branch: fix/bug-012/binary-grid-dim-type-mismatch
-status: в процессе
+status: реализован
 ---
 
 # План: BUG-012 — Несовпадение типов при бинарной записи/чтении `grid_dim`
