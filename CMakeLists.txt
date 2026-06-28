@@ -173,6 +173,7 @@ add_executable(gdm_unit_level2
     tests/unit/wells/test_AccumulatedPerforations.cpp
     tests/unit/descriptors/test_MER_Data.cpp
     tests/unit/reservoir/test_NumericalParameters.cpp
+    tests/unit/reservoir/test_BinaryIO.cpp
 )
 target_link_libraries(gdm_unit_level2 PRIVATE gdm_core Catch2::Catch2WithMain)
 catch_discover_tests(gdm_unit_level2
