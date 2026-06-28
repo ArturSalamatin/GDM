@@ -926,6 +926,14 @@ namespace reservoir_simulator
 				}
 			}
 		}
+		else
+		{
+			for (size_t k = 0; k < nz; k++)
+			{
+				jOil_Y.push_back(std::vector<std::vector<double>>());
+				j_Y.push_back(std::vector<std::vector<double>>());
+			}
+		}
 
 		// loop through the boundaries parallel to YZ-plane
 		if (nx > 1)
@@ -1045,6 +1053,14 @@ namespace reservoir_simulator
 						}
 					}
 				}
+			}
+		}
+		else
+		{
+			for (size_t k = 0; k < nz; k++)
+			{
+				jOil_X.push_back(std::vector<std::vector<double>>());
+				j_X.push_back(std::vector<std::vector<double>>());
 			}
 		}
 		return  { jOil_X, jOil_Y, j_X, j_Y };
