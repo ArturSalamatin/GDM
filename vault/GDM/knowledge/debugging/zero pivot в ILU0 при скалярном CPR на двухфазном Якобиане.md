@@ -5,7 +5,10 @@ tags:
   - ilu
   - численные-методы
 date: 2026-06-24
+github: https://github.com/ArturSalamatin/GDM/issues/4
 ---
+
+**GitHub issue:** [#4](https://github.com/ArturSalamatin/GDM/issues/4)
 
 # Zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане
 
@@ -64,6 +67,43 @@ if (math::is_zero((*D)[i]))
 | 3D completions (4 шт) | ✅ | ✅ |
 
 4 прогона полного набора (45 тестов) — стабильно.
+
+## Проявление 3: assert в cpr.hpp:522 (block-LU)
+
+Обнаружено 2026-06-29 при верификации BUG-001. Тест `Grid convergence: single injector` падает с:
+
+```
+Assertion failed: !math::is_zero(d), file .../amgcl/preconditioner/cpr.hpp, line 522
+```
+
+Это LU-факторизация B×B блока (B=2, двухфазная задача) внутри CPR:
+
+```cpp
+// cpr.hpp:520-526
+for(int k = 0; k < B; ++k) {
+    scalar_type d = A[k*B+k];
+    assert(!math::is_zero(d));  // ← abort()
+    for(int i = k+1; i < B; ++i) {
+        A[i*B+k] /= d;
+```
+
+Падает в **обоих** конфигах (Release и Debug) — `assert` в amgcl не зависит от `NDEBUG`. Патч ilu0.hpp (fallback `D[i]=1`) не покрывает этот путь — это другой уровень факторизации (block-LU в CPR, не ILU0).
+
+Корневая причина та же: near-singular 2×2 блок Якобиана при определённых Sw → zero pivot при LU-разложении блока.
+
+**Три уровня решения:**
+
+| Уровень | Задача | Суть | Покрытие |
+|---|---|---|---|
+| 1 | BUG-002 | Fallback `d = 1` при `math::is_zero(d)` в `cpr.hpp:522` + запись `A[k*B+k] = d` для обратного хода | exact zero pivot → crash устранён |
+| 2 | FEAT-010 | Threshold-based: `\|d\| < τ·max(\|A_row\|)` → weight = (1, 0) напрямую | near-zero pivot → overflow/NaN устранён |
+| 3 | FEAT-011 | True-IMPES / ABF weights: вычисление weights из nullspace ∂F/∂Sw без обращения блока | принципиальное решение, PR в upstream amgcl |
+
+**Проблема near-zero pivot (не покрыта уровнем 1):**
+При `d = 1e-15` (near-zero, не exact zero) fallback уровня 1 не срабатывает (`math::is_zero` — exact comparison). LU-разложение: `A[i*B+k] /= 1e-15` → элементы ~ 1e+15 → обратный ход: weights ≈ (0, 0) → строка App ≈ 0 → AMG получает near-singular pressure matrix. Это **хуже**, чем exact zero с fallback (weights = (1,0) → Kpp напрямую).
+
+**True-IMPES weights (уровень 3, Wallis 1983):**
+Вместо обращения блока K_diag[i] вычисляют weights w из условия wᵀ·∂F/∂Sw = 0. Для B=2: w = (∂Fw/∂Sw, −∂Fo/∂Sw) с нормировкой. Не требует обращения матрицы. При Sw → 0 отношение ∂Fw/∂Sw к ∂Fo/∂Sw остаётся определённым. При оба = 0 → w = (1, 0) (давление decoupled тривиально).
 
 ## Связанные заметки
 
