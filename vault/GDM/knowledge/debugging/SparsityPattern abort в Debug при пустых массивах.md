@@ -105,12 +105,21 @@ for (auto l = offDiagBlocks_raw.begin(); l != offDiagBlocks_raw.end();)
 2. Исправить erase-цикл: `l = offDiagBlocks_raw.erase(l)` или заменить на `std::erase_if` (C++20) / `erase-remove idiom`
 3. Если print нужен для отладки — вынести в отдельный метод `void dump(const std::string& dir) const`
 
+## Решение (2026-06-29)
+
+Реализован вариант B:
+1. Erase-цикл (строки 143–149) заменён на `std::erase(offDiagBlocks_raw, static_cast<size_t>(0))` — C++20
+2. Print-вызовы (`printPattern()`, `printDiagonalBlocks()`, `printOffDiagBlocks()`) убраны из конструктора (строки 159–161)
+3. В каждый `print*2Stream()` метод добавлен guard `if (vec.empty()) return s;`
+
+Результат: Debug 277/277, Release 277/277. Файлы `test_SparsityPattern*.txt` больше не создаются. DEBT-044 закрыт попутно.
+
 ## Связанные задачи
 
 - [[DEBT-009]]: test*.txt дамп в cwd — та же категория проблем
-- [[DEBT-044]]: SparsityPattern конструктор пишет файлы в cwd
+- [[DEBT-044]]: SparsityPattern конструктор пишет файлы в cwd (закрыт этим фиксом)
 - [[BUG-013]]: SparsityPattern конструктор — аргументы `vector<bool>` перепутаны (тот же класс)
 
 ## Рабочая ветка
 
-Исправление должно выполняться от `experimental` в ветке `fix/bug-019/sparsity-pattern-debug-abort`.
+`fix/bug-019/sparsity-pattern-debug-abort` от `experimental`.
