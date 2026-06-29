@@ -19,7 +19,7 @@ date: 2026-06-27
 - [[roadmap долгосрочный план развития GDM]] — фазы 3–8, критерии завершения, принципы
 - [[инвентаризация кодовой базы 2026-06-27]] — 22 исходника, 34 теста, матрица покрытия
 - [[известные баги и технический долг]] — BUG-001/002, DEBT-002–009
-- [[планируемые фичи]] — FEAT-001–009, привязка к фазам roadmap
+- [[планируемые фичи]] — FEAT-001–011, привязка к фазам roadmap
 - [[валидационные кейсы]] — VAL-001–006, сравнение с аналитикой и MRST
 - [[исследования и эксперименты]] — RES-001–005, численные эксперименты
 - [[закрытые баги и решённые проблемы]] — архив закрытых багов и решённого долга
@@ -33,6 +33,7 @@ date: 2026-06-27
 
 - [[bug-001 well-state-rollback]] — BUG-001: SIGSEGV при закачке воды — out-of-bounds в AddFlowFieldSnapShot при ny=1
 - [[bug-012 binary-grid-dim-type-mismatch]] — BUG-012: несовпадение типов size_t/int при бинарном I/O grid_dim
+- [[bug-002 cpr-zero-pivot]] — BUG-002: CPR zero pivot — abort() в cpr.hpp:522 при LU-факторизации блока
 - [[bug-019 sparsity-pattern-debug-abort]] — BUG-019: SparsityPattern abort в Debug при пустых массивах
 
 ### 00-home — статус и навигация
@@ -110,8 +111,15 @@ date: 2026-06-27
 - [[five-spot сравнение с MRST]]
 - [[таблица единиц GDM vs MRST]]
 
+#### Литература (`knowledge/literature/`)
+- [[Wallis 1983 Incomplete Gaussian Elimination as Preconditioning for CPR]] — CPR-прекондиционер, True-IMPES decoupling weights
+- [[Cao 2002 Development of Techniques for General Purpose Simulators]] — PhD thesis, фундамент CPR-framework, три decoupling strategy
+- [[Lacroix 2003 Decoupling Preconditioners in IPARS]] — обобщение decoupling на многокомпонентные задачи
+- [[Cao 2005 Parallel Scalable Unstructured CPR-Type Linear Solver]] — quasi-IMPES vs True-IMPES vs ABF, параллельная реализация
+- [[Cao 2009 A Fully Coupled Two-Phase Flow CPR Preconditioner]] — мета-заметка: какая публикация что покрывает в серии Cao–Tchelepi
+- [[Gries 2014 System-AMG Approach for Fully Coupled CPR]] — System-AMG как альтернатива decoupling-based CPR
+
 #### Пока пусто
-- `knowledge/literature/` — ссылки на статьи и книги с аннотациями
 - `knowledge/testing/` — методология и паттерны тестирования
 - `knowledge/performance/` — результаты профилирования и бенчмарки
 - `knowledge/architecture/` — API-контракты, паттерны, зависимости модулей
