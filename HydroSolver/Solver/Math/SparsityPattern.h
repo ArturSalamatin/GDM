@@ -56,6 +56,7 @@ namespace reservoir_simulator
 				const std::vector<size_t>& row_raw,
 				const std::vector<size_t>& col_raw)
 			{
+				if (col_raw.empty()) return s;
 				size_t width = 2 + (size_t)std::log10(
 					*std::max_element(col_raw.begin(), col_raw.end())
 					+ 1);
@@ -81,6 +82,7 @@ namespace reservoir_simulator
 				const std::vector<size_t>& diagBlocks_raw,
 				size_t size)
 			{
+				if (diagBlocks_raw.empty()) return s;
 				size_t blockSize = NmbrOfNonzerosPerUnitBlock();
 				size_t width = 2 + (size_t)std::log10(
 					*std::max_element(diagBlocks_raw.begin(), diagBlocks_raw.end())
@@ -103,6 +105,7 @@ namespace reservoir_simulator
 				const std::vector<bool>& blockPattern,
 				const std::vector<size_t>& offDiagBlocks_raw)
 			{
+				if (offDiagBlocks_raw.empty()) return s;
 				size_t blockSize = NmbrOfNonzerosPerUnitBlock();
 				size_t width = 2 + (size_t)std::log10(
 					*std::max_element(offDiagBlocks_raw.begin(), offDiagBlocks_raw.end())

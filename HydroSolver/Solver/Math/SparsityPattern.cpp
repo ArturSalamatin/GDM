@@ -138,27 +138,14 @@ namespace reservoir_simulator
 				}
 			}
 
-			// if there are false-values in the blockPattern, then corresponding elements should be erased from the offDiagBlocks_raw std::vector
-			//////////////////
-			for (auto l = offDiagBlocks_raw.begin(); l != offDiagBlocks_raw.end();)
-			{// but hopefully, we never enter this loop
-				if (*l == 0)
-					offDiagBlocks_raw.erase(l);
-				else
-					++l;
-			}
-			//////////////////
+			std::erase(offDiagBlocks_raw, static_cast<size_t>(0));
 
 			elementsAboveBlockRow = std::vector<size_t>(cellNmbr, 0);
 			for (size_t l = 1; l < cellNmbr; l++)
 				elementsAboveBlockRow[l] = elementsAboveBlockRow[l - 1] + NmbrOfNonzerosPerUnitBlock() * blocksPerRow[l - 1];
 
-			// total number of blocks in the matrix
+			// total number of (non-zero?) blocks in the matrix
 			totalNmbrOfBlocks = std::accumulate(blocksPerRow.begin(), blocksPerRow.end(), 0);
-
-			printPattern();
-			printDiagonalBlocks();
-			printOffDiagBlocks();
 		}
 
 		SparsityPattern::SparsityPattern(const unsigned char eqNmbr_, const int cellNmbr, const std::vector<std::vector<int>>& connectivityGraph) :
