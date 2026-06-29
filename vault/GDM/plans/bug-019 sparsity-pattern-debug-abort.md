@@ -6,7 +6,7 @@ date: 2026-06-29
 issue: BUG-019
 github: 3
 branch: fix/bug-019/sparsity-pattern-debug-abort
-status: готов к реализации
+status: в процессе
 ---
 
 # BUG-019: SparsityPattern — abort в Debug при пустых массивах
