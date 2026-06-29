@@ -144,7 +144,7 @@ namespace reservoir_simulator
 			for (size_t l = 1; l < cellNmbr; l++)
 				elementsAboveBlockRow[l] = elementsAboveBlockRow[l - 1] + NmbrOfNonzerosPerUnitBlock() * blocksPerRow[l - 1];
 
-			// total number of blocks in the matrix
+			// total number of (non-zero?) blocks in the matrix
 			totalNmbrOfBlocks = std::accumulate(blocksPerRow.begin(), blocksPerRow.end(), 0);
 		}
 
