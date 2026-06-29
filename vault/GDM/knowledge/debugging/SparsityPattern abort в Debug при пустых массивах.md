@@ -6,7 +6,10 @@ tags:
   - assertion
 date: 2026-06-28
 issue: BUG-019
+github: https://github.com/ArturSalamatin/GDM/issues/3
 ---
+
+**GitHub issue:** [#3](https://github.com/ArturSalamatin/GDM/issues/3)
 
 # SparsityPattern abort в Debug при пустых массивах
 

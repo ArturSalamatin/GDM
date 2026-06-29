@@ -33,6 +33,7 @@ date: 2026-06-27
 
 - [[bug-001 well-state-rollback]] — BUG-001: SIGSEGV при закачке воды — out-of-bounds в AddFlowFieldSnapShot при ny=1
 - [[bug-012 binary-grid-dim-type-mismatch]] — BUG-012: несовпадение типов size_t/int при бинарном I/O grid_dim
+- [[bug-019 sparsity-pattern-debug-abort]] — BUG-019: SparsityPattern abort в Debug при пустых массивах
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
