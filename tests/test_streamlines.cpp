@@ -104,13 +104,23 @@ static void export_velocity_csv(
         }
 }
 
+#ifdef NDEBUG
+constexpr size_t SL_N = 21;
+constexpr double SL_sim_end = 1000.0;
+constexpr int SL_n_rays = 24;
+#else
+constexpr size_t SL_N = 11;
+constexpr double SL_sim_end = 100.0;
+constexpr int SL_n_rays = 8;
+#endif
+
 // ─── single injector ───────────────────────────────────────────────────────────
 
 TEST_CASE("Streamlines: single injector radial",
           "[streamlines][single-injector]")
 {
-    constexpr double sim_end = 1000.0;
-    simulation_cases::SingleInjectorCase sc(21, 21);
+    constexpr double sim_end = SL_sim_end;
+    simulation_cases::SingleInjectorCase sc(SL_N, SL_N);
     auto sim = run_simulation(sc, sim_end);
 
     auto& field = sim->flowFields[0];
@@ -122,7 +132,7 @@ TEST_CASE("Streamlines: single injector radial",
     double cx = wells[0].x, cy = wells[0].y;
     double hx = sc.lx() / sc.nx();
     double r  = 1.0 * hx;
-    int n_rays = 24;
+    int n_rays = SL_n_rays;
 
     auto starts = make_radial_starts(cx, cy, r, n_rays);
     PhasePortrait portrait;
@@ -180,8 +190,8 @@ TEST_CASE("Streamlines: single injector radial",
 TEST_CASE("Streamlines: two wells",
           "[streamlines][two-well]")
 {
-    constexpr double sim_end = 1000.0;
-    simulation_cases::TwoWellCase sc(21, 21);
+    constexpr double sim_end = SL_sim_end;
+    simulation_cases::TwoWellCase sc(SL_N, SL_N);
     auto sim = run_simulation(sc, sim_end);
 
     auto& field = sim->flowFields[0];
@@ -195,7 +205,7 @@ TEST_CASE("Streamlines: two wells",
 
     double hx = sc.lx() / sc.nx();
     double r  = 1.0 * hx;
-    int n_rays = 24;
+    int n_rays = SL_n_rays;
 
     auto starts = make_radial_starts(inj_x, inj_y, r, n_rays);
     PhasePortrait portrait;
