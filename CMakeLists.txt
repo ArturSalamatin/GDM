@@ -140,7 +140,7 @@ catch_discover_tests(gdm_tests
 catch_discover_tests(gdm_benchmark
     TEST_PREFIX "benchmark."
     TEST_SPEC "[.slow]"
-    PROPERTIES TIMEOUT 10800
+    PROPERTIES TIMEOUT 1800
 )
 catch_discover_tests(gdm_unit_level0
     TEST_PREFIX "unit.level0."
