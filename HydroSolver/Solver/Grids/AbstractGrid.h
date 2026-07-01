@@ -129,7 +129,7 @@ namespace reservoir_simulator
 			{}
 			SomeGrid(const std::vector<bool>& active_cells)
 				:Cells{}, CellsInactive{}, IsCellActive{ active_cells },
-				cell_idx_Global2Local{ std::vector<long int>(totalCellNmbr, -1) }
+				cell_idx_Global2Local{ std::vector<long int>(active_cells.size(), -1) }
 			{
 				totalCellNmbr = active_cells.size();
 				cell_idx_Local2Global.reserve(totalCellNmbr);
