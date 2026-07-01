@@ -91,6 +91,7 @@ schemeTau = CurrentIntegrationStep() * (1 - 2 * factor);  // factor = 0.15
 ## CR-NUM-006: `Solve()` всегда возвращает `converged = true`
 
 **Файл:** `HydroSolver/Solver/Math/LinearProblem.cpp:143`
+**GitHub issue:** [#5](https://github.com/ArturSalamatin/GDM/issues/5)
 
 ```cpp
 return { iters, error, true };
