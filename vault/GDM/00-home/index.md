@@ -38,6 +38,7 @@ date: 2026-06-27
 - [[bug-006 solve-converged-always-true]] — BUG-006: Solve() всегда converged=true + CurrentANG_IsAccuracyReached() бессмысленный критерий
 - [[bug-007 harmonic-mean-zero-division]] — BUG-007: деление на ноль в гармоническом среднем подвижности
 - [[bug-008 well-pressure-zero-mobility]] — BUG-008: деление на ноль в SetRefWellPressure
+- [[bug-009 active-cells-filter]] — BUG-009: фильтр ActiveCells не работает — size_t + 1 > 0 всегда true
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
