@@ -6,7 +6,7 @@ date: 2026-07-01
 issue: BUG-007
 github: 6
 branch: fix/bug-007/harmonic-mean-zero-division
-status: в процессе
+status: реализован
 ---
 
 # BUG-007: Деление на ноль в гармоническом среднем подвижности
