@@ -6,7 +6,7 @@ date: 2026-07-01
 issue: BUG-008
 github: 7
 branch: fix/bug-008/well-pressure-zero-mobility
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-01
   findings: 0 / 0 / 0
