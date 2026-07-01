@@ -110,6 +110,7 @@ date: 2026-06-27
 - [[code-review-2026-06-28-архитектурные-ограничения]]
 - [[BUG-006 solve converged always true]]
 - [[BUG-007 harmonic mean zero division]]
+- [[BUG-008 well pressure zero mobility]]
 
 #### Валидация (`knowledge/validation/`)
 - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]
