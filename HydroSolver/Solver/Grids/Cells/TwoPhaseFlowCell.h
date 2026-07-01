@@ -31,8 +31,13 @@ namespace reservoir_simulator
 													 //	double water_mobility = MobilityWater(); // mobility of water, k*k/mu
 				DependentFieldProperties[2] = oil_mobility + MobilityWater(); // overall mobility, k*k/mu + k*k/mu
 
-				DependentFieldProperties[3] = oil_mobility / MobilityOverall(); // oil fraction of flowing stream, f_Oil
-				DependentFieldProperties[4] = 1 - F_Oil(); // water fraction of flowing stream, f_Water
+				if (MobilityOverall() > 0.0) {
+					DependentFieldProperties[3] = oil_mobility / MobilityOverall();
+					DependentFieldProperties[4] = 1 - F_Oil();
+				} else {
+					DependentFieldProperties[3] = 0.0;
+					DependentFieldProperties[4] = 0.0;
+				}
 
 				double oil_volume = OilVolume(); // oil volume
 				double water_volume = WaterVolume(); // water volume
@@ -43,7 +48,11 @@ namespace reservoir_simulator
 				DependentFieldProperties[7] = Permeability() * DerivativeRelativePermeabilityOil() / ViscousityOil(); // derivative of oil mobility by SWaterScaled, d(k*k/mu)
 				DependentFieldProperties[8] = Permeability() * DerivativeRelativePermeabilityWater() / ViscousityWater(); // derivative of water mobility, d(k*k/mu)
 
-				DependentFieldProperties[9] = (F_Water() * DerivativeMobilityOil() - F_Oil() * DerivativeMobilityWater()) / MobilityOverall(); // d(f_Oil)/d(S_Water) 
+				if (MobilityOverall() > 0.0) {
+					DependentFieldProperties[9] = (F_Water() * DerivativeMobilityOil() - F_Oil() * DerivativeMobilityWater()) / MobilityOverall();
+				} else {
+					DependentFieldProperties[9] = 0.0;
+				}
 			}
 			
 			virtual void SetPreviousStateDependentFieldProperties();
