@@ -2,7 +2,7 @@
     "cmake.ctest.testExplorerIntegrationEnabled": false,
     "testMate.cpp.test.advancedExecutables": [
         {
-            "pattern": "build/Release/gdm_unit_level*.exe",
+            "pattern": "build/{Release,Debug}/gdm_unit_level*.exe",
             "testGrouping": {
                 "groupByExecutable": {
                     "label": "${filename}",
@@ -14,7 +14,7 @@
             }
         },
         {
-            "pattern": "build/Release/gdm_tests.exe",
+            "pattern": "build/{Release,Debug}/gdm_tests.exe",
             "testGrouping": {
                 "groupByExecutable": {
                     "label": "integration"
