@@ -47,7 +47,7 @@ SolveResult solve_with_scalar(LinearProblem& lp, int maxIter, typename SolverTyp
 
     std::copy(X.begin(), X.end(), lp.SolutionCorrections().begin());
 
-    return { iters, error, true };
+    return { iters, error, std::isfinite(error) };
 }
 
 // --- CPR type definitions (scalar backend, for experimental benchmarks) ---

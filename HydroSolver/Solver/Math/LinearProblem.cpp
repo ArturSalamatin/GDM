@@ -140,7 +140,7 @@ namespace reservoir_simulator
 
 			solutionCorrections = std::move(X);
 
-			return { iters, error, true };
+			return { iters, error, std::isfinite(error) };
 		}
 
 		void LinearProblem::AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS)
