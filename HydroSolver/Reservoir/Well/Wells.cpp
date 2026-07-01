@@ -39,7 +39,7 @@ namespace reservoir_simulator
 					if (!isfinite(P_Reservoir(l)) || !isfinite(P_Well[l])
 						|| !isfinite(OverallMobility(l)) || !isfinite(Derivative_F_Oil(l))
 						|| !isfinite(factor[l]) || !isfinite(DerivativeOverallMobility(l)))
-						throw("well production is not determined. Date:" + std::to_string(nextTimeMoment));
+						throw std::runtime_error("well production is not determined. Date:" + std::to_string(nextTimeMoment));
 					//cout << "<<< production is not determined. Well " << NameString() << " Date " << std::to_string(CurrentTime()) << endl;
 
 					double dP = P_Reservoir(l) - P_Well[l];

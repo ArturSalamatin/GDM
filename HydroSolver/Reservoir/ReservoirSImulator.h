@@ -214,7 +214,7 @@ namespace reservoir_simulator
 								continue;
 							}
 
-							int blockSize = MyProblem.NmbrOfNonZerosPerUnitBlock();
+							size_t blockSize = MyProblem.NmbrOfNonZerosPerUnitBlock();
 							const TwoPhaseFlowCell& cell = Grid[l];
 							//	const std::vector<TwoPhaseFlowCell*> neighbourCells = Grid.GetNeighboursPointer(l);
 							//	const std::vector<double>& commonEdgeArea = Grid.CommonEdgeArea(l);
@@ -294,7 +294,7 @@ namespace reservoir_simulator
 								continue;
 							}
 
-							int blockSize = MyProblem.NmbrOfNonZerosPerUnitBlock();
+							size_t blockSize = MyProblem.NmbrOfNonZerosPerUnitBlock();
 							const TwoPhaseFlowCell& cell = Grid[l];
 							//	const std::vector<TwoPhaseFlowCell*> neighbourCells = Grid.GetNeighboursPointer(l);
 							//	const std::vector<double>& commonEdgeArea = Grid.CommonEdgeArea(l);

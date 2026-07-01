@@ -140,7 +140,7 @@ catch_discover_tests(gdm_tests
 catch_discover_tests(gdm_benchmark
     TEST_PREFIX "benchmark."
     TEST_SPEC "[.slow]"
-    PROPERTIES TIMEOUT 1800
+    PROPERTIES TIMEOUT 300
 )
 catch_discover_tests(gdm_unit_level0
     TEST_PREFIX "unit.level0."
@@ -219,6 +219,8 @@ set(EXAMPLE_NAMES
     ex_variable_debit
     ex_3d_completions
     ex_benchmark_51x51x4
+    ex_benchmark_series_cpr
+    ex_benchmark_series_ts
 )
 
 foreach(ex IN LISTS EXAMPLE_NAMES)

@@ -6,7 +6,7 @@ date: 2026-06-29
 issue: BUG-002
 github: 4
 branch: fix/bug-002/cpr-zero-pivot
-status: готов к реализации
+status: реализован
 ---
 
 # BUG-002: CPR zero pivot — abort() в cpr.hpp:522 при LU-факторизации блока

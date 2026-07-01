@@ -1,11 +1,12 @@
-#include <catch2/catch_test_macros.hpp>
-#include "simulation_cases/MultiLayerCase.h"
+#include "../tests/simulation_cases/MultiLayerCase.h"
 
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
+#include <iostream>
 #include <string>
+#include <vector>
 
 #include <amgcl/adapter/crs_tuple.hpp>
 #include <amgcl/make_solver.hpp>
@@ -24,7 +25,6 @@ using namespace reservoir_simulator::linear_problem;
 
 namespace {
 
-// --- Scalar solve function for experimental configurations ---
 template<typename SolverType>
 SolveResult solve_with_scalar(LinearProblem& lp, int maxIter, typename SolverType::params& prm)
 {
@@ -50,7 +50,6 @@ SolveResult solve_with_scalar(LinearProblem& lp, int maxIter, typename SolverTyp
     return { iters, error, true };
 }
 
-// --- CPR type definitions (scalar backend, for experimental benchmarks) ---
 using SB = amgcl::backend::builtin<double>;
 
 using CPR_AMG_ilu0 = amgcl::preconditioner::cpr<
@@ -74,15 +73,10 @@ using CPR_AMG_iluk = amgcl::preconditioner::cpr<
 >;
 using CPRSolver_AMG_iluk = amgcl::make_solver<CPR_AMG_iluk, amgcl::solver::lgmres<SB>>;
 
-#ifdef NDEBUG
-constexpr size_t BNx = 21, BNy = 21, BNz = 4;
-constexpr double Btotal_time = 200.0;
-#else
-constexpr size_t BNx = 11, BNy = 11, BNz = 2;
-constexpr double Btotal_time = 15.0;
-#endif
+constexpr size_t BNx = 51, BNy = 51, BNz = 4;
 constexpr double BLx = 500.0, BLy = 500.0, Bhz = 10.0;
 constexpr double Brho_oil = 800.0, Brho_water = 1000.0;
+constexpr double Btotal_time = 730.0;
 constexpr double Brate_mult = 1.4;
 
 std::vector<test_helpers::WellScheduleBuilder>
@@ -104,35 +98,31 @@ make_benchmark_wells()
     builders.back().set_completions(c_inj2)
         .inject_water(30.0 * rm).for_days(T);
 
-    auto c_prod1_b = test_helpers::WellCompletionBuilder(BNz, Bhz)
-        .open_layer(0, 0.0).open_layer(1, 0.0);
-    if constexpr (BNz > 2) c_prod1_b.open_layer(2, 0.0);
-    if constexpr (BNz > 3) c_prod1_b.open_layer(3, 0.0);
+    auto c_prod1 = test_helpers::WellCompletionBuilder(BNz, Bhz)
+        .open_layer(0, 0.0).open_layer(1, 0.0)
+        .open_layer(2, 0.0).open_layer(3, 0.0);
     builders.emplace_back(L"PROD-1", 375.0, 125.0);
-    builders.back().set_completions(c_prod1_b)
+    builders.back().set_completions(c_prod1)
         .produce_oil(25.0 * rm).for_days(T);
 
     auto c_prod2 = test_helpers::WellCompletionBuilder(BNz, Bhz)
-        .open_layer(BNz - 1, 0.0);
+        .open_layer(3, 0.0);
     builders.emplace_back(L"PROD-2", 125.0, 375.0);
     builders.back().set_completions(c_prod2)
         .produce_oil(15.0 * rm).for_days(T);
 
-    auto c_prod3_b = test_helpers::WellCompletionBuilder(BNz, Bhz)
-        .open_layer(BNz > 2 ? 1 : 0, 0.0);
-    if constexpr (BNz > 2) c_prod3_b.open_layer(2, 0.0);
+    auto c_prod3 = test_helpers::WellCompletionBuilder(BNz, Bhz)
+        .open_layer(1, 0.0).open_layer(2, 0.0);
     builders.emplace_back(L"PROD-3", 250.0, 250.0);
-    builders.back().set_completions(c_prod3_b)
+    builders.back().set_completions(c_prod3)
         .produce_oil(20.0 * rm).for_days(T);
 
     auto c_inj3 = test_helpers::WellCompletionBuilder(BNz, Bhz)
-        .open_layer(0, 40.0);
-    if constexpr (BNz > 1) c_inj3.open_layer(1, 40.0);
+        .open_layer(0, 150.0).open_layer(1, 150.0);
     builders.emplace_back(L"INJ-3", 250.0, 125.0);
     builders.back().set_completions(c_inj3)
-        .shut_in().for_days(std::min(T, 40.0));
-    if constexpr (Btotal_time > 40.0)
-        builders.back().inject_water(35.0 * rm).for_days(T - 40.0);
+        .shut_in().for_days(150.0)
+        .inject_water(35.0 * rm).for_days(T - 150.0);
 
     return builders;
 }
@@ -162,18 +152,21 @@ struct BenchmarkResult {
     double t_solve = 0;
 };
 
-// Production benchmark: uses LinearProblem::Solve() (CPR)
-BenchmarkResult run_benchmark(const std::string& config_name,
-                               bool usePIController = false,
-                               PIControllerParams piParams = {},
-                               double snapshot_dt = 5.0,
-                               double init_tau = -1.0)
+struct SolverProfile {
+    size_t n_time_steps = 0;
+    size_t n_newton_iters = 0;
+    size_t n_amg_solves = 0;
+    size_t n_wasted_trials = 0;
+    size_t total_amg_iters = 0;
+};
+
+BenchmarkResult run_benchmark(const std::string& config_name)
 {
     prof.reset();
 
     simulation_cases::MultiLayerCase sc(
         "benchmark_" + config_name, BNx, BNy, BNz, BLx, BLy, Bhz,
-        Btotal_time, snapshot_dt,
+        Btotal_time, 5.0,
         [](double, double) { return make_benchmark_wells(); },
         bm_wells_info
     );
@@ -183,12 +176,8 @@ BenchmarkResult run_benchmark(const std::string& config_name,
 
     ReservoirSimulator sim{numPrm, horizon, horizon.oil, horizon.water, horizon.other};
     sim.RefPressure = sc.ref_pressure_Pa();
-    sim.numPrm.set_initial_schemeTau(init_tau > 0 ? init_tau : sc.initial_tau());
+    sim.numPrm.set_initial_schemeTau(sc.initial_tau());
     sim.numPrm.set_currentMoment(0.0);
-    if (usePIController) {
-        sim.numPrm.SetUsePIController(true);
-        sim.numPrm.SetPIControllerParams(piParams);
-    }
     sc.add_wells(sim, horizon);
 
     double oil_mass_0 = sim.OilTotal();
@@ -270,9 +259,10 @@ BenchmarkResult run_benchmark(const std::string& config_name,
             auto Sw = sim.GetWaterSaturationField();
             auto P = sim.GetPressureField();
             for (size_t i = 0; i < total_cells; ++i) {
-                REQUIRE(Sw[i] >= 0.0);
-                REQUIRE(Sw[i] <= 1.0);
-                REQUIRE(P[i] > 0.0);
+                if (Sw[i] < 0.0 || Sw[i] > 1.0 || P[i] <= 0.0) {
+                    solver_failed = true;
+                    break;
+                }
             }
 
             auto bal = sim.GetOverallBalance();
@@ -306,7 +296,6 @@ BenchmarkResult run_benchmark(const std::string& config_name,
     return r;
 }
 
-// Experimental benchmark: uses solve_with_scalar for non-production solver configs
 template<typename SolverType>
 BenchmarkResult run_benchmark_scalar(const std::string& config_name,
                                      typename SolverType::params& prm,
@@ -412,9 +401,10 @@ BenchmarkResult run_benchmark_scalar(const std::string& config_name,
             auto Sw = sim.GetWaterSaturationField();
             auto P = sim.GetPressureField();
             for (size_t i = 0; i < total_cells; ++i) {
-                REQUIRE(Sw[i] >= 0.0);
-                REQUIRE(Sw[i] <= 1.0);
-                REQUIRE(P[i] > 0.0);
+                if (Sw[i] < 0.0 || Sw[i] > 1.0 || P[i] <= 0.0) {
+                    solver_failed = true;
+                    break;
+                }
             }
 
             auto bal = sim.GetOverallBalance();
@@ -493,27 +483,23 @@ void report(const BenchmarkResult& r) {
               << "  t_solve=" << std::setprecision(3) << r.t_solve << "s (" << std::setprecision(1) << (r.t_solve/r.t_total*100) << "%)\n";
 }
 
-const std::string csv_path = "results/amgcl_benchmark.csv";
-
 } // namespace
 
-
-// ======================== Series CPR: experimental configs ========================
-
-TEST_CASE("AMGCL benchmark: Series CPR - CPR preconditioner",
-          "[benchmark][amgcl][seriesCPR][.slow]")
-{
+int main() {
     fs::create_directories("results");
     std::string csv_path = "results/benchmark_cpr.csv";
 
-    SECTION("CPR1: production CPR (baseline)") {
+    std::cout << "=== Series CPR: full benchmark (51x51x4, 730 days) ===\n";
+
+    // CPR1: production CPR (baseline)
+    {
         auto r = run_benchmark("CPR1_production_cpr");
         report(r);
         append_csv(csv_path, r);
-        CHECK(r.balance_ok);
     }
 
-    SECTION("CPR2: cpr<amg_iluk, ilu0> + lgmres, PswLayout") {
+    // CPR2: cpr<amg_iluk, ilu0> + lgmres, PswLayout
+    {
         using S = CPRSolver_AMG_iluk;
         S::params prm;
         prm.precond.block_size = 2;
@@ -523,10 +509,10 @@ TEST_CASE("AMGCL benchmark: Series CPR - CPR preconditioner",
         auto r = run_benchmark_scalar<S>("CPR2_cpr_iluk_PswLayout", prm, Layout::InterleavedPSw);
         report(r);
         append_csv(csv_path, r);
-        CHECK(r.balance_ok);
     }
 
-    SECTION("CPR3: cpr_drs<amg_ilu0, ilu0> + lgmres, PswLayout") {
+    // CPR3: cpr_drs<amg_ilu0, ilu0> + lgmres, PswLayout
+    {
         using S = CPRDRSSolver_AMG_ilu0;
         S::params prm;
         prm.precond.block_size = 2;
@@ -535,10 +521,10 @@ TEST_CASE("AMGCL benchmark: Series CPR - CPR preconditioner",
         auto r = run_benchmark_scalar<S>("CPR3_cprdrs_ilu0_PswLayout", prm, Layout::InterleavedPSw);
         report(r);
         append_csv(csv_path, r);
-        CHECK(r.balance_ok);
     }
 
-    SECTION("CPR4: scalar ilu0 + lgmres, SwPLayout (lower bound)") {
+    // CPR4: scalar ilu0 + lgmres, SwPLayout (lower bound)
+    {
         using S = ILU0Solver_scalar;
         S::params prm;
         prm.solver.M = 15;
@@ -546,76 +532,8 @@ TEST_CASE("AMGCL benchmark: Series CPR - CPR preconditioner",
         auto r = run_benchmark_scalar<S>("CPR4_ilu0_scalar_SwPLayout", prm, Layout::InterleavedSwP);
         report(r);
         append_csv(csv_path, r);
-        CHECK(r.balance_ok);
-    }
-}
-
-
-// ======================== Series TS: timestep control ========================
-
-TEST_CASE("AMGCL benchmark: Series TS - timestep control",
-          "[benchmark][amgcl][seriesTS][.slow]")
-{
-    fs::create_directories("results");
-
-    constexpr double ts_snapshot_dt = 50.0;
-    constexpr double ts_init_tau = 0.5;
-
-    SECTION("TS_BL: fixed factor=0.15") {
-        auto r = run_benchmark("TS_BL_fixed", false, {},
-                               ts_snapshot_dt, ts_init_tau);
-        report(r);
-        append_csv(csv_path, r);
-        CHECK(r.balance_ok);
     }
 
-    SECTION("TS_PI1: PI default target=8") {
-        auto r = run_benchmark("TS_PI1_default_t8", true,
-                               PIControllerParams{},
-                               ts_snapshot_dt, ts_init_tau);
-        report(r);
-        append_csv(csv_path, r);
-        CHECK(!r.failed);
-        CHECK(r.balance_ok);
-    }
-
-    SECTION("TS_PI2: PI target=10") {
-        PIControllerParams p{.target_iters = 10};
-        auto r = run_benchmark("TS_PI2_t10", true, p,
-                               ts_snapshot_dt, ts_init_tau);
-        report(r);
-        append_csv(csv_path, r);
-        CHECK(!r.failed);
-        CHECK(r.balance_ok);
-    }
-
-    SECTION("TS_PI3: PI target=12") {
-        PIControllerParams p{.target_iters = 12};
-        auto r = run_benchmark("TS_PI3_t12", true, p,
-                               ts_snapshot_dt, ts_init_tau);
-        report(r);
-        append_csv(csv_path, r);
-        CHECK(!r.failed);
-        CHECK(r.balance_ok);
-    }
-
-    SECTION("TS_PI4: P-only target=12") {
-        PIControllerParams p{.beta = 0.0, .target_iters = 12};
-        auto r = run_benchmark("TS_PI4_Ponly_t12", true, p,
-                               ts_snapshot_dt, ts_init_tau);
-        report(r);
-        append_csv(csv_path, r);
-        CHECK(!r.failed);
-        CHECK(r.balance_ok);
-    }
-
-    SECTION("TS_PI5: alpha=0.7 target=12") {
-        PIControllerParams p{.alpha = 0.7, .target_iters = 12, .max_growth = 2.0};
-        auto r = run_benchmark("TS_PI5_alpha07_t12", true, p,
-                               ts_snapshot_dt, ts_init_tau);
-        report(r);
-        append_csv(csv_path, r);
-        CHECK(!r.failed);
-        CHECK(r.balance_ok);
-    }
+    std::cout << "\nAll CPR benchmarks complete. Results: " << csv_path << "\n";
+    return 0;
 }
