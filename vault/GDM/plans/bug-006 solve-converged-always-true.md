@@ -6,7 +6,7 @@ date: 2026-07-01
 issue: BUG-006
 github: 5
 branch: fix/bug-006/solve-converged-always-true
-status: готов к реализации
+status: в процессе
 ---
 
 # BUG-006: Solve() всегда возвращает converged = true
