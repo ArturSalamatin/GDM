@@ -378,12 +378,15 @@ TEST_CASE("3D completions: layer closure mid-simulation",
 
 
 // --- 7.4: Частичное вскрытие ---
+// Nz=2, вертикальные перетоки отключены → слои независимы.
+// Полное вскрытие: оба слоя, частичное: только слой 0.
+// В слое 1 при частичном вскрытии Sw остаётся начальной.
 TEST_CASE("3D completions: partial perforation",
           "[3d][completions][partial]")
 {
-    constexpr size_t Nz = 1;
+    constexpr size_t Nz = 2;
 
-    // Полное вскрытие
+    // Полное вскрытие — оба слоя
     simulation_cases::MultiLayerCase sc_full(
         "3d_partial_full", Nx, Ny, Nz, Lx, Ly, hz,
         200.0, 20.0,
@@ -391,7 +394,7 @@ TEST_CASE("3D completions: partial perforation",
             std::vector<test_helpers::WellScheduleBuilder> builders;
 
             auto c = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_layer(0, 0.0);
+                .open_layer(0, 0.0).open_layer(1, 0.0);
             builders.emplace_back(L"INJ", 250.0, 250.0);
             builders.back()
                 .set_completions(c)
@@ -402,15 +405,15 @@ TEST_CASE("3D completions: partial perforation",
         {{"INJ", "injector", 250.0, 250.0}}
     );
 
-    // Частичное вскрытие — верхняя половина
+    // Частичное вскрытие — только слой 0
     simulation_cases::MultiLayerCase sc_partial(
-        "3d_partial_half", Nx, Ny, Nz, Lx, Ly, hz,
+        "3d_partial_layer0", Nx, Ny, Nz, Lx, Ly, hz,
         200.0, 20.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
 
             auto c = test_helpers::WellCompletionBuilder(Nz, hz)
-                .open_interval(0, 0.0, hz / 2.0, 0.0);
+                .open_layer(0, 0.0);
             builders.emplace_back(L"INJ", 250.0, 250.0);
             builders.back()
                 .set_completions(c)
@@ -432,8 +435,15 @@ TEST_CASE("3D completions: partial perforation",
     double hx = Lx / Nx, hy = Ly / Ny;
     size_t inj_i = static_cast<size_t>(250.0 / hx);
     size_t inj_j = static_cast<size_t>(250.0 / hy);
-    size_t inj_cell = inj_j * Nx + inj_i;
-    CHECK(result_full.Sw[inj_cell] > result_partial.Sw[inj_cell]);
+    size_t layer0_offset = 0;
+    size_t layer1_offset = Nx * Ny;
+    size_t inj_cell_k0 = layer0_offset + inj_j * Nx + inj_i;
+    size_t inj_cell_k1 = layer1_offset + inj_j * Nx + inj_i;
+
+    // Слой 1: полное вскрытие закачивает воду, частичное — нет
+    CHECK(result_full.Sw[inj_cell_k1] > result_partial.Sw[inj_cell_k1]);
+    // Слой 0: частичное вскрытие концентрирует всю воду в одном слое
+    CHECK(result_partial.Sw[inj_cell_k0] > result_full.Sw[inj_cell_k0]);
 }
 
 
