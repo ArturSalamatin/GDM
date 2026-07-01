@@ -415,3 +415,21 @@ gh issue create --repo ArturSalamatin/GDM \
 - Не создавай коммитов — только issue и vault-записи. Пользователь коммитит сам
 - Тело issue сохраняй в scratchpad-директорию, не в проект
 - PATH для gh может потребовать обновления: `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`
+
+---
+
+## Следующий шаг: план
+
+После завершения всех шагов (включая сообщение результата) — предложи пользователю создать план.
+
+Определи команду по типу ID:
+- `BUG-*` → `/plan-fix`
+- `DEBT-*` → `/plan-improve`
+- `FEAT-*` → `/plan-feature`
+- `VAL-*` → `/plan-validate`
+- `RES-*` → `/plan-research`
+
+Спроси пользователя:
+> Запустить `<команда> <ID>`?
+
+Если пользователь подтвердит — вызови Skill tool с соответствующим именем и передай ID как аргумент.

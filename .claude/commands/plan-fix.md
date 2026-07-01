@@ -327,3 +327,12 @@ status: готов к реализации
 - Файл плана должен быть ДЛИННЫМ и ПОДРОБНЫМ. Избыточность лучше недосказанности
 - Если >15 шагов — предложи разбить на под-задачи со своими планами
 - PATH для gh: `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`
+
+---
+
+## Следующий шаг: аудит
+
+После завершения всех шагов — спроси пользователя:
+> Запустить `/audit-plan <ID>`?
+
+Если подтвердит — вызови Skill tool `audit-plan` с ID как аргументом.

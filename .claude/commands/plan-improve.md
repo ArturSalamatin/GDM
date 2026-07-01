@@ -344,3 +344,12 @@ status: готов к реализации
 - Инкрементальность: после каждого шага проект компилируется и тесты зелёные
 - Если >15 шагов — разбить на под-задачи
 - PATH для gh: `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`
+
+---
+
+## Следующий шаг: аудит
+
+После завершения всех шагов — спроси пользователя:
+> Запустить `/audit-plan <ID>`?
+
+Если подтвердит — вызови Skill tool `audit-plan` с ID как аргументом.
