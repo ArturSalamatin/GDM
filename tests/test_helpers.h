@@ -104,10 +104,14 @@ inline void add_simple_well(
         mer_data.push_back(rec);
     }
 
-    // Перфорация: один слой Nz=1, открыта на всю глубину, с t=0.
-    reservoir_simulator::JobsInLayer jobs_in_layer;
-    jobs_in_layer.emplace_back(0.0, nz * hz, true, 0.0);
-    reservoir_simulator::WellJobs well_jobs(name, jobs_in_layer);
+    // Перфорация: один элемент на каждый слой.
+    // WellJobs хранит RawWellPerforationData[layerID], RemovePerfsAtInactiveCells
+    // итерирует ActiveCells.size() = Nz → нужно Nz элементов.
+    reservoir_simulator::JobsInLayer one_layer;
+    one_layer.emplace_back(0.0, hz, true, 0.0);
+    reservoir_simulator::WellJobsPerLayer jobs_per_layer(
+        static_cast<size_t>(nz), one_layer);
+    reservoir_simulator::WellJobs well_jobs(name, jobs_per_layer);
 
     reservoir_simulator::WellPosition pos(x, y);
 
