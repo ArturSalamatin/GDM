@@ -68,10 +68,8 @@ namespace reservoir_simulator
 		size_t CurrentAMG_IterationsCount() const { return AMG_currentIterationCount; }
 		bool CurrentANG_IsAccuracyReached() const
 		{
-			return
-				CurrentAMG_Error() == 1.0 ||
-				CurrentAMG_Error() == 0.0 //|| CurrentAMG_Error() < 1E-15
-				;
+			return CurrentAMG_Error() <= AMG_RelTol
+				|| CurrentAMG_IterationsCount() == 0;
 		}
 		double CurrentTimeMoment() const { return currentMoment; }
 		/// <summary>

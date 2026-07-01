@@ -6,7 +6,7 @@ date: 2026-07-01
 issue: BUG-006
 github: 5
 branch: fix/bug-006/solve-converged-always-true
-status: готов к реализации
+status: выполнен
 ---
 
 # BUG-006: Solve() всегда возвращает converged = true
@@ -229,15 +229,19 @@ AMGCL lgmres использует два критерия выхода:
 return { iters, error, true };
 ```
 
-После:
+После (план → фактическое при реализации):
 ```cpp
-return { iters, error, std::isfinite(error) && error <= prm.solver.tol };
+// Планировалось: return { iters, error, std::isfinite(error) && error <= prm.solver.tol };
+// Фактически:
+return { iters, error, std::isfinite(error) };
 ```
+
+**Отклонение от плана:** `error <= prm.solver.tol` убрано. Причина: Newton loop (`PerformNewtonLoop`) при `AMG_isIterationSuccessfull=false` немедленно делает `ReverseState(); break;` — т.е. прерывает Newton и объявляет wasted trial. Это приводит к бесконечным wasted trials на задачах, где AMG не достигает tol за maxiter, но даёт конечное решение. Проверка точности AMG вынесена в `CurrentANG_IsAccuracyReached()` (шаг 2).
 
 **Проверка после этого шага:**
 - Сборка: `cmake --build build --config Release`
 - Регрессия: `ctest --test-dir build -C Release`
-- Ожидаемый результат: часть тестов может начать падать из-за cascading effect через `CurrentANG_IsAccuracyReached()` — это ожидаемо, будет исправлено в шаге 2. Если все тесты зелёные — тоже нормально (тривиальные задачи, error = 0.0).
+- Ожидаемый результат: все тесты зелёные (converged=true для всех конечных результатов AMG).
 
 **Подводные камни:**
 - `std::isfinite` требует `<cmath>` — включён транзитивно через `stdafx.h` и `amgcl/solver/lgmres.hpp`. Если по какой-то причине не компилируется — добавить `#include <cmath>` в начало `LinearProblem.cpp`
@@ -341,9 +345,9 @@ bool CurrentANG_IsAccuracyReached() const
 return { iters, error, true };
 ```
 
-После:
+После (фактически — см. отклонение в шаге 1):
 ```cpp
-return { iters, error, std::isfinite(error) && error <= prm.solver.tol };
+return { iters, error, std::isfinite(error) };
 ```
 
 **Проверка после этого шага:**

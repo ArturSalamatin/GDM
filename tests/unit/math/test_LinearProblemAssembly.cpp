@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <cmath>
 #include "Solver/Math/LinearProblem.h"
 #include "assembly_test_helpers.h"
 
@@ -96,6 +97,53 @@ TEST_CASE("LinearProblemAssembly: 3x1x1 InterleavedSwP",
 TEST_CASE("LinearProblemAssembly: 3x1x1 InterleavedPSw",
           "[unit][level4][math][LinearProblemAssembly]") {
     run_lp_test(3, 1, 1, Layout::InterleavedPSw);
+}
+
+TEST_CASE("LinearProblem::Solve returns finite error and converged=true",
+          "[math][solver]") {
+    auto graph = assembly_helpers::make_grid_graph(3, 1, 1);
+    auto bp = assembly_helpers::fullBlock2();
+    LinearProblem lp(Layout::InterleavedPSw, 1e-15, 1e-15, graph, bp);
+
+    for (size_t i = 0; i < 3; ++i) {
+        double diag[4] = {10.0, 0.1, 0.1, 10.0};
+        double rhs[2] = {1.0, 0.5};
+        lp.AddDiagBlock(i, diag, rhs);
+    }
+    for (size_t i = 0; i < 3; ++i) {
+        for (int ni = 0; ni < static_cast<int>(graph[i].size()); ++ni) {
+            double off[4] = {-1.0, 0.0, 0.0, -1.0};
+            lp.AddOffDiagBlock(i, ni, off);
+        }
+    }
+
+    auto res = lp.Solve(1);
+    CHECK(res.converged);
+    CHECK(std::isfinite(res.error));
+}
+
+TEST_CASE("LinearProblem::Solve converged=true when maxIter sufficient",
+          "[math][solver]") {
+    auto graph = assembly_helpers::make_grid_graph(3, 1, 1);
+    auto bp = assembly_helpers::fullBlock2();
+    LinearProblem lp(Layout::InterleavedPSw, 1e-2, 1e-2, graph, bp);
+
+    for (size_t i = 0; i < 3; ++i) {
+        double diag[4] = {10.0, 0.1, 0.1, 10.0};
+        double rhs[2] = {1.0, 0.5};
+        lp.AddDiagBlock(i, diag, rhs);
+    }
+    for (size_t i = 0; i < 3; ++i) {
+        for (int ni = 0; ni < static_cast<int>(graph[i].size()); ++ni) {
+            double off[4] = {-1.0, 0.0, 0.0, -1.0};
+            lp.AddOffDiagBlock(i, ni, off);
+        }
+    }
+
+    auto res = lp.Solve(100);
+    CHECK(res.converged);
+    CHECK(res.error <= 1e-2);
+    CHECK(std::isfinite(res.error));
 }
 
 TEST_CASE("LinearProblemAssembly: 3x1x1 Blocked",
