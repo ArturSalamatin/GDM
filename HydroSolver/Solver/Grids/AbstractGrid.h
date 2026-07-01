@@ -179,7 +179,7 @@ namespace reservoir_simulator
 			size_t Ny() const { return grid_size.Ny; }
 			size_t Nz() const { return grid_size.Nz; }
 
-			size_t ConvertTriple2Local(const std::vector<size_t>& idx) const
+			long int ConvertTriple2Local(const std::vector<size_t>& idx) const
 			{
 				return ConvertGlobal2Local(Nx() * Ny() * idx[2] + Nx() * idx[1] + idx[0]);
 			}
@@ -290,8 +290,8 @@ namespace reservoir_simulator
 
 			const ProcessCell& operator() (size_t i, size_t j, size_t k) const
 			{
-				size_t idx = ConvertTriple2Local(std::vector<size_t>{i, j, k});
-				return (*this)[idx];
+				long int idx = ConvertTriple2Local(std::vector<size_t>{i, j, k});
+				return (*this)[static_cast<int>(idx)];
 			}
 		};
 	} // grid
