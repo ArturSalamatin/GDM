@@ -37,6 +37,7 @@ date: 2026-06-27
 - [[bug-019 sparsity-pattern-debug-abort]] — BUG-019: SparsityPattern abort в Debug при пустых массивах
 - [[bug-006 solve-converged-always-true]] — BUG-006: Solve() всегда converged=true + CurrentANG_IsAccuracyReached() бессмысленный критерий
 - [[bug-007 harmonic-mean-zero-division]] — BUG-007: деление на ноль в гармоническом среднем подвижности
+- [[bug-008 well-pressure-zero-mobility]] — BUG-008: деление на ноль в SetRefWellPressure
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
