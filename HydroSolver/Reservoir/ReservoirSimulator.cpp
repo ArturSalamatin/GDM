@@ -577,6 +577,7 @@ namespace reservoir_simulator
 			double OverallMobilityCell = cell.MobilityOverall(),
 				OverallMobilityNeighbour = neighbourCell.MobilityOverall();
 			double denom = OverallMobilityCell + OverallMobilityNeighbour;
+			if (denom == 0.0) continue;
 
 			double MeanOverallMobility = 2 * OverallMobilityNeighbour * OverallMobilityCell / denom;
 			double
