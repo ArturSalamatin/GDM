@@ -86,6 +86,14 @@ namespace reservoir_simulator
 					denom += temp;
 					numer += temp * P_Reservoir(l);
 				}
+				if (denom == 0.0) {
+					double avg_P = 0.0;
+					for (size_t l = 0; l < NmbrOfOpenedCells(); l++)
+						avg_P += P_Reservoir(l);
+					if (NmbrOfOpenedCells() > 0) avg_P /= NmbrOfOpenedCells();
+					SetWellPressure(avg_P);
+					return;
+				}
 				double P = numer / denom;
 
 				SetWellPressure(P);
