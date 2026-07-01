@@ -868,8 +868,8 @@ namespace reservoir_simulator
 
 								double p_grad = (cellNeighbour.P() - cell.P()) / hy;
 								double f_oil, f_water;
-								double mobility = 2 * cellNeighbour.MobilityOverall() * cell.MobilityOverall() /
-									(cellNeighbour.MobilityOverall() + cell.MobilityOverall());
+								double mob_sum = cellNeighbour.MobilityOverall() + cell.MobilityOverall();
+								double mobility = (mob_sum > 0.0) ? 2.0 * cellNeighbour.MobilityOverall() * cell.MobilityOverall() / mob_sum : 0.0;
 								if (p_grad > 0)
 								{
 									f_oil = cell.F_Oil();
@@ -997,8 +997,8 @@ namespace reservoir_simulator
 
 								double p_grad = (cellNeighbour.P() - cell.P()) / cell.StepX();
 								double f_oil, f_water;
-								double mobility = 2 * cellNeighbour.MobilityOverall() * cell.MobilityOverall() /
-									(cellNeighbour.MobilityOverall() + cell.MobilityOverall());
+								double mob_sum_x = cellNeighbour.MobilityOverall() + cell.MobilityOverall();
+								double mobility = (mob_sum_x > 0.0) ? 2.0 * cellNeighbour.MobilityOverall() * cell.MobilityOverall() / mob_sum_x : 0.0;
 								if (p_grad > 0)
 								{
 									f_oil = cell.F_Oil();
