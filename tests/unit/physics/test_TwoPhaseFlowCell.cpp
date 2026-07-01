@@ -108,3 +108,14 @@ TEST_CASE("TwoPhaseFlowCell: OilMass and WaterMass are positive",
     CHECK(cell.OilMass() > 0.0);
     CHECK(cell.WaterMass() > 0.0);
 }
+
+TEST_CASE("TwoPhaseFlowCell: zero permeability gives finite properties",
+          "[unit][level3][physics][TwoPhaseFlowCell]") {
+    auto cell = make_cell(0.5, 1e7, 0.0);
+    CHECK(cell.MobilityOverall() == 0.0);
+    CHECK(cell.F_Oil() == 0.0);
+    CHECK(cell.F_Water() == 0.0);
+    CHECK(cell.Derivative_F_Oil() == 0.0);
+    CHECK(std::isfinite(cell.OilMass()));
+    CHECK(std::isfinite(cell.WaterMass()));
+}
