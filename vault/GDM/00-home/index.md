@@ -40,6 +40,7 @@ date: 2026-06-27
 - [[bug-008 well-pressure-zero-mobility]] — BUG-008: деление на ноль в SetRefWellPressure
 - [[bug-009 active-cells-filter]] — BUG-009: фильтр ActiveCells не работает — size_t + 1 > 0 всегда true
 - [[bug-013 sparsity-pattern-args-order]] — BUG-013: SparsityPattern 3-arg конструктор — аргументы vector\<bool\> перепутаны
+- [[bug-010 const-cast-perforations]] — BUG-010: const_cast на перфорациях в SomeWell — undefined behavior
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
@@ -115,6 +116,7 @@ date: 2026-06-27
 - [[BUG-008 well pressure zero mobility]]
 - [[BUG-009 active cells filter]]
 - [[BUG-013 sparsity pattern args order]]
+- [[BUG-010 const cast perforations]]
 
 #### Валидация (`knowledge/validation/`)
 - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]
