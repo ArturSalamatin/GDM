@@ -39,6 +39,7 @@ date: 2026-06-27
 - [[bug-007 harmonic-mean-zero-division]] — BUG-007: деление на ноль в гармоническом среднем подвижности
 - [[bug-008 well-pressure-zero-mobility]] — BUG-008: деление на ноль в SetRefWellPressure
 - [[bug-009 active-cells-filter]] — BUG-009: фильтр ActiveCells не работает — size_t + 1 > 0 всегда true
+- [[bug-013 sparsity-pattern-args-order]] — BUG-013: SparsityPattern 3-arg конструктор — аргументы vector\<bool\> перепутаны
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
