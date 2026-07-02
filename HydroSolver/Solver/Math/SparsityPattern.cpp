@@ -148,9 +148,9 @@ namespace reservoir_simulator
 			totalNmbrOfBlocks = std::accumulate(blocksPerRow.begin(), blocksPerRow.end(), 0);
 		}
 
-		SparsityPattern::SparsityPattern(const unsigned char eqNmbr_, const int cellNmbr, const std::vector<std::vector<int>>& connectivityGraph) :
-			SparsityPattern(eqNmbr_, cellNmbr,
-				connectivityGraph, std::vector<bool>(true, eqNmbr_* eqNmbr_)) {}
+		SparsityPattern::SparsityPattern(const unsigned char eqNmbr_, const size_t cellNmbr, const std::vector<std::vector<int>>& connectivityGraph) :
+			SparsityPattern(eqNmbr_, cellNmbr, connectivityGraph,
+				std::vector<bool>(static_cast<size_t>(eqNmbr_) * eqNmbr_, true)) {}
 
 		// number of non-zero elements in the matrix
 
