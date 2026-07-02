@@ -39,26 +39,25 @@ std::vector<std::vector<WellDataHandler::DataReader::ValueContainer>> WellDataHa
 					out.push_back(std::vector<WellDataHandler::DataReader::ValueContainer>());
 					for (int j = 0; j < line_size; j++) //перебираем колонки
 					{
-						//std::vector<char> lbuffer(sizes[j]);
-						char* var = new char[sizes[j]];
-						memcpy_s(var, sizes[j], &buffer[i + shift], sizes[j]);
+						std::vector<char> var(sizes[j]);
+						memcpy_s(var.data(), sizes[j], &buffer[i + shift], sizes[j]);
 						ValueContainer vc;
 						//преобразуем переменную
 						if (types[j] == 'A')
 						{
-							vc.Value = *reinterpret_cast<int*>(var);
+							vc.Value = *reinterpret_cast<int*>(var.data());
 						}
 						if (types[j] == 'F')
 						{
-							vc.Value = *reinterpret_cast<float*>(var);
+							vc.Value = *reinterpret_cast<float*>(var.data());
 						}
 						if (types[j] == 'D')
 						{
-							vc.Value = *reinterpret_cast<double*>(var);
+							vc.Value = *reinterpret_cast<double*>(var.data());
 						}
 						if (types[j] == 'I')
 						{
-							vc.Value = *reinterpret_cast<int*>(var);
+							vc.Value = *reinterpret_cast<int*>(var.data());
 						}
 						/*if (types[j] == 'C')
 						{
