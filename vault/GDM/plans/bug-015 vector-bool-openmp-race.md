@@ -6,7 +6,7 @@ date: 2026-07-02
 issue: BUG-015
 github: 11
 branch: fix/bug-015/vector-bool-openmp-race
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-02
   findings: 0 / 0 / 0
