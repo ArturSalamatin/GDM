@@ -6,7 +6,7 @@ date: 2026-07-02
 issue: BUG-013
 github: 9
 branch: fix/bug-013/sparsity-pattern-args-order
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-02
   pass: 2
