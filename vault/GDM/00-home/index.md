@@ -116,6 +116,7 @@ date: 2026-06-27
 - [[BUG-008 well pressure zero mobility]]
 - [[BUG-009 active cells filter]]
 - [[BUG-013 sparsity pattern args order]]
+- [[BUG-010 const cast perforations]]
 
 #### Валидация (`knowledge/validation/`)
 - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]

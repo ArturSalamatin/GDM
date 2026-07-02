@@ -6,7 +6,7 @@ date: 2026-07-02
 issue: BUG-010
 github: 10
 branch: fix/bug-010/const-cast-perforations
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-02
   findings: 0 / 0 / 0
