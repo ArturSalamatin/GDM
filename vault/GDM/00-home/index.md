@@ -123,6 +123,7 @@ date: 2026-06-27
 - [[BUG-010 const cast perforations]]
 - [[BUG-015 vector bool openmp race]]
 - [[BUG-003 welljobs isempty always false]]
+- [[BUG-016 welldatahandler memory leak]]
 
 #### Валидация (`knowledge/validation/`)
 - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]
