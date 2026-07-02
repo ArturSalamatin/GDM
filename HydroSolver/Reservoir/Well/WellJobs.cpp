@@ -94,7 +94,7 @@ namespace reservoir_simulator
 	bool WellJobs::IsEmpty() const
 	{
 		for (size_t i = 0; i < RawWellPerforationData.size(); ++i)
-			if (!RawWellPerforationData.empty())
+			if (!RawWellPerforationData[i].empty())
 				return false;
 		return true;
 	}
