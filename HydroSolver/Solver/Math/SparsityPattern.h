@@ -47,7 +47,7 @@ namespace reservoir_simulator
 				const std::vector<std::vector<int>>& connectivityGraph, //const std::vector<int>& neighbours, 
 				const std::vector<bool>& blPattern);
 
-			SparsityPattern(const unsigned char eqNmbr_, const int cellNmbr,
+			SparsityPattern(const unsigned char eqNmbr_, const size_t cellNmbr,
 				const std::vector<std::vector<int>>& connectivityGraph);
 
 		private:

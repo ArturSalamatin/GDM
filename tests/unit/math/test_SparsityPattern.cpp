@@ -68,3 +68,42 @@ TEST_CASE("SparsityPattern: partial block pattern (diagonal only)",
     size_t expected_nnz = 2 * 4;
     CHECK(sp.Row().back() == expected_nnz);
 }
+
+TEST_CASE("SparsityPattern: 3-arg ctor blockSize equals eqNmbr squared",
+          "[unit][level2][math][SparsityPattern]") {
+    std::vector<std::vector<int>> graph = {{1}, {0}};
+    SparsityPattern sp(2, 2, graph);
+
+    CHECK(sp.NmbrOfNonzerosPerUnitBlock() == 4);
+    CHECK(sp.TotalNmbrOfBlocks() == 4);
+    CHECK(sp.Row().size() == 5);
+}
+
+TEST_CASE("SparsityPattern: 3-arg ctor matches 4-arg with full block",
+          "[unit][level2][math][SparsityPattern]") {
+    std::vector<std::vector<int>> graph = {{1, 2}, {0, 2}, {0, 1}};
+    std::vector<bool> fullBlock = {true, true, true, true};
+    SparsityPattern sp4(2, 3, graph, fullBlock);
+    SparsityPattern sp3(2, 3, graph);
+
+    CHECK(sp3.EqNmbr() == sp4.EqNmbr());
+    CHECK(sp3.NmbrOfNonzerosPerUnitBlock() == sp4.NmbrOfNonzerosPerUnitBlock());
+    CHECK(sp3.TotalNmbrOfBlocks() == sp4.TotalNmbrOfBlocks());
+    CHECK(sp3.Row() == sp4.Row());
+    CHECK(sp3.Col() == sp4.Col());
+    CHECK(sp3.DiagBlocks() == sp4.DiagBlocks());
+    CHECK(sp3.OffDiagBlocks() == sp4.OffDiagBlocks());
+    CHECK(sp3.NmbrOfElementsAboveBlockRow() == sp4.NmbrOfElementsAboveBlockRow());
+}
+
+TEST_CASE("SparsityPattern: 3-arg ctor single cell eqNmbr 1",
+          "[unit][level2][math][SparsityPattern]") {
+    std::vector<std::vector<int>> graph = {{}};
+    SparsityPattern sp(1, 1, graph);
+
+    CHECK(sp.NmbrOfNonzerosPerUnitBlock() == 1);
+    CHECK(sp.TotalNmbrOfBlocks() == 1);
+    CHECK(sp.Row().size() == 2);
+    CHECK(sp.Row()[0] == 0);
+    CHECK(sp.Row()[1] == 1);
+}
