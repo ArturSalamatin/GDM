@@ -6,7 +6,7 @@ date: 2026-07-02
 issue: BUG-003
 github: 12
 branch: fix/bug-003/welljobs-isempty
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-02
   findings: 0 / 0 / 0
