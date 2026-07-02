@@ -6,7 +6,7 @@ date: 2026-07-02
 issue: BUG-016
 github: 13
 branch: fix/bug-016/welldatahandler-memory-leak
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-02
   findings: 0 / 0 / 0
