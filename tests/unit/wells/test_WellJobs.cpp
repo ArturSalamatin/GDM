@@ -77,3 +77,35 @@ TEST_CASE("WellJobs: jobsInLayer accessor",
     WellJobs wj(name, {layer0});
     CHECK(wj.jobsInLayer(0).size() == 1);
 }
+
+TEST_CASE("WellJobs: IsEmpty returns true when all layers empty",
+          "[unit][level3][wells][WellJobs]") {
+    std::wstring name = L"W_empty";
+    WellJobsPerLayer layers = {
+        JobsInLayer{},
+        JobsInLayer{},
+        JobsInLayer{}
+    };
+    WellJobs wj(name, layers);
+    CHECK(wj.IsEmpty());
+}
+
+TEST_CASE("WellJobs: IsEmpty returns false when one layer has jobs",
+          "[unit][level3][wells][WellJobs]") {
+    std::wstring name = L"W_partial";
+    WellJobsPerLayer layers = {
+        JobsInLayer{},
+        JobsInLayer{ WellJobTime(0.0, 50.0, true, 100.0) },
+        JobsInLayer{}
+    };
+    WellJobs wj(name, layers);
+    CHECK_FALSE(wj.IsEmpty());
+}
+
+TEST_CASE("WellJobs: IsEmpty returns true when zero layers",
+          "[unit][level3][wells][WellJobs]") {
+    std::wstring name = L"W_zero";
+    WellJobsPerLayer layers = {};
+    WellJobs wj(name, layers);
+    CHECK(wj.IsEmpty());
+}
