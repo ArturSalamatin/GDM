@@ -400,13 +400,19 @@ namespace set_of_points
 		PerforationsInTime.back().AddNewJob(wellJob); // add to the copy a new segment
 	}
 
-	const std::vector<SetOfPerforations>& 
+	const std::vector<SetOfPerforations>&
 		AccumulatedPerforations::getPerforationsSet() const
 	{
 		return PerforationsInTime;
 	}
 
-	const SetOfPerforations& 
+	std::vector<SetOfPerforations>&
+		AccumulatedPerforations::getPerforationsSet()
+	{
+		return PerforationsInTime;
+	}
+
+	const SetOfPerforations&
 		AccumulatedPerforations::getPerforations(double time) const
 	{
 	//	if (getPerforationsSet()[0].curTime() > time)

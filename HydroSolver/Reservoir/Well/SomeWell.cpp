@@ -110,7 +110,7 @@ namespace reservoir_simulator
 			initialize_MER_data(std::move(mer));
 
 			// for all perfs in a particular layer_id
-			for (const auto& [layer_id, perfs] : PerforationConfiguration())
+			for (auto& [layer_id, perfs] : ItsAccumulatedPerforations)
 			{
 				// save real job dates, that should be moved to relevant MER dates
 				const auto& newJobDates = perfs.AllJobMoments();
@@ -140,7 +140,7 @@ namespace reservoir_simulator
 					// otherwise, push the enclosing dates
 					jobIntervals.push_back(std::make_pair(i, std::make_pair(currentPeriodStart, nextPeriodStart)));
 				}
-				const_cast<set_of_points::AccumulatedPerforations&>(perfs).AveragePerforationsOut(jobIntervals);
+				perfs.AveragePerforationsOut(jobIntervals);
 			}
 			BringFirstPerforationToFirstMER();
 			BringLastPerforationToLastMER();
@@ -298,7 +298,7 @@ namespace reservoir_simulator
 		{
 			// loop through all layers to find the earliest perforation date
 			double perfTime = std::numeric_limits<double>::max();
-			for (const auto& [layer_id, perf] : PerforationConfiguration())
+			for (const auto& [layer_id, perf] : ItsAccumulatedPerforations)
 				if (perfTime > perf.EarliestJobDate())
 					perfTime = perf.EarliestJobDate();
 
@@ -309,12 +309,11 @@ namespace reservoir_simulator
 			if (date > 0.0 && perfTime > date)
 			{// the first perforation is later than the first MER
 				// then shift this earliest perforation date
-				for (auto& [layer_id, perf] : PerforationConfiguration())
+				for (auto& [layer_id, perf] : ItsAccumulatedPerforations)
 					if (perf.EarliestJobDate() == perfTime)
 					{
-						const_cast<set_of_points::SetOfPerforations&>(
-							perf.getPerforationsSet().front()).MoveDate(date);
-						const_cast<set_of_points::AccumulatedPerforations&>(perf).AssembleJobDates();
+						perf.getPerforationsSet().front().MoveDate(date);
+						perf.AssembleJobDates();
 					}
 				reservoir_simulator::WarningFactory::FirstPerforationMoved(NameWide(), perfTime, date);
 			}
@@ -323,7 +322,7 @@ namespace reservoir_simulator
 		void SomeWell::BringLastPerforationToLastMER()
 		{
 			double perfTime = std::numeric_limits<double>::min();
-			for (const auto& [layer_id, perf] : PerforationConfiguration())
+			for (const auto& [layer_id, perf] : ItsAccumulatedPerforations)
 				if (perfTime < perf.LatestJobDate())
 					perfTime = perf.LatestJobDate();
 
@@ -331,12 +330,11 @@ namespace reservoir_simulator
 			double date = LastProductionDate();
 			if (length == 0.0 && perfTime < date)
 			{// last job closes the entire well before the last MER date
-				for (auto& [layer_id, perf] : PerforationConfiguration())
+				for (auto& [layer_id, perf] : ItsAccumulatedPerforations)
 					if (perf.LatestJobDate() == perfTime)
 					{
-						const_cast<set_of_points::SetOfPerforations&>(
-							perf.getPerforationsSet().back()).MoveDate(date);
-						const_cast<set_of_points::AccumulatedPerforations&>(perf).AssembleJobDates();
+						perf.getPerforationsSet().back().MoveDate(date);
+						perf.AssembleJobDates();
 					}
 				reservoir_simulator::WarningFactory::LastPerforationMoved(NameWide(), perfTime, date);
 			}

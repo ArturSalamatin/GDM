@@ -159,6 +159,7 @@ namespace set_of_points
 		void AddNewJob(const WellJobTime& wellJob);
 
 		const std::vector<SetOfPerforations>& getPerforationsSet() const;
+		std::vector<SetOfPerforations>& getPerforationsSet();
 		const SetOfPerforations& getPerforations(double time) const;
 
 		const SetOfPerforations& getPerforations_future(double time) const;
