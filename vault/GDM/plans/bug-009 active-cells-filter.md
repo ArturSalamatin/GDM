@@ -6,7 +6,7 @@ date: 2026-07-01
 issue: BUG-009
 github: 8
 branch: fix/bug-009/active-cells-filter
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-01
   pass: 3

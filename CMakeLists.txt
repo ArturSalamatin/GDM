@@ -106,6 +106,7 @@ add_executable(gdm_tests
     tests/test_streamlines.cpp
     tests/test_variable_debit.cpp
     tests/test_3d_completions.cpp
+    tests/test_inactive_cells.cpp
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 

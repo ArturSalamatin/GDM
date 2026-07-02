@@ -136,10 +136,16 @@ namespace reservoir_simulator
 
 		for (size_t l = 0; l < well_local_position.size(); ++l)
 		{
-			auto cellIdx = Grid.ConvertTriple2Local(ItsGlobalIDs[l]);
-			well_local_position[l] = cellIdx;
-			cells_[l] = &(Grid[well_local_position[l]]);
-			ActiveCells.push_back(cellIdx+1 > 0);
+			long int cellIdx = Grid.ConvertTriple2Local(ItsGlobalIDs[l]);
+			bool isActive = cellIdx >= 0;
+			ActiveCells.push_back(isActive);
+			if (isActive) {
+				well_local_position[l] = static_cast<size_t>(cellIdx);
+				cells_[l] = &(Grid[static_cast<int>(cellIdx)]);
+			} else {
+				well_local_position[l] = 0;
+				cells_[l] = &(Grid[0]);
+			}
 		}
 
 		Wells.insert({ name,
