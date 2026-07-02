@@ -41,6 +41,7 @@ date: 2026-06-27
 - [[bug-008 well-pressure-zero-mobility]] — BUG-008: деление на ноль в SetRefWellPressure
 - [[bug-009 active-cells-filter]] — BUG-009: фильтр ActiveCells не работает — size_t + 1 > 0 всегда true
 - [[bug-013 sparsity-pattern-args-order]] — BUG-013: SparsityPattern 3-arg конструктор — аргументы vector\<bool\> перепутаны
+- [[bug-003 welljobs-isempty]] — BUG-003: WellJobs::IsEmpty() всегда возвращает false
 - [[bug-010 const-cast-perforations]] — BUG-010: const_cast на перфорациях в SomeWell — undefined behavior
 - [[bug-015 vector-bool-openmp-race]] — BUG-015: std::vector\<bool\> под OpenMP — data race в UpdateGrid()
 
