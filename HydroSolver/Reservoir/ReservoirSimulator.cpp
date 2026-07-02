@@ -462,7 +462,7 @@ namespace reservoir_simulator
 	bool ReservoirSimulator::UpdateGrid()
 	{
 		const double tol = 3E-3;
-		std::vector<bool> f = std::vector<bool>(B * Grid.ActiveCellsNmbr(), true);
+		std::vector<char> f(B * Grid.ActiveCellsNmbr(), 1);
 
 #ifdef	USE_PARALLEL
 #pragma omp parallel for
@@ -484,7 +484,7 @@ namespace reservoir_simulator
 				(abs(stateVaiables[i]) < 1E6) ||
 				(abs(corr[i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
 		}
-		return std::all_of(f.begin(), f.end(), [](bool x) { return x; });
+		return std::all_of(f.begin(), f.end(), [](char x) { return x != 0; });
 	}
 
 	void ReservoirSimulator::SingleIteration(double loc_tau, double nextTimeMoment)
