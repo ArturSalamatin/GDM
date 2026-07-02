@@ -44,6 +44,7 @@ date: 2026-06-27
 - [[bug-003 welljobs-isempty]] — BUG-003: WellJobs::IsEmpty() всегда возвращает false
 - [[bug-010 const-cast-perforations]] — BUG-010: const_cast на перфорациях в SomeWell — undefined behavior
 - [[bug-015 vector-bool-openmp-race]] — BUG-015: std::vector\<bool\> под OpenMP — data race в UpdateGrid()
+- [[bug-016 welldatahandler-memory-leak]] — BUG-016: утечка памяти new char[] без delete[] в WellDataHandler
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
