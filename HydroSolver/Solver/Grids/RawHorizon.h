@@ -40,7 +40,7 @@ namespace reservoir_simulator
 			std::ofstream myfile{ fName, std::ios_base::out };
 
 			char buffer[1000];
-			snprintf(buffer, 1000, "%u;%u;%u;%u\n%+19.11E;%+19.11E;%+19.11E;%+19.11E\n%+19.11E;%+19.11E;%+19.11E;%+19.11E",
+			snprintf(buffer, 1000, "%zu;%zu;%zu;%zu\n%+19.11E;%+19.11E;%+19.11E;%+19.11E\n%+19.11E;%+19.11E;%+19.11E;%+19.11E",
 				grid_size.Nx, grid_size.Ny,
 				grid_size.Nz, frames,
 				grid_bounds.x_min, grid_bounds.y_min,
