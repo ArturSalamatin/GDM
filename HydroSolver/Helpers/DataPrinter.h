@@ -51,9 +51,9 @@ namespace reservoir_simulator
 			myfile.open(path+fName, std::ios_base::out);
 
 			char buffer[1000];
-			snprintf(buffer, 1000, "%u;%u;%u;%u\n%+19.11E;%+19.11E;%+19.11E;%+19.11E\n%+19.11E;%+19.11E;%+19.11E;%+19.11E",
+			snprintf(buffer, 1000, "%zu;%zu;%zu;%zu\n%+19.11E;%+19.11E;%+19.11E;%+19.11E\n%+19.11E;%+19.11E;%+19.11E;%+19.11E",
 				reservoirIntantiator->nx(), reservoirIntantiator->ny(),
-				reservoirIntantiator->nz(), 3.0,//reservoirIntantiator->nt(),
+				reservoirIntantiator->nz(), static_cast<size_t>(3),//reservoirIntantiator->nt(),
 				reservoirIntantiator->xmin(), reservoirIntantiator->ymin(),
 				reservoirIntantiator->xmax(), reservoirIntantiator->ymax(),
 				reservoirIntantiator->xstep(), reservoirIntantiator->ystep(), 0.0, 0.0);
