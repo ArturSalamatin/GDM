@@ -125,6 +125,7 @@ date: 2026-06-27
 - [[BUG-015 vector bool openmp race]]
 - [[BUG-003 welljobs isempty always false]]
 - [[BUG-016 welldatahandler memory leak]]
+- [[BUG-018 snprintf size_t format]]
 
 #### Валидация (`knowledge/validation/`)
 - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]
