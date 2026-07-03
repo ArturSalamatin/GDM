@@ -6,7 +6,7 @@ date: 2026-07-02
 issue: BUG-018
 github: 14
 branch: fix/bug-018/snprintf-size-t-format
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-02
   findings: 0 / 0 / 0
