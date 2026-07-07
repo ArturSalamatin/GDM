@@ -32,6 +32,14 @@ namespace reservoir_simulator
 		{
 			return cells[ItsCurCellIDs[l]]->Derivative_F_Oil();
 		}
+		double WellEnvironment::CellDensityOil(size_t l) const
+		{
+			return cells[ItsCurCellIDs[l]]->DensityOil();
+		}
+		double WellEnvironment::CellDensityWater(size_t l) const
+		{
+			return cells[ItsCurCellIDs[l]]->DensityWater();
+		}
 		void WellEnvironment::SetProductions()
 		{
 			for (size_t l = 0; l < P_Well.size(); l++)
@@ -162,21 +170,20 @@ namespace reservoir_simulator
 			reservoir_simulator::MessageFactory::MERInitializationDone(NameWide());
 		}
 
+		// kg/day — must match rhs in AddWellToMatrix (production is m3/day, rho converts to mass)
 		double SomeWell::CurOilDebit_Num() const
 		{
-			auto overallDebit = CurOverallDebit();
-			if (overallDebit > 0.0)
-				return overallDebit * F_OilWellBalance;
-			else
-				return overallDebit * f_oil_in;;
+			double result = 0.0;
+			for (size_t l = 0; l < productions.size(); l++)
+				result += CellDensityOil(l) * F_Oil(l) * productions[l];
+			return result;
 		}
 		double SomeWell::CurWaterDebit_Num() const
 		{
-			auto overallDebit = CurOverallDebit();
-			if (overallDebit > 0.0)
-				return overallDebit * (1 - F_OilWellBalance);
-			else
-				return overallDebit * (1 - f_oil_in);;
+			double result = 0.0;
+			for (size_t l = 0; l < productions.size(); l++)
+				result += CellDensityWater(l) * (1 - F_Oil(l)) * productions[l];
+			return result;
 		}
 
 		const std::vector<double>& 
@@ -377,23 +384,25 @@ namespace reservoir_simulator
 			P_Well = std::vector<double>(NmbrOfOpenedCells());
 		}
 
+		// volumetric balance (m3/day) — uses totalVolumetricProd, not CurOverallDebit (kg/day)
 		void SomeWell::BalanceOil()
 		{
 			double posProduction = 0, negProduction = 0;
-			for (int l = 0; l < NmbrOfOpenedCells(); l++)
+			double totalVolumetricProd = 0;
+			for (size_t l = 0; l < NmbrOfOpenedCells(); l++)
 			{
 				auto bufProduction = productions[l];
+				totalVolumetricProd += bufProduction;
 				if (bufProduction > 0.0)
 					posProduction += F_Oil(l) * bufProduction;
 				else
 					negProduction += bufProduction;
 			}
 
-			auto overallDebit = CurOverallDebit();
-			if (overallDebit > 0.0)
-				negProduction -= overallDebit;
+			if (totalVolumetricProd > 0.0)
+				negProduction -= totalVolumetricProd;
 			else
-				posProduction -= f_oil_in * overallDebit;
+				posProduction -= f_oil_in * totalVolumetricProd;
 
 			if (negProduction < 0.0)
 				F_OilWellBalance = -posProduction / negProduction;
