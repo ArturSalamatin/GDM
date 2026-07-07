@@ -47,6 +47,7 @@ date: 2026-06-27
 - [[bug-016 welldatahandler-memory-leak]] — BUG-016: утечка памяти new char[] без delete[] в WellDataHandler
 - [[bug-018 snprintf-size-t-format]] — BUG-018: snprintf с %u для size_t — UB на x64
 - [[val-001 buckley-leverett-1d]] — VAL-001: Buckley–Leverett 1D валидация профиля насыщенности
+- [[bug-020 debit-unit-conversion]] — BUG-020: несогласованность единиц массового и объёмного расхода
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
