@@ -6,7 +6,7 @@ date: 2026-07-07
 issue: BUG-020
 github: 16
 branch: fix/bug-020/debit-unit-conversion
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-07
   findings: 0 / 3 / 3
@@ -20,7 +20,7 @@ audit:
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки:
-   - [[несогласованность единиц расхода в формуле Писмана]]
+   - [[BUG-020 несогласованность единиц расхода в формуле Писмана]]
    - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]
 3. Создай ветку: `git checkout -b fix/bug-020/debit-unit-conversion experimental`
 4. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`
@@ -583,7 +583,7 @@ TEST_CASE("BL validation: absolute volume balance",
 
 ## Связанные заметки
 
-- [[несогласованность единиц расхода в формуле Писмана]]
+- [[BUG-020 несогласованность единиц расхода в формуле Писмана]]
 - [[задача Бакли-Леверетта — аналитический тест для одномерного вытеснения]]
 - [[val-001 buckley-leverett-1d]]
 - [[r_app vs r_well мелкие сетки]]
