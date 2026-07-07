@@ -12,7 +12,7 @@ namespace reservoir_simulator
 				set_of_points::PerforationsOfWell perforationsOfWell,
 				const std::vector<const cell::TwoPhaseFlowCell*>& cells_,
 				const std::vector<size_t>& itsLocalIDs, double itsAppWellRadius
-			) : 
+			) :
 				SomeWell(name, guid, intersectionCoords, std::move(mer), perforationsOfWell, cells_, itsLocalIDs, itsAppWellRadius)
 			{ }
 
@@ -27,10 +27,12 @@ namespace reservoir_simulator
 				{
 					if (!isfinite(productions[l]) || !isfinite(F_Oil(l)))
 						throw std::exception(std::string("well production is not determined. Date:" + std::to_string(nextTimeMoment)).c_str());
-					//cout << "<<< production is not determined. Well " << NameString() << " Date " << std::to_string(CurrentTime()) << endl;
 
-					rhsPerPerforation[l][0] = -F_Oil(l) * productions[l];
-					rhsPerPerforation[l][1] = -(1 - F_Oil(l)) * productions[l];
+					double rhoO = CellDensityOil(l);
+					double rhoW = CellDensityWater(l);
+
+					rhsPerPerforation[l][0] = -rhoO * F_Oil(l) * productions[l];
+					rhsPerPerforation[l][1] = -rhoW * (1 - F_Oil(l)) * productions[l];
 				}
 
 				// fill in the matrix blocks of the linear problem
@@ -40,17 +42,17 @@ namespace reservoir_simulator
 						|| !isfinite(OverallMobility(l)) || !isfinite(Derivative_F_Oil(l))
 						|| !isfinite(factor[l]) || !isfinite(DerivativeOverallMobility(l)))
 						throw std::runtime_error("well production is not determined. Date:" + std::to_string(nextTimeMoment));
-					//cout << "<<< production is not determined. Well " << NameString() << " Date " << std::to_string(CurrentTime()) << endl;
 
 					double dP = P_Reservoir(l) - P_Well[l];
+					double rhoO = CellDensityOil(l);
+					double rhoW = CellDensityWater(l);
 
-					// derivative of OverallMobility
-					// with S_Water
-					matrixBlockPerPerforation[l][0] += factor[l] * F_Oil(l) * DerivativeOverallMobility(l) * dP;
-					matrixBlockPerPerforation[l][2] += factor[l] * (1 - F_Oil(l)) * DerivativeOverallMobility(l) * dP;
+					// derivative of OverallMobility with S_Water
+					matrixBlockPerPerforation[l][0] += rhoO * factor[l] * F_Oil(l) * DerivativeOverallMobility(l) * dP;
+					matrixBlockPerPerforation[l][2] += rhoW * factor[l] * (1 - F_Oil(l)) * DerivativeOverallMobility(l) * dP;
 					// derivative of P_Reservoir
-					matrixBlockPerPerforation[l][1] += factor[l] * F_Oil(l) * OverallMobility(l);
-					matrixBlockPerPerforation[l][3] += factor[l] * (1 - F_Oil(l)) * OverallMobility(l);
+					matrixBlockPerPerforation[l][1] += rhoO * factor[l] * F_Oil(l) * OverallMobility(l);
+					matrixBlockPerPerforation[l][3] += rhoW * factor[l] * (1 - F_Oil(l)) * OverallMobility(l);
 
 					// derivative of P_Well
 					/////!!!!!!!!!!!////////////
@@ -59,20 +61,14 @@ namespace reservoir_simulator
 					if (dP > 0)
 					{
 						double temp = productions[l] * Derivative_F_Oil(l);
-						matrixBlockPerPerforation[l][0] += temp;
-						matrixBlockPerPerforation[l][2] += -temp;
+						matrixBlockPerPerforation[l][0] += rhoO * temp;
+						matrixBlockPerPerforation[l][2] += -rhoW * temp;
 					}
 					else
 					{
 						// derivative of balanced oil. Let's try to take it from the previous iteration
 					}
 				}
-
-				
-		/*		std::cout
-					<< "Well: " << Name() << '\n'
-					<< "Overall debit:    " << CurOverallDebit() << '\n';*/
-
 
 				return { CurLocalIDs(), matrixBlockPerPerforation, rhsPerPerforation };
 			}
@@ -82,7 +78,9 @@ namespace reservoir_simulator
 				double denom = 0, numer = -CurOverallDebit();
 				for (size_t l = 0; l < NmbrOfOpenedCells(); l++)
 				{
-					double temp = factor[l] * OverallMobility(l);
+					double f = F_Oil(l);
+					double rhoMix = CellDensityOil(l) * f + CellDensityWater(l) * (1 - f);
+					double temp = rhoMix * factor[l] * OverallMobility(l);
 					denom += temp;
 					numer += temp * P_Reservoir(l);
 				}

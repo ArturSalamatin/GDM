@@ -44,6 +44,8 @@ namespace reservoir_simulator
 			double OverallMobility(size_t l) const;
 			double DerivativeOverallMobility(size_t l) const;
 			double Derivative_F_Oil(size_t l) const;
+			double CellDensityOil(size_t l) const;
+			double CellDensityWater(size_t l) const;
 			void SetProductions();
 			void SetWellPressure(double P);
 
