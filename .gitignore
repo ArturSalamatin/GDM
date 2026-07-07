@@ -18,6 +18,7 @@ test_SparsityPattern_DiagBlocks.txt
 test_SparsityPattern_OffDiagBlocks.txt
 test_SparsityPattern.txt
 WellTestData/INJ/well_MER_debit.txt
+bl_validation_profile.csv
 
 
 # Archives
