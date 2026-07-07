@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "test_helpers.h"
 #include "buckley_leverett_analytical.h"
@@ -219,6 +220,42 @@ double compute_BL_L2(size_t Nx,
     return std::sqrt(sum_sq * hx / Lx);
 }
 
+double compute_qt_eff(size_t Nx,
+                      double Lx, double hy, double hz,
+                      double perm_mD, double poro,
+                      double P_init_atm, double So_init,
+                      double water_inject_rate, double oil_prod_rate,
+                      double t_final) {
+    double Sw_init = 1.0 - So_init;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, 1, 1, Lx, hy, hz, perm_mD, poro, P_init_atm, So_init);
+    auto numPrm = test_helpers::default_num_params();
+
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+    sim.RefPressure = P_init_atm * 101325.0;
+    sim.numPrm.set_initial_schemeTau(0.01);
+    sim.numPrm.set_currentMoment(0.0);
+
+    double hx = Lx / Nx;
+    double r_app = std::max(0.2 * hx, 0.2);
+    test_helpers::add_simple_well(sim, horizon,
+        L"INJ", hx * 0.5, hy * 0.5, 0.0, water_inject_rate, r_app);
+    test_helpers::add_simple_well(sim, horizon,
+        L"PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
+
+    sim.Solve({0.0, t_final});
+
+    auto Sw_gdm = sim.GetWaterSaturationField();
+    if (Sw_gdm.size() != Nx) return -1.0;
+
+    double integral_dSw = 0.0;
+    for (size_t i = 0; i < Nx; ++i)
+        integral_dSw += (Sw_gdm[i] - Sw_init) * hx;
+    return integral_dSw * poro / t_final;
+}
+
 } // namespace
 
 TEST_CASE("BL validation: grid convergence of Sw profile",
@@ -250,6 +287,60 @@ TEST_CASE("BL validation: grid convergence of Sw profile",
         CHECK(L2[g] < L2[g - 1]);
         CHECK(p > 0.5);
     }
+}
+
+// BUG-020: MER задаёт кг/день, формула Писмана оперирует м³/день.
+// qt_eff зависит от сетки (PI Писмана ∝ 1/ln(r_app/r_well), r_app ∝ hx).
+// После фикса BUG-020: qt_eff ≈ qt_nominal, не зависит от сетки.
+// [!mayfail] — тесты документируют баг, не блокируют сборку.
+TEST_CASE("BL validation: qt_eff consistent across meshes",
+          "[buckley-leverett][validation][!mayfail]") {
+    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+    constexpr double perm_mD = 100.0, poro = 0.2;
+    constexpr double P_init_atm = 200.0;
+    constexpr double So_init = 0.8;
+    constexpr double t_final = 400.0;
+
+    constexpr size_t grids[] = {25, 50, 100, 200};
+    constexpr size_t N = sizeof(grids) / sizeof(grids[0]);
+    double qt[N];
+
+    for (size_t g = 0; g < N; ++g) {
+        qt[g] = compute_qt_eff(grids[g], Lx, hy, hz,
+                                perm_mD, poro, P_init_atm, So_init,
+                                -1000.0, 800.0, t_final);
+        WARN("Nx=" << grids[g] << " qt_eff=" << qt[g]);
+        REQUIRE(qt[g] > 0.0);
+    }
+
+    for (size_t g = 1; g < N; ++g) {
+        double rel_diff = std::abs(qt[g] - qt[0]) / qt[0];
+        WARN("qt[" << grids[g] << "] vs qt[" << grids[0]
+             << "]: rel_diff=" << rel_diff);
+        CHECK(rel_diff < 0.15);
+    }
+}
+
+TEST_CASE("BL validation: absolute volume balance",
+          "[buckley-leverett][validation][!mayfail]") {
+    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+    constexpr double perm_mD = 100.0, poro = 0.2;
+    constexpr double P_init_atm = 200.0;
+    constexpr double So_init = 0.8;
+    constexpr double t_final = 400.0;
+    constexpr double A = hy * hz;
+    constexpr double rho_w = 1000.0;
+    constexpr double qt_nominal = 1000.0 / rho_w / A;
+
+    constexpr size_t Nx = 100;
+    double qt_eff = compute_qt_eff(Nx, Lx, hy, hz,
+                                    perm_mD, poro, P_init_atm, So_init,
+                                    -1000.0, 800.0, t_final);
+
+    WARN("qt_eff=" << qt_eff << " qt_nominal=" << qt_nominal
+         << " ratio=" << qt_eff / qt_nominal);
+    REQUIRE(qt_eff > 0.0);
+    CHECK(qt_eff == Catch::Approx(qt_nominal).epsilon(0.1));
 }
 
 TEST_CASE("BL validation: front position and monotonicity",
