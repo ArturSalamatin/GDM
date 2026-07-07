@@ -6,7 +6,7 @@ date: 2026-07-07
 issue: DEBT-048
 github: 17
 branch: refactor/debt-048/well-jacobian-dpwell
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-07
   findings: 0 / 0 / 2
