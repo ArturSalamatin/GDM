@@ -35,6 +35,15 @@ namespace reservoir_simulator
 					rhsPerPerforation[l][1] = -rhoW * (1 - F_Oil(l)) * productions[l];
 				}
 
+				// denominator for dP_well/dP_res: D = Σ ρ_mix(k)·PI(k)
+				double D_pw = 0.0;
+				for (size_t k = 0; k < NmbrOfOpenedCells(); k++)
+				{
+					double f = F_Oil(k);
+					double rhoMix = CellDensityOil(k) * f + CellDensityWater(k) * (1 - f);
+					D_pw += rhoMix * factor[k] * OverallMobility(k);
+				}
+
 				// fill in the matrix blocks of the linear problem
 				for (size_t l = 0; l < NmbrOfOpenedCells(); l++)
 				{
@@ -50,12 +59,19 @@ namespace reservoir_simulator
 					// derivative of OverallMobility with S_Water
 					matrixBlockPerPerforation[l][0] += rhoO * factor[l] * F_Oil(l) * DerivativeOverallMobility(l) * dP;
 					matrixBlockPerPerforation[l][2] += rhoW * factor[l] * (1 - F_Oil(l)) * DerivativeOverallMobility(l) * dP;
-					// derivative of P_Reservoir
+					// derivative of P_Reservoir (direct contribution)
 					matrixBlockPerPerforation[l][1] += rhoO * factor[l] * F_Oil(l) * OverallMobility(l);
 					matrixBlockPerPerforation[l][3] += rhoW * factor[l] * (1 - F_Oil(l)) * OverallMobility(l);
 
-					// derivative of P_Well
-					/////!!!!!!!!!!!////////////
+					// derivative of P_well w.r.t. P_res(l): dPw/dP = ρ_mix(l)·PI(l) / D
+					if (D_pw > 0.0)
+					{
+						double f = F_Oil(l);
+						double rhoMix = rhoO * f + rhoW * (1 - f);
+						double dPw_dP = rhoMix * factor[l] * OverallMobility(l) / D_pw;
+						matrixBlockPerPerforation[l][1] -= rhoO * factor[l] * F_Oil(l) * OverallMobility(l) * dPw_dP;
+						matrixBlockPerPerforation[l][3] -= rhoW * factor[l] * (1 - F_Oil(l)) * OverallMobility(l) * dPw_dP;
+					}
 
 					// derivative of F_Oil
 					if (dP > 0)
