@@ -6,7 +6,7 @@ date: 2026-07-07
 issue: BUG-020
 github: 16
 branch: fix/bug-020/debit-unit-conversion
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-07
   findings: 0 / 3 / 3
