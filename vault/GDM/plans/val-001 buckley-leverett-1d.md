@@ -7,7 +7,7 @@ date: 2026-07-03
 issue: VAL-001
 github: 15
 branch: val/val-001/buckley-leverett-1d
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-03
   findings: 0 / 2 / 2
