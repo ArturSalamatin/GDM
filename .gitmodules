@@ -1,0 +1,6 @@
+[submodule "GridEngine"]
+	path = GridEngine
+	url = http://10.8.0.1:9999/pcnac_development/gridengine.git
+[submodule "Eigen"]
+	path = Eigen
+	url = https://gitlab.com/libeigen/eigen.git
