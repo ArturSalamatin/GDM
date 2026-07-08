@@ -7,8 +7,6 @@
 #include <mutex>
 #include <cmath>
 #include <filesystem>
-#include <Eigen/Eigen>
-
 #include <geos/geom.h>
 #include <geos\triangulate\VoronoiDiagramBuilder.h>
 

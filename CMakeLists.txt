@@ -339,8 +339,6 @@ if(PostgreSQL_FOUND)
         ${HYDRO}/Reservoir/CalculationManager.cpp
     )
     target_link_libraries(gdm_data PUBLIC gdm_core pqxx GEOS::geos)
-    # Maps.h включает системную Eigen (std::result_of удалён в C++23)
-    target_compile_definitions(gdm_data PUBLIC _HAS_DEPRECATED_RESULT_OF=1)
 
     # --- gdm_app (executable, DB-backed entry point) ---
     add_executable(gdm_app
