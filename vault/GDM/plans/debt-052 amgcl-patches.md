@@ -9,7 +9,7 @@ issues:
   - DEBT-052
 github: 19
 branch: refactor/debt-052/amgcl-patches
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-08
   round: 3
