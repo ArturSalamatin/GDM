@@ -51,6 +51,7 @@ date: 2026-06-27
 - [[debt-048 well-jacobian-dpwell]] — DEBT-048: добавить ∂P_well/∂P_res в якобиан скважины
 - [[debt-008 eigen-remove-dead-include]] — DEBT-008: удалить мёртвый include Eigen
 - [[debt-051 amgcl-submodule-and-solvers]] — DEBT-051..053 + FEAT-010/011: AMGCL submodule, патчи и новые солверы
+- [[debt-052 amgcl-patches]] — DEBT-052: патчи AMGCL (ilu0.hpp, cpr.hpp) в ветку experimental/patches
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
