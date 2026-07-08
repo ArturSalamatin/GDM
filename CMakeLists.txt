@@ -75,7 +75,7 @@ add_library(gdm_core STATIC
     # Helpers
     ${HYDRO}/Helpers/LogFile.cpp
 )
-target_include_directories(gdm_core PUBLIC ${HYDRO} ${HYDRO}/AMGSolver/amgcl)
+target_include_directories(gdm_core PUBLIC ${HYDRO} ${CMAKE_SOURCE_DIR}/amgcl)
 option(AMGCL_PROFILING "Enable AMGCL built-in profiling (prof.tic/toc)" ON)
 target_compile_definitions(gdm_core PUBLIC AMGCL_NO_BOOST)
 if(AMGCL_PROFILING)
