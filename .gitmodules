@@ -4,3 +4,7 @@
 [submodule "Eigen"]
 	path = Eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "amgcl"]
+	path = amgcl
+	url = https://github.com/ArturSalamatin/vcpkg-amgcl.git
+	branch = experimental/master
