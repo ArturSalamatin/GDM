@@ -14,7 +14,7 @@ issues:
   - FEAT-011
 github: 18
 branch: refactor/debt-051/amgcl-submodule
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-08
   pass: 2
