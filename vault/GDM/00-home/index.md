@@ -49,6 +49,7 @@ date: 2026-06-27
 - [[val-001 buckley-leverett-1d]] — VAL-001: Buckley–Leverett 1D валидация профиля насыщенности
 - [[bug-020 debit-unit-conversion]] — BUG-020: несогласованность единиц массового и объёмного расхода
 - [[debt-048 well-jacobian-dpwell]] — DEBT-048: добавить ∂P_well/∂P_res в якобиан скважины
+- [[debt-008 eigen-remove-dead-include]] — DEBT-008: удалить мёртвый include Eigen
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
