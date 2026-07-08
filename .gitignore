@@ -5,7 +5,7 @@ legacy
 report
 NewProject
 example_files
-AMGSolver
+HydroSolver/AMGSolver/
 x64
 MatLab
 Support
