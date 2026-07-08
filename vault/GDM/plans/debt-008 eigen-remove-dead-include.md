@@ -6,7 +6,7 @@ date: 2026-07-08
 issue: DEBT-008
 github: null
 branch: refactor/debt-008/eigen-remove-dead-include
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-08
   findings: 0 / 0 / 0
