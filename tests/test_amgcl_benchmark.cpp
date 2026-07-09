@@ -7,16 +7,12 @@
 #include <filesystem>
 #include <string>
 
-#include <amgcl/adapter/crs_tuple.hpp>
-#include <amgcl/make_solver.hpp>
-#include <amgcl/amg.hpp>
-#include <amgcl/solver/lgmres.hpp>
-#include <amgcl/coarsening/aggregation.hpp>
-#include <amgcl/relaxation/ilu0.hpp>
-#include <amgcl/relaxation/iluk.hpp>
-#include <amgcl/relaxation/as_preconditioner.hpp>
+#include "Solver/Math/SolverConfig.h"
 #include <amgcl/preconditioner/cpr.hpp>
 #include <amgcl/preconditioner/cpr_drs.hpp>
+#include <amgcl/solver/bicgstab.hpp>
+#include <amgcl/coarsening/smoothed_aggregation.hpp>
+#include <amgcl/relaxation/iluk.hpp>
 
 namespace fs = std::filesystem;
 using namespace reservoir_simulator;
