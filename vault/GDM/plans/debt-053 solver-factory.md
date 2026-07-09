@@ -6,7 +6,7 @@ date: 2026-07-09
 issue: DEBT-053
 github: 20
 branch: refactor/debt-053/solver-factory
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-09
   round: 3
