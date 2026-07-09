@@ -8,7 +8,7 @@ issue: FEAT-011
 github: 22
 branch: feat/feat-011/true-impes-weights
 phase: 3
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-09
   revision: 4
