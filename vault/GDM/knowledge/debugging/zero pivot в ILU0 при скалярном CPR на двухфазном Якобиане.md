@@ -110,11 +110,19 @@ A[k*B+k] = d;
 | Уровень | Задача | Суть | Покрытие |
 |---|---|---|---|
 | 1 | BUG-002 | Fallback `d = 1` при `math::is_zero(d)` в `cpr.hpp:522` + запись `A[k*B+k] = d` для обратного хода | exact zero pivot → crash устранён |
-| 2 | FEAT-010 | Threshold-based: `\|d\| < τ·max(\|A_row\|)` → weight = (1, 0) напрямую | near-zero pivot → overflow/NaN устранён |
+| 2 | FEAT-010 | Threshold-based: `\|d\| < τ·max(\|diag\|)` → `d = 1`, продолжить LU | near-zero pivot → overflow/NaN устранён |
 | 3 | FEAT-011 | True-IMPES / ABF weights: вычисление weights из nullspace ∂F/∂Sw без обращения блока | принципиальное решение, PR в upstream amgcl |
 
-**Проблема near-zero pivot (не покрыта уровнем 1):**
-При `d = 1e-15` (near-zero, не exact zero) fallback уровня 1 не срабатывает (`math::is_zero` — exact comparison). LU-разложение: `A[i*B+k] /= 1e-15` → элементы ~ 1e+15 → обратный ход: weights ≈ (0, 0) → строка App ≈ 0 → AMG получает near-singular pressure matrix. Это **хуже**, чем exact zero с fallback (weights = (1,0) → Kpp напрямую).
+**Реализация уровня 2 (FEAT-010, 2026-07-09):**
+
+Параметр `pivot_threshold` (τ) в `cpr::params`. При `|d| < τ·max(|diag|)` pivot заменяется на 1, LU продолжается. Подход «d=1, continue LU» выбран вместо early return с `y=(1,0)`: early return давал near-singular pressure matrix для AMG coarse solver (skyline_lu factorization failure на 41×41). Продолжение LU с «подпоркой» d=1 сохраняет структуру остальных LU-факторов и даёт более «гладкие» weights.
+
+Значение τ=1e-14 задаётся в `LinearProblem.cpp` (для CPR и CPR_BICGSTAB конфигураций, исключая ILU0 и CPR_DRS).
+
+Верификация: Release 295/295, Debug 295/295. Новый тест: Sw_init=0.001 на 41×41 — mass balance < 1e-3, Sw ∈ [0,1].
+
+**Проблема near-zero pivot (покрыта уровнем 2):**
+При `d = 1e-15` (near-zero, не exact zero) fallback уровня 1 не срабатывал (`math::is_zero` — exact comparison). LU-разложение: `A[i*B+k] /= 1e-15` → элементы ~ 1e+15 → обратный ход: weights ≈ (0, 0) → строка App ≈ 0 → AMG получает near-singular pressure matrix. Уровень 2 ловит такие pivots по threshold.
 
 **True-IMPES weights (уровень 3, Wallis 1983):**
 Вместо обращения блока K_diag[i] вычисляют weights w из условия wᵀ·∂F/∂Sw = 0. Для B=2: w = (∂Fw/∂Sw, −∂Fo/∂Sw) с нормировкой. Не требует обращения матрицы. При Sw → 0 отношение ∂Fw/∂Sw к ∂Fo/∂Sw остаётся определённым. При оба = 0 → w = (1, 0) (давление decoupled тривиально).

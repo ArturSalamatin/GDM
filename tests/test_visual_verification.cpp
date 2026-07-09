@@ -261,3 +261,20 @@ TEST_CASE("Two-well: INJ + PROD with mass balance",
         CHECK(result.P[i] > 0.0);
     }
 }
+
+TEST_CASE("Near-zero Sw: single injector Sw=0.001",
+          "[near-zero-sw][single-injector]")
+{
+    simulation_cases::SingleInjectorCase sc(41, 41);
+    sc.oil_saturation = 0.999; // Sw_init = 0.001
+
+    auto result = run_case(sc, true);
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
+
+    for (double s : result.Sw) {
+        CHECK(s >= 0.0);
+        CHECK(s <= 1.0);
+    }
+}
