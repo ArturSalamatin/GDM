@@ -91,6 +91,9 @@ namespace reservoir_simulator
 #if !defined(GDM_SOLVER_ILU0)
 			prm.precond.block_size = B;
 #endif
+#if !defined(GDM_SOLVER_ILU0) && !defined(GDM_SOLVER_CPR_DRS)
+			prm.precond.pivot_threshold = 1e-14;
+#endif
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
