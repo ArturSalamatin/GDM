@@ -8,7 +8,7 @@ issue: FEAT-010
 github: 21
 branch: feat/feat-010/cpr-threshold-fallback
 phase: 3
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-09
   round: 4
