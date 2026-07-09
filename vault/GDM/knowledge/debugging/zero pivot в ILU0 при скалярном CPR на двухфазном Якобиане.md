@@ -8,7 +8,7 @@ date: 2026-06-24
 github: https://github.com/ArturSalamatin/GDM/issues/4
 ---
 
-**GitHub issue:** [#4](https://github.com/ArturSalamatin/GDM/issues/4)
+**GitHub issue:** [#4](https://github.com/ArturSalamatin/GDM/issues/4) (BUG-002), [#21](https://github.com/ArturSalamatin/GDM/issues/21) (FEAT-010)
 
 # Zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане
 

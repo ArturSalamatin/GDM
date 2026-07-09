@@ -53,6 +53,7 @@ date: 2026-06-27
 - [[debt-051 amgcl-submodule-and-solvers]] — DEBT-051..053 + FEAT-010/011: AMGCL submodule, патчи и новые солверы
 - [[debt-052 amgcl-patches]] — DEBT-052: патчи AMGCL (ilu0.hpp, cpr.hpp) в ветку experimental/patches
 - [[debt-053 solver-factory]] — DEBT-053: SolverFactory — compile-time выбор конфигурации СЛАУ (CMake + SolverConfig.h)
+- [[feat-010 cpr-threshold-fallback]] — FEAT-010: threshold-based fallback в CPR block-LU (near-zero pivot, τ·max_diag)
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
