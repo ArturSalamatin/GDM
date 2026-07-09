@@ -12,7 +12,7 @@ public:
     static constexpr double Lx = 250.0, Ly = 250.0, hz = 10.0;
     static constexpr double perm_mD = 100.0, poro = 0.2;
     static constexpr double P_init_atm = 200.0;
-    static constexpr double oil_saturation = 0.8;
+    double oil_saturation = 0.8;
     static constexpr double rho_water = 1000.0;
     static constexpr double Q_inj_vol = 50.0; // m3/day
 
