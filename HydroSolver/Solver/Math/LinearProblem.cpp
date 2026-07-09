@@ -88,11 +88,15 @@ namespace reservoir_simulator
 			solutionCorrections{ std::vector<double>(rhsSize, 0.0) },
 			matrix{ std::make_unique<MatrixCSR>(layout, B, cellNmbr, connectivityGraph, blPattern) }
 		{
+#if !defined(GDM_SOLVER_ILU0)
 			prm.precond.block_size = B;
+#endif
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
+#if !defined(GDM_SOLVER_CPR_BICGSTAB)
 			prm.solver.K = 5;
+#endif
 		}
 
 		LinearProblem::~LinearProblem() = default;
@@ -126,7 +130,7 @@ namespace reservoir_simulator
 			}
 
 			prof.tic("setup");
-			CPRSolver solve(
+			SolverType solve(
 				std::tie(rhsSize, Matrix().Row(), Matrix().Col(), Matrix().Val()),
 				prm);
 			prof.toc("setup");

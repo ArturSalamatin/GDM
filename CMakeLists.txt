@@ -76,6 +76,9 @@ add_library(gdm_core STATIC
     ${HYDRO}/Helpers/LogFile.cpp
 )
 target_include_directories(gdm_core PUBLIC ${HYDRO} ${CMAKE_SOURCE_DIR}/amgcl)
+set(GDM_SOLVER "CPR" CACHE STRING "AMGCL solver configuration (CPR, CPR_BICGSTAB, CPR_SA, CPR_DRS, ILU0)")
+set_property(CACHE GDM_SOLVER PROPERTY STRINGS CPR CPR_BICGSTAB CPR_SA CPR_DRS ILU0)
+target_compile_definitions(gdm_core PUBLIC GDM_SOLVER_${GDM_SOLVER})
 option(AMGCL_PROFILING "Enable AMGCL built-in profiling (prof.tic/toc)" ON)
 target_compile_definitions(gdm_core PUBLIC AMGCL_NO_BOOST)
 if(AMGCL_PROFILING)

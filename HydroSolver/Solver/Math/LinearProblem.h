@@ -6,16 +6,8 @@
 #undef min
 #undef max
 
-#include <amgcl/adapter/crs_tuple.hpp>
-#include <amgcl/make_solver.hpp>
-#include <amgcl/amg.hpp>
-#include <amgcl/coarsening/aggregation.hpp>
-#include <amgcl/relaxation/ilu0.hpp>
-#include <amgcl/relaxation/as_preconditioner.hpp>
-#include <amgcl/preconditioner/cpr.hpp>
-#include <amgcl/solver/lgmres.hpp>
+#include "SolverConfig.h"
 #include <amgcl/profiler.hpp>
-
 
 #undef min
 #undef max
@@ -34,15 +26,6 @@ namespace reservoir_simulator
 			bool converged;
 		};
 
-		using ScalarBackend = amgcl::backend::builtin<double>;
-
-		using CPRPrecond = amgcl::preconditioner::cpr<
-			amgcl::amg<ScalarBackend, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>,
-			amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>
-		>;
-
-		using CPRSolver = amgcl::make_solver<CPRPrecond, amgcl::solver::lgmres<ScalarBackend>>;
-
 		constexpr unsigned char B = 2;
 		class LinearProblem
 		{
@@ -54,7 +37,7 @@ namespace reservoir_simulator
 			std::vector<double> solutionCorrections;
 			std::unique_ptr<MatrixCSR> matrix;
 
-			CPRSolver::params prm;
+			SolverType::params prm;
 
 		public:
 			const MatrixCSR& Matrix() const;
