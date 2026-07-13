@@ -6,7 +6,7 @@ date: 2026-07-13
 issue: DEBT-054
 github: 23
 branch: refactor/debt-054/jacobian-assembler
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-13
   round: 2

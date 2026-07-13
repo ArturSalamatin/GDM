@@ -40,6 +40,7 @@ add_library(gdm_core STATIC
 
     # Reservoir
     ${HYDRO}/Reservoir/ReservoirSimulator.cpp
+    ${HYDRO}/Reservoir/JacobianAssembler.cpp
     ${HYDRO}/Reservoir/NumericalParameters.cpp
     ${HYDRO}/Reservoir/PIController.cpp
 
@@ -206,6 +207,7 @@ add_executable(gdm_unit_level4
     tests/unit/math/test_MatrixAssembly.cpp
     tests/unit/math/test_LinearProblemAssembly.cpp
     tests/unit/math/test_JacobianAssembly.cpp
+    tests/unit/math/test_JacobianAssembler_standalone.cpp
 )
 target_link_libraries(gdm_unit_level4 PRIVATE gdm_core Catch2::Catch2WithMain)
 catch_discover_tests(gdm_unit_level4
