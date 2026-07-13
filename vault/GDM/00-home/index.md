@@ -57,6 +57,7 @@ date: 2026-06-27
 - [[feat-011 true-impes-weights]] — FEAT-011: True-IMPES weights для CPR decoupling (nullspace ∂F/∂Sw, tag dispatch)
 - [[debt-003 refactoring-reservoir-simulator]] — DEBT-003: декомпозиция ReservoirSimulator на JacobianAssembler, NewtonSolver, MassBalanceTracker, TimeIntegrator
 - [[debt-054 jacobian-assembler]] — DEBT-054: выделить JacobianAssembler из ReservoirSimulator (этап 1 DEBT-003)
+- [[debt-055 newton-solver]] — DEBT-055: выделить NewtonSolver из ReservoirSimulator (этап 2 DEBT-003)
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
