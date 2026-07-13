@@ -40,7 +40,8 @@ using SolverType = amgcl::make_solver<PrecondType, amgcl::solver::lgmres<ScalarB
 
 using PrecondType = amgcl::preconditioner::cpr<
     amgcl::amg<ScalarBackend, amgcl::coarsening::smoothed_aggregation, amgcl::relaxation::ilu0>,
-    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>
+    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>,
+    amgcl::preconditioner::true_impes_weights
 >;
 using SolverType = amgcl::make_solver<PrecondType, amgcl::solver::lgmres<ScalarBackend>>;
 
@@ -48,7 +49,8 @@ using SolverType = amgcl::make_solver<PrecondType, amgcl::solver::lgmres<ScalarB
 
 using PrecondType = amgcl::preconditioner::cpr<
     amgcl::amg<ScalarBackend, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>,
-    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>
+    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>,
+    amgcl::preconditioner::true_impes_weights
 >;
 using SolverType = amgcl::make_solver<PrecondType, amgcl::solver::bicgstab<ScalarBackend>>;
 
@@ -62,7 +64,8 @@ using SolverType = amgcl::make_solver<PrecondType, amgcl::solver::lgmres<ScalarB
 
 using PrecondType = amgcl::preconditioner::cpr<
     amgcl::amg<ScalarBackend, amgcl::coarsening::aggregation, amgcl::relaxation::ilu0>,
-    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>
+    amgcl::relaxation::as_preconditioner<ScalarBackend, amgcl::relaxation::ilu0>,
+    amgcl::preconditioner::true_impes_weights
 >;
 using SolverType = amgcl::make_solver<PrecondType, amgcl::solver::lgmres<ScalarBackend>>;
 

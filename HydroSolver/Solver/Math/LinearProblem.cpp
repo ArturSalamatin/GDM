@@ -91,9 +91,6 @@ namespace reservoir_simulator
 #if !defined(GDM_SOLVER_ILU0)
 			prm.precond.block_size = B;
 #endif
-#if !defined(GDM_SOLVER_ILU0) && !defined(GDM_SOLVER_CPR_DRS)
-			prm.precond.pivot_threshold = 1e-14;
-#endif
 			prm.solver.tol = AMG_RelTol;
 			prm.solver.abstol = amg_AbsTol;
 			prm.solver.maxiter = 5;
@@ -115,13 +112,14 @@ namespace reservoir_simulator
 		{
 			prm.solver.maxiter = maxIter;
 
-			// Regularize near-zero diagonals for saturation rows (odd rows in InterleavedPSw).
-			// At Sw≈0 the water equation Jacobian row is degenerate; scalar ILU needs nonzero pivots.
+			// Regularize near-zero diagonals for degenerate equation rows.
+			// At Sw≈0 the water equation row has zero pressure-dependence;
+			// scalar ILU needs nonzero pivots.
 			{
 				const auto& row = Matrix().Row();
 				const auto& col = Matrix().Col();
 				auto& val = Matrix().Val();
-				for (size_t i = 1; i < rhsSize; i += B) {
+				for (size_t i = 0; i < rhsSize; ++i) {
 					for (size_t k = row[i]; k < row[i + 1]; ++k) {
 						if (col[k] == i) {
 							if (std::abs(val[k]) < 1e-20)
