@@ -438,71 +438,24 @@ namespace reservoir_simulator
 	}
 	void ReservoirSimulator::PerformNewtonLoop(double loc_tau, double nextTimeMoment)
 	{
-		numPrm.set_currentNewtonIterationCount(0);
-		numPrm.update_isSuccesfullNewtonTrial(false);
-		numPrm.set_currentAMG_maxSolverIterationCount();
-		while (!numPrm.IsSuccessfullNewtonTrial())
-		{
-			SingleIteration(loc_tau, nextTimeMoment);
-			solverProfile_.n_newton_iters++;
-
-			if (numPrm.IsSuccessfullAMG_Iteration() && numPrm.IsNewtonIterationContinue())
-			{
-				prof.tic("update");
-				numPrm.update_isSuccesfullNewtonTrial(UpdateGrid());
-				prof.toc("update");
-			}
-			else
-			{
-				Grid.ReverseState();
-				break;
-			}
-		}
+		newton_solver_.Solve(loc_tau, nextTimeMoment, Grid, MyProblem,
+			numPrm, RefPressure, Wells, solverProfile_);
 	}
 	bool ReservoirSimulator::UpdateGrid()
 	{
-		const double tol = 3E-3;
-		std::vector<char> f(B * Grid.ActiveCellsNmbr(), 1);
-
-#ifdef	USE_PARALLEL
-#pragma omp parallel for
-#endif
-		for (int l = 0; l < Grid.ActiveCellsNmbr(); l++)
-		{
-			double corr[B];
-			MyProblem.UnpackCellCorrections(l, corr);
-			Grid[l].UpdateState(corr);
-
-			const std::vector<double>& stateVaiables = Grid[l].GetVariableFieldProperties();
-
-			int i = 0; // saturation
-			f[B * l + i] =
-				(abs(stateVaiables[i]) < numPrm.NewtonTol() * tol) || (abs(1.0 - stateVaiables[i]) < numPrm.NewtonTol() * tol) ||
-				(abs(corr[i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
-			i = 1; // pressure
-			f[B * l + i] =
-				(abs(stateVaiables[i]) < 1E6) ||
-				(abs(corr[i]) <= numPrm.NewtonTol() * abs(stateVaiables[i]));
-		}
-		return std::all_of(f.begin(), f.end(), [](char x) { return x != 0; });
+		return newton_solver_.UpdateGrid(Grid, MyProblem, numPrm);
 	}
 
 	void ReservoirSimulator::SingleIteration(double loc_tau, double nextTimeMoment)
 	{
-		prof.tic("assemble");
-		AssembleMyProblem(loc_tau, nextTimeMoment);
-		prof.toc("assemble");
-
-		auto res = MyProblem.Solve(numPrm.CurrentAMG_maxSolverIterationCount());
-		numPrm.update_currentAMGState({ static_cast<int>(res.iters), res.error, res.converged });
-
-		solverProfile_.n_amg_solves++;
-		solverProfile_.total_amg_iters += res.iters;
+		newton_solver_.SingleIteration(loc_tau, nextTimeMoment, Grid, MyProblem,
+			numPrm, RefPressure, Wells, solverProfile_);
 	}
 
 	void ReservoirSimulator::AssembleMyProblem(double loc_tau, double nextTimeMoment)
 	{
-		assembler_.Assemble(loc_tau, nextTimeMoment, Grid, MyProblem, RefPressure, Wells);
+		newton_solver_.assembler_.Assemble(loc_tau, nextTimeMoment,
+			Grid, MyProblem, RefPressure, Wells);
 	}
 
 	void ReservoirSimulator::AddFlowFieldSnapShot()
