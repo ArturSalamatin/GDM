@@ -210,6 +210,7 @@ add_executable(gdm_unit_level4
     tests/unit/math/test_LinearProblemAssembly.cpp
     tests/unit/math/test_JacobianAssembly.cpp
     tests/unit/math/test_JacobianAssembler_standalone.cpp
+    tests/unit/math/test_MassBalanceTracker_standalone.cpp
     tests/unit/math/test_NewtonSolver_standalone.cpp
 )
 target_link_libraries(gdm_unit_level4 PRIVATE gdm_core Catch2::Catch2WithMain)
