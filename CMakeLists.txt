@@ -39,6 +39,7 @@ add_library(gdm_core STATIC
     ${HYDRO}/stdafx.cpp
 
     # Reservoir
+    ${HYDRO}/Reservoir/MassBalanceTracker.cpp
     ${HYDRO}/Reservoir/ReservoirSimulator.cpp
     ${HYDRO}/Reservoir/JacobianAssembler.cpp
     ${HYDRO}/Reservoir/NewtonSolver.cpp
