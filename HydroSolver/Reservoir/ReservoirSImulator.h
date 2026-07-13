@@ -8,7 +8,7 @@
 #include "../Solver/Grids/DevelopedHorizon.h"
 
 #include "../Anomaly/FlowField/FlowField.h"
-#include "JacobianAssembler.h"
+#include "NewtonSolver.h"
 
 namespace reservoir_simulator
 {
@@ -70,7 +70,7 @@ namespace reservoir_simulator
 		std::vector<phasePortrait::SomeFlowField> flowFields;
 
 		SolverProfile solverProfile_;
-		JacobianAssembler assembler_;
+		NewtonSolver newton_solver_;
 	public:
 		phasePortrait::SomeFlowField::SequencePtr
 			GetFlowFieldsPtr(double multiplier) const;
