@@ -6,7 +6,7 @@ date: 2026-07-13
 issue: DEBT-055
 github: 24
 branch: refactor/debt-055/newton-solver
-status: в процессе
+status: реализован
 estimates:
   steps: 4
   files-changed: 5
