@@ -6,7 +6,7 @@ date: 2026-07-13
 issue: DEBT-056
 github: 25
 branch: refactor/debt-056/mass-balance-tracker
-status: готов к реализации
+status: реализован
 estimates:
   steps: 4
   files-changed: 4

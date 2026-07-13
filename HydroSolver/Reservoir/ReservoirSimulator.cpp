@@ -63,15 +63,7 @@ namespace reservoir_simulator
 				std::move(poro));
 
 		}
-		curOil = OilTotal();
-		accumDebet = 0.0;
-		accumOilOutFlux = 0.0;
-		accumOil = 0.0;
-		curWater = WaterTotal();
-		accumWaterDebet = 0.0;
-		accumWaterOutFlux = 0.0;
-		accumWater = 0.0;
-		curTime = 0.0;
+		balance_tracker_.Initialize(OilTotal(), WaterTotal());
 
 		auto appRadiusWell{ 0.2 * horizon.block_size.step_x };
 		for (const auto& name : horizon.well_names)
@@ -214,8 +206,7 @@ namespace reservoir_simulator
 
 	std::vector<double> ReservoirSimulator::GetOverallBalance() const
 	{
-		return std::vector<double>{curTime, accumOil, accumOilOutFlux, accumDebet,
-			accumWater, accumWaterOutFlux, accumWaterDebet};
+		return balance_tracker_.GetBalance();
 	}
 
 	void ReservoirSimulator::PrintReservoirState(std::ios_base::openmode mode) const
@@ -473,21 +464,10 @@ namespace reservoir_simulator
 	}
 	void ReservoirSimulator::MassBalance(double loc_tau)
 	{
-		prevOil = curOil;
-		curOil = OilTotal();
-		accumOil += curOil - prevOil;
-
-		accumOilOutFlux += OilContourFlux() * loc_tau;
-		accumDebet -= OilDebitTotal() * loc_tau;
-
-		prevWater = curWater;
-		curWater = WaterTotal();
-		accumWater += curWater - prevWater;
-
-		accumWaterOutFlux += WaterContourFlux() * loc_tau;
-		accumWaterDebet -= WaterDebitTotal() * loc_tau;
-
-		curTime += loc_tau;
+		balance_tracker_.Update(loc_tau,
+			OilTotal(), WaterTotal(),
+			OilContourFlux(), WaterContourFlux(),
+			OilDebitTotal(), WaterDebitTotal());
 	}
 
 	//////////// FILE IN/OUT

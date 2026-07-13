@@ -8,6 +8,7 @@
 #include "../Solver/Grids/DevelopedHorizon.h"
 
 #include "../Anomaly/FlowField/FlowField.h"
+#include "MassBalanceTracker.h"
 #include "NewtonSolver.h"
 
 namespace reservoir_simulator
@@ -63,13 +64,10 @@ namespace reservoir_simulator
 		void PrintPlanarMesh(const std::wstring fName) const;
 		void PrintWellCoords() const;
 
-		double prevOil, curOil, accumOil, accumOilOutFlux, accumDebet;
-		double prevWater, curWater, accumWater, accumWaterOutFlux, accumWaterDebet;
-		double curTime;
-
 		std::vector<phasePortrait::SomeFlowField> flowFields;
 
 		SolverProfile solverProfile_;
+		MassBalanceTracker balance_tracker_;
 		NewtonSolver newton_solver_;
 	public:
 		phasePortrait::SomeFlowField::SequencePtr
