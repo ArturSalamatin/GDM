@@ -41,6 +41,7 @@ add_library(gdm_core STATIC
     # Reservoir
     ${HYDRO}/Reservoir/ReservoirSimulator.cpp
     ${HYDRO}/Reservoir/JacobianAssembler.cpp
+    ${HYDRO}/Reservoir/NewtonSolver.cpp
     ${HYDRO}/Reservoir/NumericalParameters.cpp
     ${HYDRO}/Reservoir/PIController.cpp
 
