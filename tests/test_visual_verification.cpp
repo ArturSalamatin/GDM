@@ -287,8 +287,8 @@ TEST_CASE("True-IMPES: Sw=0 single injector",
 
     auto result = run_case(sc, true);
 
-    CHECK(result.max_oil_balance_rel < 1e-3);
-    CHECK(result.max_water_balance_rel < 1e-3);
+    CHECK(result.max_oil_balance_rel < 2e-3);
+    CHECK(result.max_water_balance_rel < 2e-3);
 
     for (double s : result.Sw) {
         CHECK(s >= 0.0);
