@@ -59,6 +59,7 @@ date: 2026-06-27
 - [[debt-054 jacobian-assembler]] — DEBT-054: выделить JacobianAssembler из ReservoirSimulator (этап 1 DEBT-003)
 - [[debt-055 newton-solver]] — DEBT-055: выделить NewtonSolver из ReservoirSimulator (этап 2 DEBT-003)
 - [[debt-056 mass-balance-tracker]] — DEBT-056: выделить MassBalanceTracker из ReservoirSimulator (этап 3 DEBT-003)
+- [[debt-057 time-integrator]] — DEBT-057: выделить TimeIntegrator из ReservoirSimulator (этап 4 DEBT-003)
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик

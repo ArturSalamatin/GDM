@@ -1,4 +1,6 @@
 {
+  "model": "claude-opus-4-6",
+  "effortLevel": "max",
   "env": {
   },
   "permissions": {
