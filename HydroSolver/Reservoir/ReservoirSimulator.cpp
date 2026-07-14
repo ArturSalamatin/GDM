@@ -387,45 +387,26 @@ namespace reservoir_simulator
 	{
 		prof.tic("total");
 
-#ifdef PRINT_DEBUG_INFO
-		std::ofstream myfile;
-		myfile.open("test_tau.txt", std::ios_base::out);
-#endif // PRINT_DEBUG_INFO
+		TimeIntegrator::StepCallbacks callbacks;
+		callbacks.prepare_step = [this](double nextRef) {
+			numPrm.update_maxTauAllowed(nextRef, GetWells());
+		};
+		callbacks.perform_newton = [this](double tau, double nextTime) {
+			PerformNewtonLoop(tau, nextTime);
+		};
+		callbacks.on_accept = [this](double tau) {
+			MassBalance(tau);
+			Grid.AcceptState();
+		};
+		callbacks.on_post_update = [this]() {
+			AddFlowFieldSnapShot();
+		};
 
-		for (size_t i = 1; i < timeMoments.size(); i++)
-		{
-			while (numPrm.CurrentTimeMoment() < timeMoments[i])
-			{
-				numPrm.update_maxTauAllowed(timeMoments[i], GetWells());
-#ifdef PRINT_DEBUG_INFO
-				myfile << numPrm.CurrentIntegrationStep() << "  " << numPrm.CurrentTimeMoment() << std::endl;
-#endif // PRINT_DEBUG_INFO
-
-				PerformNewtonLoop(numPrm.CurrentIntegrationStep(),
-					numPrm.NextTimeMoment());
-
-				if (numPrm.IsSuccessfullNewtonTrial())
-				{
-					MassBalance(numPrm.CurrentIntegrationStep());
-					Grid.AcceptState();
-					numPrm.update_currentMoment();
-					AddFlowFieldSnapShot();
-					solverProfile_.n_time_steps++;
-				}
-				else
-				{
-					numPrm.decrease_schemeTau();
-					solverProfile_.n_wasted_trials++;
-					continue;
-				}
-			}
-		}
-#ifdef PRINT_DEBUG_INFO
-		myfile.close();
-#endif // PRINT_DEBUG_INFO
+		auto result = time_integrator_.Integrate(
+			timeMoments, numPrm, solverProfile_, callbacks);
 
 		prof.toc("total");
-		return numPrm.CurrentSchemeTau();
+		return result;
 	}
 	void ReservoirSimulator::PerformNewtonLoop(double loc_tau, double nextTimeMoment)
 	{
