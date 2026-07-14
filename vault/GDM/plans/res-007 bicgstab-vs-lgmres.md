@@ -7,7 +7,7 @@ date: 2026-07-14
 issue: RES-007
 github: 27
 branch: research/res-007/bicgstab-vs-lgmres
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-14
   pass: 2
