@@ -6,7 +6,7 @@ date: 2026-07-14
 issue: DEBT-057
 github: 26
 branch: refactor/debt-057/time-integrator
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-14
   round: 2

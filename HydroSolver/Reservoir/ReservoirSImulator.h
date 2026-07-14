@@ -10,6 +10,7 @@
 #include "../Anomaly/FlowField/FlowField.h"
 #include "MassBalanceTracker.h"
 #include "NewtonSolver.h"
+#include "TimeIntegrator.h"
 
 namespace reservoir_simulator
 {
@@ -69,6 +70,7 @@ namespace reservoir_simulator
 		SolverProfile solverProfile_;
 		MassBalanceTracker balance_tracker_;
 		NewtonSolver newton_solver_;
+		TimeIntegrator time_integrator_;
 	public:
 		phasePortrait::SomeFlowField::SequencePtr
 			GetFlowFieldsPtr(double multiplier) const;
