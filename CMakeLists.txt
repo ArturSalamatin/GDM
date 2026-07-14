@@ -122,6 +122,7 @@ target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
 # =============================================================================
 add_executable(gdm_benchmark
     tests/test_amgcl_benchmark.cpp
+    tests/test_solver_comparison.cpp
 )
 target_link_libraries(gdm_benchmark PRIVATE gdm_core Catch2::Catch2WithMain)
 
