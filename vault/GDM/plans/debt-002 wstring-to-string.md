@@ -6,7 +6,7 @@ date: 2026-07-15
 issue: DEBT-002
 github: 29
 branch: refactor/debt-002/wstring-to-string
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-15
   round: 4

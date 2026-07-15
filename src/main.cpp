@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
 #include "../HydroSolver/stdafx.h"
 #include "../HydroSolver/Solver/Grids/DevelopedHorizon.h"
 #include "../HydroSolver/Reservoir/ReservoirSimulator.h"
@@ -58,6 +62,9 @@ static reservoir_simulator::DevelopedHorizon make_synthetic_horizon()
 
 int main()
 {
+#ifdef _WIN32
+	SetConsoleOutputCP(CP_UTF8);
+#endif
 	std::cout << "GDM Reservoir Simulator — synthetic test case\n";
 
 	auto horizon = make_synthetic_horizon();

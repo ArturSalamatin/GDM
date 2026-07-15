@@ -56,16 +56,16 @@ public:
             remaining -= dt;
 
             reservoir_simulator::mer_descriptor::SingleMERrecord rec;
-            rec[L"time"] = static_cast<float>(cursor_ + dt);
-            rec[L"oil_m"] = static_cast<float>(pending_oil_mass_rate_ * dt);
-            rec[L"water_m"] = static_cast<float>(pending_water_mass_rate_ * dt);
-            rec[L"oil_v"] = static_cast<float>(pending_oil_mass_rate_ * dt / rho_oil_);
-            rec[L"water_v"] = static_cast<float>(pending_water_mass_rate_ * dt / rho_water_);
-            rec[L"type"] = 1.0f;
-            rec[L"is_work"] = is_shut_ ? 0.0f : 1.0f;
-            rec[L"worked_time"] = is_shut_ ? 0.0f : static_cast<float>(dt);
-            rec[L"idle_time"] = is_shut_ ? static_cast<float>(dt) : 0.0f;
-            rec[L"pump_water"] = 0.0f;
+            rec["time"] = static_cast<float>(cursor_ + dt);
+            rec["oil_m"] = static_cast<float>(pending_oil_mass_rate_ * dt);
+            rec["water_m"] = static_cast<float>(pending_water_mass_rate_ * dt);
+            rec["oil_v"] = static_cast<float>(pending_oil_mass_rate_ * dt / rho_oil_);
+            rec["water_v"] = static_cast<float>(pending_water_mass_rate_ * dt / rho_water_);
+            rec["type"] = 1.0f;
+            rec["is_work"] = is_shut_ ? 0.0f : 1.0f;
+            rec["worked_time"] = is_shut_ ? 0.0f : static_cast<float>(dt);
+            rec["idle_time"] = is_shut_ ? static_cast<float>(dt) : 0.0f;
+            rec["pump_water"] = 0.0f;
 
             mer_data_.push_back(rec);
             cursor_ += dt;

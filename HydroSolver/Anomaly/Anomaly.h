@@ -13,11 +13,11 @@ namespace reservoir_simulator
 {
 	class SingleWellDomain;
 
-	using AnomaliesPerWellData = std::vector<std::map<std::wstring, float>>;
+	using AnomaliesPerWellData = std::vector<std::map<std::string, float>>;
 	using WellDomainsPerLayer = std::vector<SingleWellDomain>; // each layer of reservoir may contain a set of domains
-	using TrajectoryInitializer = std::map<std::wstring, double>;
+	using TrajectoryInitializer = std::map<std::string, double>;
 	using TimeFrame = struct { double interval_start, interval_end, startSignalRollback, endSignalRollback; };
-	using Features = struct { std::wstring well_name; };
+	using Features = struct { std::string well_name; };
 
 	class SingleWellDomain
 	{
@@ -43,28 +43,28 @@ namespace reservoir_simulator
 
 		SingleWellDomain(TrajectoryInitializer data, TimeFrame timeFrame, phasePortrait::FlowField& field, const Features& features);
 
-		//std::wstring print() const
+		//std::string print() const
 		//{
 		//	const int n = 40;
 		//	// external contour
 		//	wchar_t buffer[n];
-		//	swprintf(buffer, n, L"%u;", extContour.size()); // number of points to print
-		//	std::wstring result{ buffer };
+		//	swprintf(buffer, n, "%u;", extContour.size()); // number of points to print
+		//	std::string result{ buffer };
 		//	for (int l = 0; l < extContour.size(); l++)
 		//	{
-		//		swprintf(buffer, n, L"%+19.11E;", extContour.x()[l]);
+		//		swprintf(buffer, n, "%+19.11E;", extContour.x()[l]);
 		//		result += buffer;
-		//		swprintf(buffer, n, L"%+19.11E;", extContour.y()[l]);
+		//		swprintf(buffer, n, "%+19.11E;", extContour.y()[l]);
 		//		result += buffer;
 		//	}
 		//	// internal contour
-		//	swprintf(buffer, n, L"%u;", intContour.size()); // number of points to print
+		//	swprintf(buffer, n, "%u;", intContour.size()); // number of points to print
 		//	result += buffer;
 		//	for (int l = 0; l < intContour.size(); l++)
 		//	{
-		//		swprintf(buffer, n, L"%+19.11E;", intContour.x()[l]);
+		//		swprintf(buffer, n, "%+19.11E;", intContour.x()[l]);
 		//		result += buffer;
-		//		swprintf(buffer, n, L"%+19.11E;", intContour.y()[l]);
+		//		swprintf(buffer, n, "%+19.11E;", intContour.y()[l]);
 		//		result += buffer;
 		//	}
 		//	return result;
@@ -72,17 +72,17 @@ namespace reservoir_simulator
 
 		__declspec(noinline) void print_geo_json(GeoJsonEngine& sraka) const;
 
-		std::wstring print_json() const;
+		std::string print_json() const;
 
-		std::wstring print_time_json() const;
+		std::string print_time_json() const;
 	};
 
 	class WellSignals
 	{
 	public:
-		const std::wstring& Name() { return name; }
+		const std::string& Name() { return name; }
 	protected:
-		std::wstring name; // well name
+		std::string name; // well name
 		std::vector<std::pair<double, double>> intervals;
 		std::vector<double> coords, numCoords;// real coordinates and coordinates of the cell center
 		AnomaliesPerWellData anomalies;
@@ -90,21 +90,21 @@ namespace reservoir_simulator
 		std::vector<WellDomainsPerLayer> wellDomains;
 
 	public:
-		WellSignals(const std::wstring& name, const std::vector<double> coords, const std::vector<double>& numCoords, const AnomaliesPerWellData& anomalies_);
+		WellSignals(const std::string& name, const std::vector<double> coords, const std::vector<double>& numCoords, const AnomaliesPerWellData& anomalies_);
 
 		void SetIntervals(const std::pair<double, double>& overallInterval, double spread, float anomalyType = 2.0);
 
 
 		void print_intervals();
 
-		const std::wstring& Name() const;
+		const std::string& Name() const;
 		const std::vector<double>& Coords() const;
 
 		//void set_trajectories(double startSignalRollback, double endSignalRollback, 
 		//	const std::vector<phasePortrait::SomeFlowField>& flowFields, double r, int count, const SomeWell* wellData)
 		//{
-		//	TrajectoryInitializer data = { {L"x0", numCoords[0]},{L"y0",numCoords[1]},{L"r", r},  //{L"count", count},
-		//		{L"dist_abs", 1}, {L"dist_rel", 25} };
+		//	TrajectoryInitializer data = { {"x0", numCoords[0]},{"y0",numCoords[1]},{"r", r},  //{"count", count},
+		//		{"dist_abs", 1}, {"dist_rel", 25} };
 
 		//	std::vector<FlowField> fields;
 		//	// loop through z-sections
@@ -121,8 +121,8 @@ namespace reservoir_simulator
 		//					fields.back()));
 		//			else
 		//			{
-		//				LogFileSpace::LogFile::WriteLog(L"class_WellSignals", L"method_set_trajectories", L"warning", 
-		//					L"The layer " + std::to_wstring(k) + L" is not perforated at " + std::to_wstring((int)(intervals[i].first)) + L" for the well " +  wellData->Name() + L".");						
+		//				LogFileSpace::LogFile::WriteLog("class_WellSignals", "method_set_trajectories", "warning", 
+		//					"The layer " + std::to_wstring(k) + " is not perforated at " + std::to_wstring((int)(intervals[i].first)) + " for the well " +  wellData->Name() + ".");						
 		//			}
 		//		}
 		//	}
@@ -131,14 +131,14 @@ namespace reservoir_simulator
 		void set_trajectories_fixed_time(double startSignalRollback, double endSignalRollback,
 			FlowField::FlowFieldSequence& fields, double r, const wells::SomeWell* wellData);
 
-		//const std::wstring print_well_signals() const
+		//const std::string print_well_signals() const
 		//{
 		//	wchar_t buffer[20];
-		//	swprintf(buffer, 20, L"%u;", wellDomains.size());// number of z-sections
-		//	std::wstring result{ buffer };
+		//	swprintf(buffer, 20, "%u;", wellDomains.size());// number of z-sections
+		//	std::string result{ buffer };
 		//	for (int k = 0; k < wellDomains.size(); k++)
 		//	{
-		//		swprintf(buffer, 20, L"%u;", wellDomains[k].size());// number of domains in the z-section
+		//		swprintf(buffer, 20, "%u;", wellDomains[k].size());// number of domains in the z-section
 		//		result += buffer; 
 		//		for (int l = 0; l < wellDomains[k].size(); l++)
 		//		{
@@ -162,7 +162,7 @@ namespace reservoir_simulator
 	{
 	protected:
 		std::vector<WellSignals> relevantAnomalies;
-		std::map<std::wstring, wells::SomeWell*> wells;
+		std::map<std::string, wells::SomeWell*> wells;
 		WellDataHandler::AnomData anomalyData;
 
 		std::pair<double, double> overallInterval;
@@ -174,7 +174,7 @@ namespace reservoir_simulator
 
 	public:
 
-		Anomalies(const std::map<std::wstring, wells::SomeWell*>& wells, const std::wstring& anomalyPath);
+		Anomalies(const std::map<std::string, wells::SomeWell*>& wells, const std::string& anomalyPath);
 
 		void instantiate(const std::vector<ModelHanlder::ReadModel::WellData>& well_data, double r, int count,
 			const std::pair<double, double>& overallInterval, double spread, float anomalyType = 2.0);
@@ -191,11 +191,11 @@ namespace reservoir_simulator
 		void set_trajectories_fixed_time(double startRollback, double endRollback,
 			FlowField::FlowFieldSequence& flowFields);
 
-		//std::wstring print()
+		//std::string print()
 		//{
 		//	wchar_t buffer[20];
-		//	swprintf(buffer, 20, L"%u;", relevantAnomalies.size());// number of wells with anomalies
-		//	std::wstring result{ buffer };
+		//	swprintf(buffer, 20, "%u;", relevantAnomalies.size());// number of wells with anomalies
+		//	std::string result{ buffer };
 
 		//	for (const auto& anom : relevantAnomalies)
 		//		result += anom.print_well_signals();
@@ -204,6 +204,6 @@ namespace reservoir_simulator
 
 		void print_json();
 
-		void print_geo_json(const std::wstring& filename);
+		void print_geo_json(const std::string& filename);
 	};
 }

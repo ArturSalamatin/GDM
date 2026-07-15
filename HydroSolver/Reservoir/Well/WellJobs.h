@@ -22,7 +22,7 @@ namespace reservoir_simulator
 	/// <summary>
 	/// [layerName, std::vector[tuple[time, open/close, pair[start, end]]]
 	/// </summary>
-	using LayerName = std::wstring;
+	using LayerName = std::string;
 	using WellJobsData = std::map<LayerName, JobsOfWell>;
 
 	/// <summary>

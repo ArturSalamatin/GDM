@@ -21,7 +21,7 @@ namespace reservoir_simulator
 			double PosX() const { return  itsIntersectionCoords.get()->getX(); }
 			double PosY() const { return itsIntersectionCoords.get()->getY(); }
 			std::vector<double> IntersectionCoords() const { return { PosX(), PosY() }; }
-			std::wstring IntersectionCoords_json() const { std::wstring result = L"[" + std::to_wstring(PosX()) + L"," + std::to_wstring(PosY()) + L"]";    return result; }
+			std::string IntersectionCoords_json() const { std::string result = "[" + std::to_string(PosX()) + "," + std::to_string(PosY()) + "]";    return result; }
 			double PosXnum() const { return Cells()[0]->X(); }
 			double PosYnum() const { return Cells()[0]->Y(); }
 			std::vector<double> IntersectionCoordsNum() const { return { PosXnum(), PosYnum() }; }

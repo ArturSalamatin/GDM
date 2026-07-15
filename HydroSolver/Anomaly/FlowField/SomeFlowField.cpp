@@ -21,14 +21,14 @@ namespace reservoir_simulator
 			return mesh;
 		}
 
-		const std::wstring SomeField2D::print() const
+		const std::string SomeField2D::print() const
 		{
-			std::wstring result;
+			std::string result;
 			for (int j = 0; j < field.size(); j++)
 				for (int i = 0; i < field[j].size(); i++)
 				{
-					wchar_t buffer[40];
-					swprintf(buffer, 40, L"%+19.11E;", field[j][i]);
+					char buffer[40];
+					snprintf(buffer, 40, "%+19.11E;", field[j][i]);
 					result += buffer;
 				}
 			return result;
@@ -46,11 +46,11 @@ namespace reservoir_simulator
 			return sqrt(vxvy.first * vxvy.first + vxvy.second * vxvy.second);
 		}
 
-		const std::wstring FlowFieldSnapshot::print() const
+		const std::string FlowFieldSnapshot::print() const
 		{
-			wchar_t buffer[40];
-			swprintf(buffer, 40, L"%+19.11E;", time);
-			std::wstring result = buffer;
+			char buffer[40];
+			snprintf(buffer, 40, "%+19.11E;", time);
+			std::string result = buffer;
 
 			result += vxField.print() + vyField.print();
 			return result;
@@ -83,12 +83,12 @@ namespace reservoir_simulator
 			return result;
 		}
 
-		const std::wstring
+		const std::string
 			SomeFlowField::print() const
 		{
-			wchar_t buffer[40];
-			swprintf(buffer, 40, L"%u;", field.size());
-			std::wstring result = buffer;
+			char buffer[40];
+			snprintf(buffer, 40, "%u;", field.size());
+			std::string result = buffer;
 
 			for (int t = 0; t < field.size(); t++)
 			{

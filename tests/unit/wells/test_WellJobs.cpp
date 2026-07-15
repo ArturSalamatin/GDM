@@ -8,19 +8,19 @@ using Catch::Approx;
 
 TEST_CASE("WellJobs: construct from single layer jobs",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W1";
+    std::string name = "W1";
     JobsInLayer jobs = {
         WellJobTime(10.0, 30.0, true, 100.0),
         WellJobTime(40.0, 60.0, true, 200.0)
     };
     WellJobs wj(name, jobs);
-    CHECK(wj.Name() == L"W1");
+    CHECK(wj.Name() == "W1");
     CHECK_FALSE(wj.IsEmpty());
 }
 
 TEST_CASE("WellJobs: AccumulatePerforations produces correct layers",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W2";
+    std::string name = "W2";
     JobsInLayer layer0 = {
         WellJobTime(0.0, 50.0, true, 100.0),
         WellJobTime(60.0, 80.0, true, 200.0)
@@ -39,7 +39,7 @@ TEST_CASE("WellJobs: AccumulatePerforations produces correct layers",
 
 TEST_CASE("WellJobs: empty layer does not appear in AccumulatePerforations",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W3";
+    std::string name = "W3";
     JobsInLayer layer0 = {};
     JobsInLayer layer1 = {
         WellJobTime(10.0, 40.0, true, 100.0)
@@ -54,7 +54,7 @@ TEST_CASE("WellJobs: empty layer does not appear in AccumulatePerforations",
 
 TEST_CASE("WellJobs: AccumulatePerforations respects time ordering",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W4";
+    std::string name = "W4";
     JobsInLayer jobs = {
         WellJobTime(0.0, 100.0, true, 50.0),
         WellJobTime(30.0, 60.0, false, 150.0)
@@ -70,7 +70,7 @@ TEST_CASE("WellJobs: AccumulatePerforations respects time ordering",
 
 TEST_CASE("WellJobs: jobsInLayer accessor",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W5";
+    std::string name = "W5";
     JobsInLayer layer0 = {
         WellJobTime(10.0, 30.0, true, 100.0)
     };
@@ -80,7 +80,7 @@ TEST_CASE("WellJobs: jobsInLayer accessor",
 
 TEST_CASE("WellJobs: IsEmpty returns true when all layers empty",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W_empty";
+    std::string name = "W_empty";
     WellJobsPerLayer layers = {
         JobsInLayer{},
         JobsInLayer{},
@@ -92,7 +92,7 @@ TEST_CASE("WellJobs: IsEmpty returns true when all layers empty",
 
 TEST_CASE("WellJobs: IsEmpty returns false when one layer has jobs",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W_partial";
+    std::string name = "W_partial";
     WellJobsPerLayer layers = {
         JobsInLayer{},
         JobsInLayer{ WellJobTime(0.0, 50.0, true, 100.0) },
@@ -104,7 +104,7 @@ TEST_CASE("WellJobs: IsEmpty returns false when one layer has jobs",
 
 TEST_CASE("WellJobs: IsEmpty returns true when zero layers",
           "[unit][level3][wells][WellJobs]") {
-    std::wstring name = L"W_zero";
+    std::string name = "W_zero";
     WellJobsPerLayer layers = {};
     WellJobs wj(name, layers);
     CHECK(wj.IsEmpty());

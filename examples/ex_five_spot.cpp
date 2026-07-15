@@ -27,15 +27,15 @@ int main() {
     double hx = Lx / Nx, hy = Ly / Ny;
 
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", 10.5 * hx, 10.5 * hy, 0.0, -Q_inj_vol * rho_water);
+        "INJ", 10.5 * hx, 10.5 * hy, 0.0, -Q_inj_vol * rho_water);
     test_helpers::add_simple_well(sim, horizon,
-        L"P1", 0.5 * hx, 0.5 * hy, Q_prod_vol * rho_oil, 0.0);
+        "P1", 0.5 * hx, 0.5 * hy, Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P2", 0.5 * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_oil, 0.0);
+        "P2", 0.5 * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P3", (Nx - 0.5) * hx, 0.5 * hy, Q_prod_vol * rho_oil, 0.0);
+        "P3", (Nx - 0.5) * hx, 0.5 * hy, Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_oil, 0.0);
+        "P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_oil, 0.0);
 
     std::vector<double> timeMoments = {0.0};
     for (double t = 5.0; t <= 500.0; t += 5.0)

@@ -27,9 +27,9 @@ namespace reservoir_simulator
 			const double x() const { return X; }
 			const double y() const { return Y; }
 
-			const std::wstring print_json() const
+			const std::string print_json() const
 			{
-				return L"[" + std::to_wstring((int)x()) + L"," + std::to_wstring((int)y()) + L"]";
+				return "[" + std::to_string((int)x()) + "," + std::to_string((int)y()) + "]";
 			}
 
 			const double Area(const phasePortrait::Point& P) const
@@ -107,17 +107,17 @@ namespace reservoir_simulator
 			std::vector<double> X{}, Y{};
 		public:
 			Contour(const std::vector<double>& x = {}, const std::vector<double>& y = {}) :X{ x }, Y{ y } {};
-			std::wstring print_json() const
+			std::string print_json() const
 			{
 				if (size() == 0)
-					return L"[]";
-				std::wstring result = L"[";
+					return "[]";
+				std::string result = "[";
 				for (size_t i{0ll}; i < size(); ++i)
 				{
-					if (i > 0) result += L",";
+					if (i > 0) result += ",";
 					result += Point(X[i], Y[i]).print_json();
 				}
-				return result + L"]";
+				return result + "]";
 			}
 
 			size_t size() const { return X.size(); }
@@ -139,7 +139,7 @@ namespace reservoir_simulator
 			bool intersects(const geos_polygon&) const { return false; }
 			geos_polygon Union(const geos_polygon& p) const { return *this; }
 			geos_polygon combine_with(const geos_polygon& p) const { return *this; }
-			std::wstring print_json() const { return L"[]"; }
+			std::string print_json() const { return "[]"; }
 		};
 
 	} // phasePortrait

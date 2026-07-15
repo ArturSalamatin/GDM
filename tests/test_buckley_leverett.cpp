@@ -97,7 +97,7 @@ TEST_CASE("Well injection: basic well works without crash",
     double hx = L / Nx;
     // Небольшая закачка воды в первую ячейку
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", hx * 0.5, hy_cell * 0.5,
+        "INJ", hx * 0.5, hy_cell * 0.5,
         0.0, -1000.0);  // -1000 кг/день закачки
 
     sim.Solve({0.0, 1.0});
@@ -129,7 +129,7 @@ TEST_CASE("Well injection: Sw increases with water injection",
 
     double hx = L / Nx;
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", hx * 0.5, hy_cell * 0.5,
+        "INJ", hx * 0.5, hy_cell * 0.5,
         0.0, -1000.0);
 
     sim.Solve({0.0, 10.0});
@@ -166,9 +166,9 @@ double compute_BL_L2(size_t Nx,
     double hx = Lx / Nx;
     double r_app = std::max(0.2 * hx, 0.2);
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", hx * 0.5, hy * 0.5, 0.0, water_inject_rate, r_app);
+        "INJ", hx * 0.5, hy * 0.5, 0.0, water_inject_rate, r_app);
     test_helpers::add_simple_well(sim, horizon,
-        L"PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
+        "PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
 
     sim.Solve({0.0, t_final});
 
@@ -241,9 +241,9 @@ double compute_qt_eff(size_t Nx,
     double hx = Lx / Nx;
     double r_app = std::max(0.2 * hx, 0.2);
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", hx * 0.5, hy * 0.5, 0.0, water_inject_rate, r_app);
+        "INJ", hx * 0.5, hy * 0.5, 0.0, water_inject_rate, r_app);
     test_helpers::add_simple_well(sim, horizon,
-        L"PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
+        "PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
 
     sim.Solve({0.0, t_final});
 
@@ -367,9 +367,9 @@ TEST_CASE("BL validation: front position and monotonicity",
 
     double hx = Lx / Nx;
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0);
+        "INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0);
+        "PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0);
 
     sim.Solve({0.0, t_final});
 
@@ -452,9 +452,9 @@ TEST_CASE("BL validation: CSV export for visual check",
     double hx = Lx / Nx;
     double r_app = std::max(0.2 * hx, 0.2);
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0, r_app);
+        "INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0, r_app);
     test_helpers::add_simple_well(sim, horizon,
-        L"PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0, r_app);
+        "PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0, r_app);
 
     sim.Solve({0.0, t_final});
 

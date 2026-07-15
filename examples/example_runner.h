@@ -114,7 +114,7 @@ inline void run_case(const simulation_cases::SimulationCase& sc,
     std::cerr << "[" << sc.name() << "] running..." << std::flush;
 
     std::ofstream solver_log(out_dir + "/solver.log");
-    std::wofstream wnull("NUL");
+    std::wofstream wnull("NU");
     auto* cout_buf = std::cout.rdbuf(solver_log.rdbuf());
     auto* wcout_buf = std::wcout.rdbuf(wnull.rdbuf());
 

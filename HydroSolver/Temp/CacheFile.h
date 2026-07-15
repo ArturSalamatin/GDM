@@ -18,7 +18,7 @@ public:
 		cache = std::make_unique<char[]>(cache_size);
 	}
 
-	void load(std::wstring file_name)
+	void load(std::string file_name)
 	{
 		if (file_stream == nullptr)
 		{

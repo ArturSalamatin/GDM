@@ -41,21 +41,21 @@ TEST_CASE("Five-spot: runs without crash", "[five-spot][2d][benchmark]") {
 
     // Инжектор в центре (ячейка 10,10): закачка 50 м³/день воды
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", 10.5 * hx, 10.5 * hy,
+        "INJ", 10.5 * hx, 10.5 * hy,
         0.0, -Q_inj_vol * rho_water);
 
     // 4 продюсера в углах: каждый добывает 12.5 м³/день нефти
     test_helpers::add_simple_well(sim, horizon,
-        L"P1", 0.5 * hx, 0.5 * hy,
+        "P1", 0.5 * hx, 0.5 * hy,
         Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P2", 0.5 * hx, (Ny - 0.5) * hy,
+        "P2", 0.5 * hx, (Ny - 0.5) * hy,
         Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P3", (Nx - 0.5) * hx, 0.5 * hy,
+        "P3", (Nx - 0.5) * hx, 0.5 * hy,
         Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy,
+        "P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy,
         Q_prod_vol * rho_oil, 0.0);
 
     std::vector<double> timeMoments = {0.0};
@@ -107,19 +107,19 @@ TEST_CASE("Five-spot: export results for MRST comparison",
     double hx = Lx / Nx, hy = Ly / Ny;
 
     test_helpers::add_simple_well(sim, horizon,
-        L"INJ", 10.5 * hx, 10.5 * hy,
+        "INJ", 10.5 * hx, 10.5 * hy,
         0.0, -Q_inj_vol * rho_water);
     test_helpers::add_simple_well(sim, horizon,
-        L"P1", 0.5 * hx, 0.5 * hy,
+        "P1", 0.5 * hx, 0.5 * hy,
         Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P2", 0.5 * hx, (Ny - 0.5) * hy,
+        "P2", 0.5 * hx, (Ny - 0.5) * hy,
         Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P3", (Nx - 0.5) * hx, 0.5 * hy,
+        "P3", (Nx - 0.5) * hx, 0.5 * hy,
         Q_prod_vol * rho_oil, 0.0);
     test_helpers::add_simple_well(sim, horizon,
-        L"P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy,
+        "P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy,
         Q_prod_vol * rho_oil, 0.0);
 
     std::vector<double> save_times = {0.0, 100.0, 300.0, 500.0};

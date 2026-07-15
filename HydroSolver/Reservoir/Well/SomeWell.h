@@ -66,7 +66,7 @@ namespace reservoir_simulator
 		{
 		protected:
 			WellName itsName;
-			std::wstring itsGUID;
+			std::string itsGUID;
 			double itsWellRadius = 1E-1; // in meters
 			double itsApparentWellRadius;
 			const int B = 2;
@@ -82,7 +82,7 @@ namespace reservoir_simulator
 			double TimeToNextMomemnt(double curTime) const;
 			const WellName& NameWide() const;
 			std::string Name() const;
-			std::wstring Guid() const;
+			std::string Guid() const;
 			double WellRadius() const;
 
 			mer_descriptor::TimeFrame KnownExploitationPeriod() const;
@@ -160,7 +160,7 @@ namespace reservoir_simulator
 				return CurCellIDs().size();
 			}
 			SomeWell() noexcept;
-			SomeWell(const WellName& name, const std::wstring& guid,
+			SomeWell(const WellName& name, const std::string& guid,
 				const WellPosition& intersectionCoords,
 				std::unique_ptr<const mer_descriptor::MER_Data>&& mer,
 				const set_of_points::PerforationsOfWell& perforationsOfWell,
@@ -220,7 +220,7 @@ namespace reservoir_simulator
 
 				for (const auto& mer : (*mer_Data).MERdata())
 				{
-					double time = mer.at(L"time");
+					double time = mer.at("time");
 					auto length = PerforationLengthOverall(time);
 					double debit = DebitOverall(time);
 					// whether well operates, i.e., produces or injects fluid
@@ -244,27 +244,27 @@ namespace reservoir_simulator
 					{ // print MER data
 						const auto& m = mer;
 						o << std::setw(11) << std::left
-							<< m.at(L"oil_v")
+							<< m.at("oil_v")
 							<< std::setw(13) << std::left
-							<< m.at(L"water_v")
+							<< m.at("water_v")
 							<< std::setw(10) << std::left
-							<< m.at(L"oil_m")
+							<< m.at("oil_m")
 							<< std::setw(12) << std::left
-							<< m.at(L"water_m")
+							<< m.at("water_m")
 							<< std::setw(14) << std::left
-							<< m.at(L"pump_water")
+							<< m.at("pump_water")
 							<< std::setw(13) << std::left
-							<< m.at(L"idle_time")
+							<< m.at("idle_time")
 							<< std::setw(5) << std::left
-							<< m.at(L"type")
+							<< m.at("type")
 							<< std::setw(8) << std::left
-							<< m.at(L"is_work");
+							<< m.at("is_work");
 					}
 
 					myfile << std::endl;
 					if (!isPerforated)
 					{
-						std::wcout << L"<<<<<  " << NameWide() << L" at date " << time << std::endl;
+						std::cout << "<<<<<  " << NameWide() << " at date " << time << std::endl;
 						f = true;
 					}
 				}

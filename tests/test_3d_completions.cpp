@@ -200,14 +200,14 @@ make_7well_builders(size_t Nz, double hz_val, double total_time,
 
     auto c_inj1 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(0, 0.0).open_layer(1, 0.0);
-    builders.emplace_back(L"INJ-1", 125.0, 125.0);
+    builders.emplace_back("INJ-1", 125.0, 125.0);
     builders.back()
         .set_completions(c_inj1)
         .inject_water(40.0 * rate_mult).for_days(total_time);
 
     auto c_inj2 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(0, 0.0).open_layer(2, 200.0);
-    builders.emplace_back(L"INJ-2", 375.0, 375.0);
+    builders.emplace_back("INJ-2", 375.0, 375.0);
     builders.back()
         .set_completions(c_inj2)
         .inject_water(30.0 * rate_mult).for_days(total_time);
@@ -215,14 +215,14 @@ make_7well_builders(size_t Nz, double hz_val, double total_time,
     auto c_prod1 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(0, 0.0).open_layer(1, 0.0)
         .open_layer(2, 0.0).open_layer(3, 0.0);
-    builders.emplace_back(L"PROD-1", 375.0, 125.0);
+    builders.emplace_back("PROD-1", 375.0, 125.0);
     builders.back()
         .set_completions(c_prod1)
         .produce_oil(25.0 * rate_mult).for_days(total_time);
 
     auto c_prod2 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(3, 0.0);
-    builders.emplace_back(L"PROD-2", 125.0, 375.0);
+    builders.emplace_back("PROD-2", 125.0, 375.0);
     builders.back()
         .set_completions(c_prod2)
         .produce_oil(15.0 * rate_mult).for_days(total_time);
@@ -230,14 +230,14 @@ make_7well_builders(size_t Nz, double hz_val, double total_time,
     auto c_prod3 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(1, 0.0).open_layer(2, 0.0)
         .close_layer(1, 300.0);
-    builders.emplace_back(L"PROD-3", 250.0, 250.0);
+    builders.emplace_back("PROD-3", 250.0, 250.0);
     builders.back()
         .set_completions(c_prod3)
         .produce_oil(20.0 * rate_mult).for_days(total_time);
 
     auto c_inj3 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(0, 150.0).open_layer(1, 150.0);
-    builders.emplace_back(L"INJ-3", 250.0, 125.0);
+    builders.emplace_back("INJ-3", 250.0, 125.0);
     builders.back()
         .set_completions(c_inj3)
         .shut_in().for_days(150.0)
@@ -245,7 +245,7 @@ make_7well_builders(size_t Nz, double hz_val, double total_time,
 
     auto c_prod4 = test_helpers::WellCompletionBuilder(Nz, hz_val)
         .open_layer(2, 300.0).open_layer(3, 300.0);
-    builders.emplace_back(L"PROD-4", 250.0, 375.0);
+    builders.emplace_back("PROD-4", 250.0, 375.0);
     builders.back()
         .set_completions(c_prod4)
         .shut_in().for_days(300.0)
@@ -319,14 +319,14 @@ TEST_CASE("3D completions: delayed well start",
 
             auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0);
-            builders.emplace_back(L"INJ", 125.0, 250.0);
+            builders.emplace_back("INJ", 125.0, 250.0);
             builders.back()
                 .set_completions(c_inj)
                 .inject_water(30.0).for_days(400.0);
 
             auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 200.0);
-            builders.emplace_back(L"PROD", 375.0, 250.0);
+            builders.emplace_back("PROD", 375.0, 250.0);
             builders.back()
                 .set_completions(c_prod)
                 .shut_in().for_days(200.0)
@@ -360,7 +360,7 @@ TEST_CASE("3D completions: layer closure mid-simulation",
             auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
                 .close_layer(1, 200.0);
-            builders.emplace_back(L"INJ", 250.0, 250.0);
+            builders.emplace_back("INJ", 250.0, 250.0);
             builders.back()
                 .set_completions(c_inj)
                 .inject_water(30.0).for_days(400.0);
@@ -395,7 +395,7 @@ TEST_CASE("3D completions: partial perforation",
 
             auto c = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0);
-            builders.emplace_back(L"INJ", 250.0, 250.0);
+            builders.emplace_back("INJ", 250.0, 250.0);
             builders.back()
                 .set_completions(c)
                 .inject_water(30.0).for_days(200.0);
@@ -414,7 +414,7 @@ TEST_CASE("3D completions: partial perforation",
 
             auto c = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0);
-            builders.emplace_back(L"INJ", 250.0, 250.0);
+            builders.emplace_back("INJ", 250.0, 250.0);
             builders.back()
                 .set_completions(c)
                 .inject_water(30.0).for_days(200.0);
@@ -486,7 +486,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
         {
             auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
                 .open_layer(0, 0.0).open_layer(1, 0.0);
-            builders.emplace_back(L"INJ-1", 125.0, 125.0);
+            builders.emplace_back("INJ-1", 125.0, 125.0);
             const double rates[] = {50, 30, 45, 25, 55, 35, 40};
             double cursor = 0.0;
             int idx = 0;
@@ -503,7 +503,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
         {
             auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
                 .open_layer(0, 0.0).open_layer(2, 730.0);
-            builders.emplace_back(L"INJ-2", 375.0, 375.0);
+            builders.emplace_back("INJ-2", 375.0, 375.0);
             const double rates[] = {35, 20, 40, 50, 30, 45, 25, 55};
             double cursor = 0.0;
             int idx = 0;
@@ -521,7 +521,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
             auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
                 .open_layer(2, 0.0).open_layer(3, 0.0);
-            builders.emplace_back(L"PROD-1", 375.0, 125.0);
+            builders.emplace_back("PROD-1", 375.0, 125.0);
             const double rates[] = {30, 20, 35, 15, 25, 40, 10, 30, 22, 28, 18, 33};
             double cursor = 0.0;
             int idx = 0;
@@ -538,7 +538,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
         {
             auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
                 .open_layer(3, 365.0);
-            builders.emplace_back(L"PROD-2", 125.0, 375.0);
+            builders.emplace_back("PROD-2", 125.0, 375.0);
             builders.back().shut_in().for_days(365.0);
             const double rates[] = {25, 15, 10, 20};
             double cursor = 365.0;
@@ -559,7 +559,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
                 .open_layer(1, 0.0).open_layer(2, 0.0)
                 .close_layer(1, 1095.0)
                 .open_layer(1, 1825.0);
-            builders.emplace_back(L"PROD-3", 250.0, 250.0);
+            builders.emplace_back("PROD-3", 250.0, 250.0);
             const double rates[] = {20, 28, 12, 35, 18, 25, 30, 22};
             double cursor = 0.0;
             int idx = 0;
@@ -576,7 +576,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
         {
             auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
                 .open_layer(0, 730.0).open_layer(1, 730.0);
-            builders.emplace_back(L"INJ-3", 250.0, 125.0);
+            builders.emplace_back("INJ-3", 250.0, 125.0);
             builders.back().shut_in().for_days(730.0);
             const double rates[] = {40, 20, 50, 30, 45, 15, 55, 25, 35, 48};
             double cursor = 730.0;
@@ -595,7 +595,7 @@ TEST_CASE("3D completions: 7-well fine grid 10yr dynamic rates",
         {
             auto c = test_helpers::WellCompletionBuilder(Nz, hz_val)
                 .open_layer(2, 1095.0).open_layer(3, 1095.0);
-            builders.emplace_back(L"PROD-4", 250.0, 375.0);
+            builders.emplace_back("PROD-4", 250.0, 375.0);
             builders.back().shut_in().for_days(1095.0);
             const double rates[] = {15, 22, 30, 18};
             double cursor = 1095.0;

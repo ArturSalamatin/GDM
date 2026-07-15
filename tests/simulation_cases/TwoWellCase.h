@@ -53,11 +53,11 @@ public:
         double prod_y = (Ny / 2 + 0.5) * hy;
 
         test_helpers::add_simple_well(sim, h,
-            L"INJ", inj_x, inj_y,
+            "INJ", inj_x, inj_y,
             0.0, -Q_vol * rho_water);
 
         test_helpers::add_simple_well(sim, h,
-            L"PROD", prod_x, prod_y,
+            "PROD", prod_x, prod_y,
             Q_vol * rho_oil, 0.0);
     }
 

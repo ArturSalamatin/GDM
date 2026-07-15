@@ -56,15 +56,15 @@ namespace reservoir_simulator
 			{
 				return points.back();
 			}
-			std::wstring PrintTrajectory() const
+			std::string PrintTrajectory() const
 			{
-				wchar_t buffer[200];
-				swprintf(buffer, 200, L"%u;", (unsigned int)points.size());
-				std::wstring result{ buffer };
+				char buffer[200];
+				snprintf(buffer, 200, "%u;", (unsigned int)points.size());
+				std::string result{ buffer };
 				for (int l = 0; l < points.size(); l++)
 				{
-					wchar_t buffer[700];
-					swprintf(buffer, 700, L"%+19.11E;%+19.11E;", points[l].x(), points[l].y());
+					char buffer[700];
+					snprintf(buffer, 700, "%+19.11E;%+19.11E;", points[l].x(), points[l].y());
 					result += buffer;
 				}
 				return result;

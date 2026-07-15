@@ -28,7 +28,7 @@ namespace reservoir_simulator
 		public:
 			double record_time(const size_t id) const { 
 				
-				return MERdata()[id].at(L"time"); }
+				return MERdata()[id].at("time"); }
 			size_t recordsSize() const { return MERdata().size(); }
 
 		protected:
@@ -126,23 +126,23 @@ namespace reservoir_simulator
 				for (const auto& m : MER_records)
 				{
 					o << std::setw(8) << std::left
-						<< m.at(L"time")
+						<< m.at("time")
 						<< std::setw(10) << std::left
-						<< m.at(L"oil_v")
+						<< m.at("oil_v")
 						<< std::setw(10) << std::left
-						<< m.at(L"water_v")
+						<< m.at("water_v")
 						<< std::setw(12) << std::left
-						<< m.at(L"oil_m")
+						<< m.at("oil_m")
 						<< std::setw(12) << std::left
-						<< m.at(L"water_m")
+						<< m.at("water_m")
 						<< std::setw(12) << std::left
-						<< m.at(L"pump_water")
+						<< m.at("pump_water")
 						<< std::setw(11) << std::left
-						<< m.at(L"idle_time")
+						<< m.at("idle_time")
 						<< std::setw(5) << std::left
-						<< m.at(L"type")
+						<< m.at("type")
 						<< std::setw(8) << std::left
-						<< m.at(L"is_work")
+						<< m.at("is_work")
 						<< std::endl;
 				}
 			}

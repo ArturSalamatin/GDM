@@ -91,16 +91,16 @@ inline void add_simple_well(
     reservoir_simulator::mer_descriptor::SingleWell_MER_Data mer_data;
     for (int k = 0; k < n_records; ++k) {
         reservoir_simulator::mer_descriptor::SingleMERrecord rec;
-        rec[L"time"] = static_cast<float>((k + 1) * month);
-        rec[L"oil_m"] = static_cast<float>(oil_mass_rate * month);
-        rec[L"water_m"] = static_cast<float>(water_mass_rate * month);
-        rec[L"oil_v"] = static_cast<float>(oil_mass_rate * month / 800.0);
-        rec[L"water_v"] = static_cast<float>(water_mass_rate * month / 1000.0);
-        rec[L"type"] = 1.0f;
-        rec[L"is_work"] = 1.0f;
-        rec[L"worked_time"] = static_cast<float>(month);
-        rec[L"idle_time"] = 0.0f;
-        rec[L"pump_water"] = 0.0f;
+        rec["time"] = static_cast<float>((k + 1) * month);
+        rec["oil_m"] = static_cast<float>(oil_mass_rate * month);
+        rec["water_m"] = static_cast<float>(water_mass_rate * month);
+        rec["oil_v"] = static_cast<float>(oil_mass_rate * month / 800.0);
+        rec["water_v"] = static_cast<float>(water_mass_rate * month / 1000.0);
+        rec["type"] = 1.0f;
+        rec["is_work"] = 1.0f;
+        rec["worked_time"] = static_cast<float>(month);
+        rec["idle_time"] = 0.0f;
+        rec["pump_water"] = 0.0f;
         mer_data.push_back(rec);
     }
 

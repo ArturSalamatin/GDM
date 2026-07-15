@@ -6,14 +6,14 @@
 
 namespace reservoir_simulator
 {
-	std::wstring OutputPath()
+	std::string OutputPath()
 	{
-		return L"ReservoirTestData//";
+		return "ReservoirTestData//";
 	}
 
 	void ReservoirSimulator::PrintWellCoords() const
 	{
-		std::wstring fName{ OutputPath() + L"well_coordinates.txt" };
+		std::string fName{ OutputPath() + "well_coordinates.txt" };
 		std::ofstream myfile{ fName, std::ios_base::out };
 
 		for (const auto& [name, p] :
@@ -214,10 +214,10 @@ namespace reservoir_simulator
 		namespace fs = std::filesystem;
 		fs::create_directories(OutputPath());
 
-		std::wstring 
-			saveOilSaturation_fName = OutputPath() + L"oil_saturation.txt",
-			savePressure_fName = OutputPath() + L"pressure.txt",
-			saveOverallBalance_fName = OutputPath() + L"overall_balance.txt";
+		std::string 
+			saveOilSaturation_fName = OutputPath() + "oil_saturation.txt",
+			savePressure_fName = OutputPath() + "pressure.txt",
+			saveOverallBalance_fName = OutputPath() + "overall_balance.txt";
 
 		printPointVariable(saveOverallBalance_fName,
 			GetOverallBalance(), mode);
@@ -246,7 +246,7 @@ namespace reservoir_simulator
 				j_Z, mode);*/
 	}
 
-	void ReservoirSimulator::printPointVariable(const std::wstring fName,
+	void ReservoirSimulator::printPointVariable(const std::string fName,
 		const std::vector<double>& data,
 		std::ios_base::openmode mode) const
 	{
@@ -264,7 +264,7 @@ namespace reservoir_simulator
 		myfile.close();
 	}
 
-	void ReservoirSimulator::printFieldVariable(const std::wstring fName,
+	void ReservoirSimulator::printFieldVariable(const std::string fName,
 		const std::vector<double>& data,
 		std::ios_base::openmode mode) const
 	{
@@ -284,27 +284,27 @@ namespace reservoir_simulator
 		/////////////////////////////////////////////////
 		// start result sending
 		JSONArray result;
-		//	JSONObject nodes{ { L"name", L"s" } , { L"dimension", L"4" } };
-		//	nodes.push_back({ L"names", JSON::CreateJSON::CreateArray(JSONArray{ L"d0", L"d1a", L"d1b", L"d1vgd" }) });
+		//	JSONObject nodes{ { "name", "s" } , { "dimension", "4" } };
+		//	nodes.push_back({ "names", JSON::CreateJSON::CreateArray(JSONArray{ "d0", "d1a", "d1b", "d1vgd" }) });
 		//	result.push_back(JSON::CreateJSON::CreateObject(nodes));
-		JSONObject nodes{ { L"name", L"p" } , { L"dimension", L"4" },
-				{ L"names", JSON::CreateJSON::CreateArray(JSONArray{ L"d0", L"d1a", L"d1b", L"d1vgd" }) } };
+		JSONObject nodes{ { "name", "p" } , { "dimension", "4" },
+				{ "names", JSON::CreateJSON::CreateArray(JSONArray{ "d0", "d1a", "d1b", "d1vgd" }) } };
 		result.push_back(JSON::CreateJSON::CreateObject(std::move(nodes)));
-//		LogFileSpace::LogFile::WriteLog(L"main", L"pressure_sender", L"success", JSON::CreateJSON::CreateArray(std::move(result)), "");
+//		LogFileSpace::LogFile::WriteLog("main", "pressure_sender", "success", JSON::CreateJSON::CreateArray(std::move(result)), "");
 		/////////////////////////////////////////////////
 
 
 
 
-	//		std::wstring fName = itsPathToConfigFile;
+	//		std::string fName = itsPathToConfigFile;
 	//		std::vector<IRCGEngine::IrapClassicGrid> irap_output_p;
 	//		std::vector<IRCGEngine::IrapClassicGrid> irap_output_s;
 	//		for (int k = 0; k < nz(); k++)
 	//		{
 	//			Grid.Nx()
 
-	//			irap_output_p.emplace_back(fName + L"pressure_" + std::to_wstring(k) + L".irap", xstep(), ystep(), reservoir_bonds());
-	//			irap_output_s.emplace_back(fName + L"saturation_" + std::to_wstring(k) + L".irap", xstep(), ystep(), reservoir_bonds());
+	//			irap_output_p.emplace_back(fName + "pressure_" + std::to_string(k) + ".irap", xstep(), ystep(), reservoir_bonds());
+	//			irap_output_s.emplace_back(fName + "saturation_" + std::to_string(k) + ".irap", xstep(), ystep(), reservoir_bonds());
 
 	////			irap_output_p[k].Add({x, y}, p);
 
@@ -322,27 +322,27 @@ namespace reservoir_simulator
 				double x = Grid(i, 0, 0).X();
 				JSONArray sVals, pVals;
 				JSONObject resultXY;
-				resultXY.push_back({ L"x", std::to_wstring(x) });
-				resultXY.push_back({ L"y", std::to_wstring(y) });
+				resultXY.push_back({ "x", std::to_string(x) });
+				resultXY.push_back({ "y", std::to_string(y) });
 				for (size_t k = 0; k < Grid.Nz(); ++k)
 				{
 					auto l = Grid.ConvertTriple2Global(std::vector<size_t>{ i, j, k });
-					//	sVals.push_back(std::to_wstring(s[l]));
-					pVals.push_back(std::to_wstring((p[l] - 101325 * 167) * 1E-5));
+					//	sVals.push_back(std::to_string(s[l]));
+					pVals.push_back(std::to_string((p[l] - 101325 * 167) * 1E-5));
 
 					//	irap_output_p[k].Add({ x, y }, p[l]);
 				}
-				//	resultXY.push_back({ L"s", JSON::CreateJSON::CreateArray(sVals) });
-				resultXY.push_back({ L"p", JSON::CreateJSON::CreateArray(std::move(pVals)) });
+				//	resultXY.push_back({ "s", JSON::CreateJSON::CreateArray(sVals) });
+				resultXY.push_back({ "p", JSON::CreateJSON::CreateArray(std::move(pVals)) });
 
 				result.push_back(JSON::CreateJSON::CreateObject(std::move(resultXY)));
 			}
 		}
-	//	LogFileSpace::LogFile::WriteLog(L"class_ReservoirSimulator", L"method_pressure_json", L"success",
+	//	LogFileSpace::LogFile::WriteLog("class_ReservoirSimulator", "method_pressure_json", "success",
 	//		JSON::CreateJSON::CreateArray(std::move(result)));
 
-		//		UniversalWriter::ASCIWriter huinya(path + L"\\dam\\gdm\\x_y_s_p.xyz");
-		//		huinya.Write(L"X\tY\tS0\tS1\tS2\tS3");
+		//		UniversalWriter::ASCIWriter huinya(path + "\\dam\\gdm\\x_y_s_p.xyz");
+		//		huinya.Write("X\tY\tS0\tS1\tS2\tS3");
 
 	}
 
@@ -452,15 +452,15 @@ namespace reservoir_simulator
 	}
 
 	//////////// FILE IN/OUT
-	void ReservoirSimulator::SaveFlowField2File(const std::wstring& /*configPath*/, const std::wstring& /*fileName*/)
+	void ReservoirSimulator::SaveFlowField2File(const std::string& /*configPath*/, const std::string& /*fileName*/)
 	{
 		// TODO: re-implement without legacy UniversalSVWriter (encoding issues)
 	}
 
-	void ReservoirSimulator::SaveFlowField2File_bin(const std::wstring& configPath, const std::wstring& fileName,
+	void ReservoirSimulator::SaveFlowField2File_bin(const std::string& configPath, const std::string& fileName,
 		double saturation_date, double startDate, double endDate, int frameCount)
 	{
-		const std::wstring ext = L".bin";
+		const std::string ext = ".bin";
 
 		namespace fs = std::filesystem;
 		try {
@@ -471,8 +471,8 @@ namespace reservoir_simulator
 		catch (std::exception& e)
 		{
 			reservoir_simulator::WarningFactory::NoFolderCreated();
-			/*LogFileSpace::LogFile::WriteLog(L"class_ReservoirSimulator", L"method_SaveFlowField2File",
-				L"warning", L"Could not create folder dam//gdm", e.what());*/
+			/*LogFileSpace::LogFile::WriteLog("class_ReservoirSimulator", "method_SaveFlowField2File",
+				"warning", "Could not create folder dam//gdm", e.what());*/
 		}
 
 		std::ofstream wstream(fileName + ext, std::ios::binary);
@@ -491,10 +491,10 @@ namespace reservoir_simulator
 		wstream.close();
 	}
 
-	void ReservoirSimulator::SaveSaturationPressure_bin(const std::wstring& configPath, const std::wstring& fileName,
+	void ReservoirSimulator::SaveSaturationPressure_bin(const std::string& configPath, const std::string& fileName,
 		double saturation_date, double startDate, double endDate, int frameCount)
 	{
-		const std::wstring ext = L".bin";
+		const std::string ext = ".bin";
 
 		namespace fs = std::filesystem;
 		try {
@@ -505,8 +505,8 @@ namespace reservoir_simulator
 		catch (std::exception&)
 		{
 			reservoir_simulator::WarningFactory::NoFolderCreated();
-			/*LogFileSpace::LogFile::WriteLog(L"class_ReservoirSimulator", L"method_SaveFlowField2File",
-				L"warning", L"Could not create folder dam//gdm.");*/
+			/*LogFileSpace::LogFile::WriteLog("class_ReservoirSimulator", "method_SaveFlowField2File",
+				"warning", "Could not create folder dam//gdm.");*/
 		}
 
 		std::ofstream wstream(fileName + ext, std::ios::binary);
@@ -526,13 +526,13 @@ namespace reservoir_simulator
 
 	}
 
-	void ReservoirSimulator::LoadFlowFieldFromFile(const std::wstring& /*fileName*/)
+	void ReservoirSimulator::LoadFlowFieldFromFile(const std::string& /*fileName*/)
 	{
 		// TODO: re-implement without legacy UniversalSVParser (encoding issues)
 	}
 
 
-	void ReservoirSimulator::LoadFlowFieldFromFile_bin(const std::wstring& fileName)
+	void ReservoirSimulator::LoadFlowFieldFromFile_bin(const std::string& fileName)
 	{
 		std::ifstream wstream(fileName, std::ios::binary);
 
