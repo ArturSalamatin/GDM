@@ -62,6 +62,7 @@ date: 2026-06-27
 - [[debt-057 time-integrator]] — DEBT-057: выделить TimeIntegrator из ReservoirSimulator (этап 4 DEBT-003)
 - [[res-007 bicgstab-vs-lgmres]] — RES-007: CPR+BiCGStab vs CPR+LGMRES — может ли BiCGStab стать default
 - [[debt-004 remove-db-factories]] — DEBT-004: удаление мёртвых DB-фабрик и PostgreSQL-зависимого слоя
+- [[debt-002 wstring-to-string]] — DEBT-002: wstring → string (UTF-8) в ядре
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
