@@ -9,7 +9,7 @@ date: 2026-06-27
 
 Наукоёмкий симулятор для моделирования работы нефтяного месторождения с множеством скважин в двухфазном приближении нефть–вода (обе фазы несжимаемые). Язык разработки — C++23, сборка CMake под Visual Studio 2022.
 
-**Статус проекта:** 296 тестов (Catch2), все проходят в Release (~119 сек). CPR-солвер с True-IMPES weights, 3D сетки, переменный дебит, 6 standalone examples. AMGCL как git submodule (форк). Текущая фаза: стабилизация ядра.
+**Статус проекта:** 310 тестов (Catch2), все проходят в Release (~99 сек). CPR_BICGSTAB с True-IMPES weights, 3D сетки, переменный дебит, 6 standalone examples. AMGCL как git submodule (форк). Текущая фаза: стабилизация ядра.
 
 ---
 
@@ -226,3 +226,4 @@ date: 2026-06-27
 - [[2026-07-09 solver-factory-debt-053]]
 - [[2026-07-13 feat-011-sw0-diagonal-regularization]]
 - [[2026-07-15 res-007-bicgstab-vs-lgmres]]
+- [[2026-07-15 debt-004-remove-db-factories]]
