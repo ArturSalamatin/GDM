@@ -6,7 +6,7 @@ date: 2026-07-15
 issue: DEBT-004
 github: 28
 branch: refactor/debt-004/remove-db-factories
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-15
   pass: 2
