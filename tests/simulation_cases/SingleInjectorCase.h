@@ -47,7 +47,7 @@ public:
         double cx = (Nx / 2 + 0.5) * hx;
         double cy = (Ny / 2 + 0.5) * hy;
         test_helpers::add_simple_well(sim, h,
-            L"INJ", cx, cy,
+            "INJ", cx, cy,
             0.0, -Q_inj_vol * rho_water);
     }
 

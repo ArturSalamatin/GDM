@@ -237,7 +237,7 @@ namespace math_routines
 			)
 			result.push_back(P);
 		if (result.size() < 151)
-			std::wcout << result.size() << std::endl;
+			std::cout << result.size() << std::endl;
 	}
 
 	template<typename Field, typename Functor>

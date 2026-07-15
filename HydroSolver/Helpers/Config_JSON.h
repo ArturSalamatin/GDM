@@ -8,32 +8,32 @@ namespace reservoir_simulator
 	{
 		class Config_JSON : public Config
 		{
-			typedef std::map<std::wstring, std::unique_ptr<JSON::IJObject>> JSONtree;
+			typedef std::map<std::string, std::unique_ptr<JSON::IJObject>> JSONtree;
 
 		protected:
 			//	INIReader reader;
 			JSONtree values;
-			const std::wstring folderName = L"MatLab\\";
+			const std::string folderName = "MatLab\\";
 
 		public:
-			Config_JSON(std::wstring fileName) : Config()
+			Config_JSON(std::string fileName) : Config()
 			{
 				if (fileName.back() != '\\')
 					fileName += '\\';
 
 				try {
-					values = JSON::JSONParser(fileName + L"config.json").Parse()->Value();
+					values = JSON::JSONParser(fileName + "config.json").Parse()->Value();
 
-					anomaly_date_start = PathUtils::Utils::ConvertDateToExcelDate(GetLeave(L"temporal_parameters", L"anomaly_date_start"));
-					anomaly_date_end = PathUtils::Utils::ConvertDateToExcelDate(GetLeave(L"temporal_parameters", L"anomaly_date_end"));
-					saturation_field_date = PathUtils::Utils::ConvertDateToExcelDate(GetLeave(L"temporal_parameters", L"saturation_field_date"));
-					number_of_snapshots = (int)GetValue(L"temporal_parameters", L"number_of_snapshots");
-					anomaly_detection_interval = GetValue(L"anomaly", L"anomaly_detection_interval");
+					anomaly_date_start = PathUtils::Utils::ConvertDateToExcelDate(GetLeave("temporal_parameters", "anomaly_date_start"));
+					anomaly_date_end = PathUtils::Utils::ConvertDateToExcelDate(GetLeave("temporal_parameters", "anomaly_date_end"));
+					saturation_field_date = PathUtils::Utils::ConvertDateToExcelDate(GetLeave("temporal_parameters", "saturation_field_date"));
+					number_of_snapshots = (int)GetValue("temporal_parameters", "number_of_snapshots");
+					anomaly_detection_interval = GetValue("anomaly", "anomaly_detection_interval");
 					// at least two snapshopts must be saved, thus we can show the progress bar
 					if (number_of_snapshots < 2)
 					{
 						number_of_snapshots = 2;
-						LogFileSpace::LogFile::WriteLog(L"class_Config_JSON", L"method_Config_JSON", L"warning", L"number_of_snapshots in config file is set to 2. Revise confg file.");
+						LogFileSpace::LogFile::WriteLog("class_Config_JSON", "method_Config_JSON", "warning", "number_of_snapshots in config file is set to 2. Revise confg file.");
 					}
 
 					std::string msg{ "temporal_parameters section in config file is wrong." };
@@ -65,20 +65,20 @@ namespace reservoir_simulator
 					throw std::runtime_error(std::string{ "Read config error. " + std::string{e.what()} }.data());
 				}
 			}
-			virtual  std::wstring GetWideProjectPath() {
-				auto result = GetLeave(L"model", L"path");
+			virtual  std::string GetWideProjectPath() {
+				auto result = GetLeave("model", "path");
 				if (result.back() != '\\')
 					result += '\\';
 				return  result;
 			}
 
-			virtual std::vector<std::vector<std::wstring>> LayerAggregation()
+			virtual std::vector<std::vector<std::string>> LayerAggregation()
 			{
-				auto val = values[L"model"]->Value()[L"layer_aggregation"]->Value();
-				std::vector < std::vector < std::wstring>> layers;
+				auto val = values["model"]->Value()["layer_aggregation"]->Value();
+				std::vector < std::vector < std::string>> layers;
 				for (const auto& pohui : val)
 				{
-					layers.push_back(std::vector<std::wstring>());
+					layers.push_back(std::vector<std::string>());
 					for (const auto& poh : pohui.second->Value())
 					{
 						auto val = poh.second->GetSrc();
@@ -94,70 +94,70 @@ namespace reservoir_simulator
 				return layers;
 			}
 
-			virtual double ExtBoundaryPressure() { return UnitsConversionFactors::pressureConversion * GetValue(L"common_properties", L"external_bundary_pressure"); }
+			virtual double ExtBoundaryPressure() { return UnitsConversionFactors::pressureConversion * GetValue("common_properties", "external_bundary_pressure"); }
 			virtual PhaseProperties WaterPhaseProperties()
 			{
-				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue(L"phase_properties", L"viscosity", L"0"),
-					UnitsConversionFactors::densityConversion * GetValue(L"phase_properties", L"density", L"0"),
-					UnitsConversionFactors::compressibilityConversion * GetValue(L"phase_properties", L"compressibility", L"0"),
-					UnitsConversionFactors::saturationConversion * GetValue(L"phase_properties", L"residual", L"0"),
-					UnitsConversionFactors::pressureConversion * GetValue(L"phase_properties", L"reference_pressure_for_compressibility", L"0"));
+				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "0"),
+					UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "0"),
+					UnitsConversionFactors::compressibilityConversion * GetValue("phase_properties", "compressibility", "0"),
+					UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "0"),
+					UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "0"));
 			}
 			virtual PhaseProperties OilPhaseProperties()
 			{
-				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue(L"phase_properties", L"viscosity", L"1"),
-					UnitsConversionFactors::densityConversion * GetValue(L"phase_properties", L"density", L"1"),
-					UnitsConversionFactors::compressibilityConversion * GetValue(L"phase_properties", L"compressibility", L"1"),
-					UnitsConversionFactors::saturationConversion * GetValue(L"phase_properties", L"residual", L"1"),
-					UnitsConversionFactors::pressureConversion * GetValue(L"phase_properties", L"reference_pressure_for_compressibility", L"1"));
+				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "1"),
+					UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "1"),
+					UnitsConversionFactors::compressibilityConversion * GetValue("phase_properties", "compressibility", "1"),
+					UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "1"),
+					UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "1"));
 			}
-			virtual double RequiredNewtonTol() { return GetValue(L"scheme_parameters", L"required_Newton_Tolerance"); }
-			virtual double g() { return GetValue(L"common_properties", L"freeFall_acceleration"); }
-			virtual double StartTimeStep() { return GetValue(L"scheme_parameters", L"initial_time_step"); }
+			virtual double RequiredNewtonTol() { return GetValue("scheme_parameters", "required_Newton_Tolerance"); }
+			virtual double g() { return GetValue("common_properties", "freeFall_acceleration"); }
+			virtual double StartTimeStep() { return GetValue("scheme_parameters", "initial_time_step"); }
 
 
-			virtual double VelocityMultiplier() { return GetValue(L"trajectories", L"velocity_multiplier"); }
+			virtual double VelocityMultiplier() { return GetValue("trajectories", "velocity_multiplier"); }
 			virtual double InitialTrajectoryDistance()
 			{
-				auto val = GetValue(L"trajectories", L"start_distance");
+				auto val = GetValue("trajectories", "start_distance");
 				val = (val < 0.0) ? 0.5 : val;
 				return val;
 			}
-			//		virtual double TrajectoryCount() { return GetValue(L"trajectories", L"number_of_trajectories_from_well"); }
-			virtual double StartSignalRollbackTime() { return GetValue(L"trajectories", L"start_signal_rollback_time"); }
-			virtual double EndSignalRollbackTime() { return GetValue(L"trajectories", L"end_signal_rollback_time"); }
+			//		virtual double TrajectoryCount() { return GetValue("trajectories", "number_of_trajectories_from_well"); }
+			virtual double StartSignalRollbackTime() { return GetValue("trajectories", "start_signal_rollback_time"); }
+			virtual double EndSignalRollbackTime() { return GetValue("trajectories", "end_signal_rollback_time"); }
 
-			virtual int NewtonMaxIterCount() { return (int)GetValue(L"scheme_parameters", L"newton_max_iteration_count"); }
-			virtual double AMG_RelTol() { return GetValue(L"scheme_parameters", L"AMG_RelTol"); }
-			virtual double AMG_AbsTol() { return GetValue(L"scheme_parameters", L"AMG_AbsTol"); }
-			virtual std::wstring WaterSaturation_fileName() { return folderName + GetLeave(L"save_files", L"water_saturation"); }
-			virtual std::wstring OilSaturation_fileName() { return folderName + GetLeave(L"save_files", L"oil_saturation"); }
-			virtual std::wstring Pressure_fileName() { return folderName + GetLeave(L"save_files", L"pressure"); }
-			virtual std::wstring OverallBalance_fileName() { return folderName + GetLeave(L"save_files", L"overall_oil_balance"); }
+			virtual int NewtonMaxIterCount() { return (int)GetValue("scheme_parameters", "newton_max_iteration_count"); }
+			virtual double AMG_RelTol() { return GetValue("scheme_parameters", "AMG_RelTol"); }
+			virtual double AMG_AbsTol() { return GetValue("scheme_parameters", "AMG_AbsTol"); }
+			virtual std::string WaterSaturation_fileName() { return folderName + GetLeave("save_files", "water_saturation"); }
+			virtual std::string OilSaturation_fileName() { return folderName + GetLeave("save_files", "oil_saturation"); }
+			virtual std::string Pressure_fileName() { return folderName + GetLeave("save_files", "pressure"); }
+			virtual std::string OverallBalance_fileName() { return folderName + GetLeave("save_files", "overall_oil_balance"); }
 
 
-			virtual double MinCellThickness() { return GetValue(L"common_properties", L"min_cell_thickness"); }
-			virtual double MinPorosity() { return GetValue(L"common_properties", L"min_cell_porosity"); }
-			virtual double MinPermeability() { return UnitsConversionFactors::permeabilityConversion * GetValue(L"common_properties", L"min_cell_permeability"); }
+			virtual double MinCellThickness() { return GetValue("common_properties", "min_cell_thickness"); }
+			virtual double MinPorosity() { return GetValue("common_properties", "min_cell_porosity"); }
+			virtual double MinPermeability() { return UnitsConversionFactors::permeabilityConversion * GetValue("common_properties", "min_cell_permeability"); }
 
-			std::wstring GetLeave(std::wstring section, std::wstring name)
+			std::string GetLeave(std::string section, std::string name)
 			{
 				auto val = values[section]->Value()[name]->GetSrc();
 				return val;
 			}
-			std::wstring GetLeave(std::wstring section, std::wstring name, std::wstring id)
+			std::string GetLeave(std::string section, std::string name, std::string id)
 			{
 				auto val = values[section]->Value()[id]->Value()[name]->GetSrc();
 				return val;
 			}
 
-			double GetValue(std::wstring section, std::wstring name)
+			double GetValue(std::string section, std::string name)
 			{
 				//		auto result = GetLeave(section, name);
 				auto result0 = GetLeave(section, name);
 
 				//auto xx = result.find(L'.');
-				//if (xx != std::wstring::npos)
+				//if (xx != std::string::npos)
 				//{
 				//	result[xx] = L'.';
 				//	auto res = stod(result);
@@ -170,7 +170,7 @@ namespace reservoir_simulator
 
 				return stod(result0);
 			}
-			double GetValue(std::wstring section, std::wstring name, std::wstring id)
+			double GetValue(std::string section, std::string name, std::string id)
 			{
 
 				auto result = GetLeave(section, name, id);

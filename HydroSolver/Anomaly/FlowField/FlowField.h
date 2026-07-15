@@ -26,9 +26,9 @@ namespace reservoir_simulator
 
 		public:
 
-			static std::vector<phasePortrait::Point> DistributeStartPoints_radial(const std::map<std::wstring, double> data)
+			static std::vector<phasePortrait::Point> DistributeStartPoints_radial(const std::map<std::string, double> data)
 			{
-				double x0 = data.at(L"x0"), y0 = data.at(L"y0"), r = data.at(L"r"), count = data.at(L"count");
+				double x0 = data.at("x0"), y0 = data.at("y0"), r = data.at("r"), count = data.at("count");
 
 				constexpr auto PI = 3.141592653589793;
 				std::vector<reservoir_simulator::phasePortrait::Point> startPoints;
@@ -60,12 +60,12 @@ namespace reservoir_simulator
 				return startPoints;
 			}
 
-			static std::vector<phasePortrait::Point> DistributeStartPoints_rectangle(const std::map<std::wstring, double> data)
+			static std::vector<phasePortrait::Point> DistributeStartPoints_rectangle(const std::map<std::string, double> data)
 			{
-				double xmin = data.at(L"xmin");
-				double ymin = data.at(L"ymin");
-				double xmax = data.at(L"xmax");
-				double ymax = data.at(L"ymax");
+				double xmin = data.at("xmin");
+				double ymin = data.at("ymin");
+				double xmax = data.at("xmax");
+				double ymax = data.at("ymax");
 
 				int n = 15;
 				double hx = (xmax - xmin) / (n - 1);
@@ -101,18 +101,18 @@ namespace reservoir_simulator
 					trajectoryEnsemble[i].FollowTrajectory_fixed_time(endTime, field, dt, fixed_time);
 			}
 
-			void improve_discretization(double endTime, SomeFlowField& field, double dt, double fixed_time, std::map<std::wstring, double> data)
+			void improve_discretization(double endTime, SomeFlowField& field, double dt, double fixed_time, std::map<std::string, double> data)
 			{
 				constexpr auto PI = 3.141592653589793;
 				std::vector<double> phi{ 0,PI,2 * PI };
 				phi.reserve(100);
 
-				double r = data[L"r"];
-				double x0 = data[L"x0"];
-				double y0 = data[L"y0"];
-				double dist_abs = data[L"dist_abs"];
-				double dist_rel = data[L"dist_rel"];
-				double t0 = data[L"start_time"];
+				double r = data["r"];
+				double x0 = data["x0"];
+				double y0 = data["y0"];
+				double dist_abs = data["dist_abs"];
+				double dist_rel = data["dist_rel"];
+				double t0 = data["start_time"];
 
 				int tr_id = 0; // start with the first trajectory
 				double dist_forward = 0; // must be less than 1 meter
@@ -194,10 +194,10 @@ namespace reservoir_simulator
 				return trajectoryEnsemble[i];
 			}
 
-			/*std::wstring PrintPhasePortrait() const
+			/*std::string PrintPhasePortrait() const
 			{
 				int trCount = 0;
-				std::wstring result;
+				std::string result;
 				for (int i = 0; i < NumberOfTrajectories(); i++)
 				{
 					if (trajectoryEnsemble[i].size() > 1)
@@ -207,9 +207,9 @@ namespace reservoir_simulator
 					}
 				}
 
-				wchar_t buffer[30];
-				swprintf(buffer, 30, L"%u;", trCount);
-				std::wstring result0{ buffer };
+				char buffer[30];
+				snprintf(buffer, 30, "%u;", trCount);
+				std::string result0{ buffer };
 
 				return result0 + result;
 			}*/
@@ -240,7 +240,7 @@ namespace reservoir_simulator
 		{
 		public:
 			using FlowFieldSequence = std::vector<FlowField>;
-			using Features = struct { std::wstring layer_name; };
+			using Features = struct { std::string layer_name; };
 		protected:
 			SomeFlowField::Ptr field_ptr;
 			Features features;
@@ -251,9 +251,9 @@ namespace reservoir_simulator
 
 		public:
 
-			const std::wstring& layer_name() { return features.layer_name; }
+			const std::string& layer_name() { return features.layer_name; }
 
-			FlowField(const SomeFlowField::Ptr& f, const std::wstring& layer_name) :field_ptr{ f }, features{ layer_name } {}
+			FlowField(const SomeFlowField::Ptr& f, const std::string& layer_name) :field_ptr{ f }, features{ layer_name } {}
 
 			//void FollowPhasePortrait(const std::vector<phasePortrait::Point>& pVector, double startTime, double endTime, double dt)
 			//{
@@ -267,7 +267,7 @@ namespace reservoir_simulator
 			//}
 
 			geos_polygon FollowPhasePortrait_fixed_time(std::vector<phasePortrait::Point>&& pVector,
-				double startTime, double endTime, double dt, double fixed_time, std::map<std::wstring, double> data)
+				double startTime, double endTime, double dt, double fixed_time, std::map<std::string, double> data)
 			{
 				dt = abs(dt); // assume we go forward in time
 				if (endTime < startTime) dt *= (-1); // the trajectory is followed back in time
@@ -281,15 +281,15 @@ namespace reservoir_simulator
 				return end_elem.create_geos_polygon();
 			}
 
-			/*void FollowPhasePortrait(std::map<std::wstring, double> data, double startTime, double endTime, double dt)
+			/*void FollowPhasePortrait(std::map<std::string, double> data, double startTime, double endTime, double dt)
 			{
 				FollowPhasePortrait(PhasePortrait::DistributeStartPoints_radial(data), 
 					startTime, endTime, dt);
 			}*/
 
-			geos_polygon FollowPhasePortrait_fixed_time(std::map<std::wstring, double> data, double startTime, double endTime, double fixed_time)
+			geos_polygon FollowPhasePortrait_fixed_time(std::map<std::string, double> data, double startTime, double endTime, double fixed_time)
 			{
-				double dt = data.at(L"time_step");
+				double dt = data.at("time_step");
 				return FollowPhasePortrait_fixed_time(std::move(PhasePortrait::DistributeStartPoints_radial(data)),
 					startTime, endTime, dt, fixed_time, data);
 			}
@@ -300,7 +300,7 @@ namespace reservoir_simulator
 					startTime, endTime, dt);
 			}*/
 
-			/*void FollowPhasePortrait(double startTime, double endTime, double dt, const std::map<std::wstring, double> data)
+			/*void FollowPhasePortrait(double startTime, double endTime, double dt, const std::map<std::string, double> data)
 			{
 				FollowPhasePortrait(PhasePortrait::DistributeStartPoints_rectangle(data),
 					startTime, endTime, dt);
@@ -311,10 +311,10 @@ namespace reservoir_simulator
 			//	return phasePortraitEnsemble;
 			//}
 
-			/*std::wstring PrintPhasePortrait()
+			/*std::string PrintPhasePortrait()
 			{
-				std::wstring result;
-				result = std::to_wstring(phasePortraitEnsemble.size()) + L";";
+				std::string result;
+				result = std::to_string(phasePortraitEnsemble.size()) + ";";
 				for (int i = 0; i < phasePortraitEnsemble.size(); i++)
 					result += phasePortraitEnsemble[i].PrintPhasePortrait();
 				return result;

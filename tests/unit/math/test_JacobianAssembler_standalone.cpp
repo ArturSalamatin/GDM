@@ -68,8 +68,8 @@ TEST_CASE("JacobianAssembler: bitwise match with wells 5x5x1",
     auto np = test_helpers::default_num_params();
     auto sim = ReservoirSimulator(np, horizon, horizon.oil, horizon.water, horizon.other);
 
-    test_helpers::add_simple_well(sim, horizon, L"INJ", 50.0, 250.0, 0.0, -10.0);
-    test_helpers::add_simple_well(sim, horizon, L"PROD", 450.0, 250.0, 5.0, 0.0);
+    test_helpers::add_simple_well(sim, horizon, "INJ", 50.0, 250.0, 0.0, -10.0);
+    test_helpers::add_simple_well(sim, horizon, "PROD", 450.0, 250.0, 5.0, 0.0);
 
     compare_assembly(sim, 0.1, 0.1);
 }

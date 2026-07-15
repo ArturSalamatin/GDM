@@ -17,7 +17,7 @@ namespace reservoir_simulator
 			size_t i = 0;
 			while (
 				(i < MER_records.size()) &&
-				((MER_records[i].at(L"oil_v") + MER_records[i].at(L"water_v")) == 0.0)
+				((MER_records[i].at("oil_v") + MER_records[i].at("water_v")) == 0.0)
 				)
 				i++;
 			if (i == MER_records.size())
@@ -28,13 +28,13 @@ namespace reservoir_simulator
 			}
 			if (i > 0)
 			{
-				monthGap = MER_records[i].at(L"time") - MER_records[i - 1].at(L"time");
+				monthGap = MER_records[i].at("time") - MER_records[i - 1].at("time");
 				MER_records.erase(MER_records.begin(), MER_records.begin() + i);
 				//	LogFileSpace::LogFile::Well_InitialMER_RecordsRemoved(Name(), i);
 			}
 
 			int j = (int)MER_records.size() - 1;
-			while ((MER_records[j].at(L"oil_v") + MER_records[j].at(L"water_v")) == 0.0)
+			while ((MER_records[j].at("oil_v") + MER_records[j].at("water_v")) == 0.0)
 				j--;
 			if (j < MER_records.size() - 1)
 			{
@@ -110,8 +110,8 @@ namespace reservoir_simulator
 				return;
 			}
 
-			curFluidDebit = FluidDebit{ lastUsed_MER_record().at(L"oil_m"),
-				lastUsed_MER_record().at(L"water_m") } /
+			curFluidDebit = FluidDebit{ lastUsed_MER_record().at("oil_m"),
+				lastUsed_MER_record().at("water_m") } /
 				MER_record_time_interval(timeMoment) *
 				conversion.convert2SI();
 		}
@@ -126,24 +126,24 @@ namespace reservoir_simulator
 				MER_records.begin(), MER_records.end(),
 				[](const SingleMERrecord& a, const SingleMERrecord& b) -> bool
 				{
-					return a.at(L"time") < b.at(L"time");
+					return a.at("time") < b.at("time");
 				}
 			);
 			// delete records corresponding to the same date
 			for (size_t l = 1; l < MER_records.size(); ++l)
 			{
-				if (MER_records[l - 1].at(L"time") == MER_records[l].at(L"time"))
+				if (MER_records[l - 1].at("time") == MER_records[l].at("time"))
 				{// two records at same date
 					WarningFactory::MERrecordsAtSameDate(itsName, MER_records[l - 1], MER_records[l]);
 					// delete one record
-					if (MER_records[l - 1].at(L"oil_v") + MER_records[l - 1].at(L"water_v") == 0.0)
+					if (MER_records[l - 1].at("oil_v") + MER_records[l - 1].at("water_v") == 0.0)
 					{
 						MER_records.erase(MER_records.begin() + l - 1);
 						WarningFactory::DuplicateMERrecordWithZeroDebitDeleted();
 						--l;
 						continue;
 					}
-					if (MER_records[l].at(L"oil_v") + MER_records[l].at(L"water_v") == 0.0)
+					if (MER_records[l].at("oil_v") + MER_records[l].at("water_v") == 0.0)
 					{
 						MER_records.erase(MER_records.begin() + l);
 						WarningFactory::DuplicateMERrecordWithZeroDebitDeleted();
@@ -153,15 +153,15 @@ namespace reservoir_simulator
 					{ // sumup two records
 						auto r1 = MER_records[l - 1];
 						auto r2 = MER_records[l];
-						if (r1.at(L"type") == r2.at(L"type") &&
-							r1.at(L"is_work") == r2.at(L"is_work"))
+						if (r1.at("type") == r2.at("type") &&
+							r1.at("is_work") == r2.at("is_work"))
 						{
-							r1.at(L"oil_v") += r2.at(L"oil_v");
-							r1.at(L"water_v") += r2.at(L"water_v");
-							r1.at(L"oil_m") += r2.at(L"oil_m");
-							r1.at(L"water_m") += r2.at(L"water_m");
-							r1.at(L"pump_water") += r2.at(L"pump_water");
-							r1.at(L"idle_time") += r2.at(L"idle_time");
+							r1.at("oil_v") += r2.at("oil_v");
+							r1.at("water_v") += r2.at("water_v");
+							r1.at("oil_m") += r2.at("oil_m");
+							r1.at("water_m") += r2.at("water_m");
+							r1.at("pump_water") += r2.at("pump_water");
+							r1.at("idle_time") += r2.at("idle_time");
 							MER_records[l - 1] = r1;
 							MER_records.erase(MER_records.begin() + l);
 
@@ -197,11 +197,7 @@ namespace reservoir_simulator
 
 		std::string MER_Data::Name() const
 		{
-			std::string str;
-			size_t size;
-			str.resize(itsName.length());
-			wcstombs_s(&size, &str[0], str.size() + 1, itsName.c_str(), itsName.size());
-			return str;
+			return itsName;
 		}
 	} // mer_descriptor
 } // reservoir_simulator

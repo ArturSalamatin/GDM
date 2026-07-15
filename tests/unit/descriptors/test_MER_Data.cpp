@@ -10,15 +10,15 @@ static SingleMERrecord make_record(float time, float oil_v, float water_v,
                                    float pump_water = 0.0f, float idle_time = 0.0f,
                                    float type = 1.0f, float is_work = 1.0f) {
     return {
-        {L"time", time},
-        {L"oil_v", oil_v},
-        {L"water_v", water_v},
-        {L"oil_m", oil_m},
-        {L"water_m", water_m},
-        {L"pump_water", pump_water},
-        {L"idle_time", idle_time},
-        {L"type", type},
-        {L"is_work", is_work}
+        {"time", time},
+        {"oil_v", oil_v},
+        {"water_v", water_v},
+        {"oil_m", oil_m},
+        {"water_m", water_m},
+        {"pump_water", pump_water},
+        {"idle_time", idle_time},
+        {"type", type},
+        {"is_work", is_work}
     };
 }
 
@@ -35,7 +35,7 @@ TEST_CASE("MER_Data: construct with sorted records",
         make_record(60.0f, 12.0f, 6.0f, 9600.0f, 6000.0f),
         make_record(90.0f, 8.0f, 3.0f, 6400.0f, 3000.0f)
     };
-    std::wstring name = L"TestWell";
+    std::string name = "TestWell";
     MER_Data md(name, data);
 
     CHECK(md.recordsSize() == 3);
@@ -50,7 +50,7 @@ TEST_CASE("MER_Data: unsorted records get sorted by time",
         make_record(30.0f, 10.0f, 5.0f, 8000.0f, 5000.0f),
         make_record(60.0f, 12.0f, 6.0f, 9600.0f, 6000.0f)
     };
-    std::wstring name = L"TestWell";
+    std::string name = "TestWell";
     MER_Data md(name, data);
 
     CHECK(md.firstRecordDate() == Approx(30.0));
@@ -63,7 +63,7 @@ TEST_CASE("MER_Data: debitPartial returns mass rate",
         make_record(30.0f, 10.0f, 5.0f, 300.0f, 150.0f),
         make_record(60.0f, 12.0f, 6.0f, 360.0f, 180.0f)
     };
-    std::wstring name = L"W1";
+    std::string name = "W1";
     MER_Data md(name, data);
 
     auto& debit = md.debitPartial(45.0);
@@ -79,7 +79,7 @@ TEST_CASE("MER_Data: CleanMER_record removes leading zero-debit",
         make_record(90.0f, 10.0f, 5.0f, 8000.0f, 5000.0f),
         make_record(120.0f, 12.0f, 6.0f, 9600.0f, 6000.0f)
     };
-    std::wstring name = L"W2";
+    std::string name = "W2";
     MER_Data md(name, data);
     md.CleanMER_record();
 
@@ -93,7 +93,7 @@ TEST_CASE("MER_Data: knownExploitationPeriod covers data range",
         make_record(100.0f, 10.0f, 5.0f, 8000.0f, 5000.0f),
         make_record(200.0f, 12.0f, 6.0f, 9600.0f, 6000.0f)
     };
-    std::wstring name = L"W3";
+    std::string name = "W3";
     MER_Data md(name, data);
 
     auto period = md.knownExploitationPeriod();

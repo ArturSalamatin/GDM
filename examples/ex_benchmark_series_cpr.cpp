@@ -84,38 +84,38 @@ make_benchmark_wells()
 
     auto c_inj1 = test_helpers::WellCompletionBuilder(BNz, Bhz)
         .open_layer(0, 0.0).open_layer(1, 0.0);
-    builders.emplace_back(L"INJ-1", 125.0, 125.0);
+    builders.emplace_back("INJ-1", 125.0, 125.0);
     builders.back().set_completions(c_inj1)
         .inject_water(40.0 * rm).for_days(T);
 
     auto c_inj2 = test_helpers::WellCompletionBuilder(BNz, Bhz)
         .open_layer(0, 0.0);
-    builders.emplace_back(L"INJ-2", 375.0, 375.0);
+    builders.emplace_back("INJ-2", 375.0, 375.0);
     builders.back().set_completions(c_inj2)
         .inject_water(30.0 * rm).for_days(T);
 
     auto c_prod1 = test_helpers::WellCompletionBuilder(BNz, Bhz)
         .open_layer(0, 0.0).open_layer(1, 0.0)
         .open_layer(2, 0.0).open_layer(3, 0.0);
-    builders.emplace_back(L"PROD-1", 375.0, 125.0);
+    builders.emplace_back("PROD-1", 375.0, 125.0);
     builders.back().set_completions(c_prod1)
         .produce_oil(25.0 * rm).for_days(T);
 
     auto c_prod2 = test_helpers::WellCompletionBuilder(BNz, Bhz)
         .open_layer(3, 0.0);
-    builders.emplace_back(L"PROD-2", 125.0, 375.0);
+    builders.emplace_back("PROD-2", 125.0, 375.0);
     builders.back().set_completions(c_prod2)
         .produce_oil(15.0 * rm).for_days(T);
 
     auto c_prod3 = test_helpers::WellCompletionBuilder(BNz, Bhz)
         .open_layer(1, 0.0).open_layer(2, 0.0);
-    builders.emplace_back(L"PROD-3", 250.0, 250.0);
+    builders.emplace_back("PROD-3", 250.0, 250.0);
     builders.back().set_completions(c_prod3)
         .produce_oil(20.0 * rm).for_days(T);
 
     auto c_inj3 = test_helpers::WellCompletionBuilder(BNz, Bhz)
         .open_layer(0, 150.0).open_layer(1, 150.0);
-    builders.emplace_back(L"INJ-3", 250.0, 125.0);
+    builders.emplace_back("INJ-3", 250.0, 125.0);
     builders.back().set_completions(c_inj3)
         .shut_in().for_days(150.0)
         .inject_water(35.0 * rm).for_days(T - 150.0);

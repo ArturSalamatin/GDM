@@ -9,13 +9,13 @@
 
 namespace reservoir_simulator
 {
-	using WellName = std::wstring;
+	using WellName = std::string;
 	using WellNames = std::vector<WellName>;
 
 	using WellPosition = GeosShell::GeosPoint;
 	using WellPositions = std::map<WellName, WellPosition>;
 
-	using LayerID = std::wstring;
+	using LayerID = std::string;
 
 	namespace mer_descriptor
 	{
@@ -23,7 +23,7 @@ namespace reservoir_simulator
 		/// Essentially a single MER record described as a map-container of pairs [field name; value] with 
 		/// field name: {time, oil, water, pump_water, worked_time, idle_time, type, is_work}
 		/// </summary>
-		using SingleMERrecord = std::map<std::wstring, float>;
+		using SingleMERrecord = std::map<std::string, float>;
 
 		/// <summary>
 		/// Container of single MER records for a well. Suck container should be introduced for every layer for layered_mer
@@ -75,7 +75,7 @@ namespace reservoir_simulator
 
 	class WellJobs;
 	/// <summary>
-	/// Operations(WellJobs), performed on each well(std::wstring = well_name)
+	/// Operations(WellJobs), performed on each well(std::string = well_name)
 	/// </summary>
 	using WellJobsContainer = std::map<WellName, WellJobs>;
 

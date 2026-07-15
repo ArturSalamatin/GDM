@@ -6,17 +6,17 @@
 namespace PathUtils {
 	class Utils {
 	public:
-		static std::wstring GetDir(std::wstring project_path)
+		static std::string GetDir(std::string project_path)
 		{
 			//вычисляем путь папки с проектом
-			std::wstring prpath = project_path;
+			std::string prpath = project_path;
 			std::reverse(prpath.begin(), prpath.end()); //реверсим путь
-			int size = prpath.find(L"\\"); //находим первое вхождение обратного слеша
+			int size = prpath.find("\\"); //находим первое вхождение обратного слеша
 			prpath.erase(0, size); //удаляем все до него
 			std::reverse(prpath.begin(), prpath.end()); //реверсим путь обратно
 			return prpath;
 		}
-		static std::wstring RelativePathParser(std::wstring raw, std::wstring MainDirPath)
+		static std::string RelativePathParser(std::string raw, std::string MainDirPath)
 		{
 			/*
 				* ./ - установить текущий катало
@@ -29,16 +29,16 @@ namespace PathUtils {
 			int _pos = 0;
 			int entry = 0;
 			do {
-				_pos = raw.find(L".\\", _off);
-				if (_pos != std::wstring::npos)
+				_pos = raw.find(".\\", _off);
+				if (_pos != std::string::npos)
 				{
 					_off = _pos + 2;
 					entry++;
 				}
-			} while (_pos != std::wstring::npos);
+			} while (_pos != std::string::npos);
 			if (entry)
 			{
-				std::wstring add_path = MainDirPath;
+				std::string add_path = MainDirPath;
 				//i == 1 т.к. при entry = 1 добавляем только путь до рабочей папки
 				for (int i = 1; i < entry; i++)
 				{
@@ -52,13 +52,13 @@ namespace PathUtils {
 			}
 		}
 
-		static std::wstring DelimeterReplacer(std::wstring raw)
+		static std::string DelimeterReplacer(std::string raw)
 		{
-			if (raw.find(L".") != std::wstring::npos)
+			if (raw.find(".") != std::string::npos)
 			{
-				int pos = raw.find(L".");
+				int pos = raw.find(".");
 				auto nstr = raw;
-				nstr.replace(nstr.begin() + pos, nstr.begin() + pos+ 1, L",");
+				nstr.replace(nstr.begin() + pos, nstr.begin() + pos+ 1, ",");
 				return nstr;
 			}
 			else {
@@ -66,16 +66,16 @@ namespace PathUtils {
 			}
 		}
 
-		static int ConvertDateToExcelDate(const std::wstring& date)
+		static int ConvertDateToExcelDate(const std::string& date)
 		{
-			const std::wregex date_regex(L"\\d{2}\\W\\d{2}\\W\\d{4}");
-			std::wsmatch base_match;
+			const std::regex date_regex("\\d{2}\\W\\d{2}\\W\\d{4}");
+			std::smatch base_match;
 
 			if (std::regex_match(date, base_match, date_regex))//дд.мм.гггг
 			{
-				int year = stoi(std::wstring(date.begin() + 6, date.end())) - 1900 + 70;
-				int month = stoi(std::wstring(date.begin() + 3, date.begin() + 5));
-				int day = stoi(std::wstring(date.begin(), date.begin() + 2));
+				int year = stoi(std::string(date.begin() + 6, date.end())) - 1900 + 70;
+				int month = stoi(std::string(date.begin() + 3, date.begin() + 5));
+				int day = stoi(std::string(date.begin(), date.begin() + 2));
 
 
 

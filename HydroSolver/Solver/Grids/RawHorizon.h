@@ -36,7 +36,7 @@ namespace reservoir_simulator
 
 		void PrintModelData(size_t frames) const
 		{
-			std::wstring fName{ L"ReservoirTestData//grid_descriptor.txt" };
+			std::string fName{ "ReservoirTestData//grid_descriptor.txt" };
 			std::ofstream myfile{ fName, std::ios_base::out };
 
 			char buffer[1000];

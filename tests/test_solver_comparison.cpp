@@ -29,8 +29,8 @@ TEST_CASE("RES-007: per-timestep solver comparison",
 
     ReservoirSimulator sim(np, h, h.oil, h.water, h.other);
 
-    test_helpers::add_simple_well(sim, h, L"INJ", 50.0, 250.0, 0.0, -10.0);
-    test_helpers::add_simple_well(sim, h, L"PROD", 450.0, 250.0, 5.0, 0.0);
+    test_helpers::add_simple_well(sim, h, "INJ", 50.0, 250.0, 0.0, -10.0);
+    test_helpers::add_simple_well(sim, h, "PROD", 450.0, 250.0, 5.0, 0.0);
 
     double oil_mass_0 = sim.OilTotal();
     double water_mass_0 = sim.WaterTotal();

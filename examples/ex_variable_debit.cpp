@@ -19,7 +19,7 @@ void run_two_rates() {
         t1 + t2, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
-            builders.emplace_back(L"INJ", cx, cy);
+            builders.emplace_back("INJ", cx, cy);
             builders.back()
                 .inject_water(Q1).for_days(t1)
                 .inject_water(Q2).for_days(t2);
@@ -42,7 +42,7 @@ void run_shut_in() {
         t_work + t_shut + t_work, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
-            builders.emplace_back(L"INJ", cx, cy);
+            builders.emplace_back("INJ", cx, cy);
             builders.back()
                 .inject_water(Q).for_days(t_work)
                 .shut_in().for_days(t_shut)
@@ -69,11 +69,11 @@ void run_increasing_inj() {
         t1 + t2, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
-            builders.emplace_back(L"INJ", inj_x, inj_y);
+            builders.emplace_back("INJ", inj_x, inj_y);
             builders.back()
                 .inject_water(Q_inj1).for_days(t1)
                 .inject_water(Q_inj2).for_days(t2);
-            builders.emplace_back(L"PROD", prod_x, prod_y);
+            builders.emplace_back("PROD", prod_x, prod_y);
             builders.back()
                 .produce_oil(Q_prod).for_days(t1 + t2);
             return builders;
@@ -97,11 +97,11 @@ void run_alternating() {
         2 * t_phase, 5.0,
         [&](double, double) {
             std::vector<test_helpers::WellScheduleBuilder> builders;
-            builders.emplace_back(L"INJ_A", x_a, cy);
+            builders.emplace_back("INJ_A", x_a, cy);
             builders.back()
                 .inject_water(Q).for_days(t_phase)
                 .shut_in().for_days(t_phase);
-            builders.emplace_back(L"INJ_B", x_b, cy);
+            builders.emplace_back("INJ_B", x_b, cy);
             builders.back()
                 .shut_in().for_days(t_phase)
                 .inject_water(Q).for_days(t_phase);

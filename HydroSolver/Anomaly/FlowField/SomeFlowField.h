@@ -60,7 +60,7 @@ namespace reservoir_simulator
 			const std::vector<std::vector<double>>& 
 				get_field() const { return field; }
 
-			const std::wstring print() const;
+			const std::string print() const;
 
 			void write(std::ofstream& wstream);
 		};
@@ -120,7 +120,7 @@ namespace reservoir_simulator
 			const FlowFieldComponentX& get_vxField() const { return vxField; }
 			const FlowFieldComponentY& get_vyField() const { return vyField; }
 
-			const std::wstring print() const;
+			const std::string print() const;
 
 			void write(std::ofstream& wstream);
 		};
@@ -174,7 +174,7 @@ namespace reservoir_simulator
 				GetVelocityField() const { return field; }
 			const PorosityField& 
 				porosity() const { return poro; }
-			const std::wstring
+			const std::string
 				print() const;
 			void write(std::ofstream& wstream);
 			bool is_empty() const { return field.empty(); }

@@ -42,20 +42,20 @@ namespace reservoir_simulator
 		{
 		public:
 
-			virtual  std::wstring GetWideProjectPath() = 0;
+			virtual  std::string GetWideProjectPath() = 0;
 			virtual  std::string GetProjectPath()
 			{
-				std::wstring path = GetWideProjectPath();
+				std::string path = GetWideProjectPath();
 				UniversalSCParser::CP1251Encoder enc;
 				return enc.ToString(path);
 			}
-			virtual  std::wstring GetWideProject_FileName_Full(std::wstring projectName = L"Project.bop")
+			virtual  std::string GetWideProject_FileName_Full(std::string projectName = "Project.bop")
 			{
 				return GetWideProjectPath() + projectName;
 			}
-			virtual  std::string GetProject_FileName_Full(std::wstring projectName = L"Project.bop")
+			virtual  std::string GetProject_FileName_Full(std::string projectName = "Project.bop")
 			{
-				std::wstring fileName = GetWideProject_FileName_Full(projectName);
+				std::string fileName = GetWideProject_FileName_Full(projectName);
 				UniversalSCParser::CP1251Encoder enc;
 				return enc.ToString(fileName);
 			}
@@ -76,14 +76,14 @@ namespace reservoir_simulator
 
 
 
-			virtual std::wstring WaterSaturation_fileName() = 0;
-			virtual std::wstring OilSaturation_fileName() = 0;
-			virtual std::wstring Pressure_fileName() = 0;
-			virtual std::wstring OverallBalance_fileName() = 0;
+			virtual std::string WaterSaturation_fileName() = 0;
+			virtual std::string OilSaturation_fileName() = 0;
+			virtual std::string Pressure_fileName() = 0;
+			virtual std::string OverallBalance_fileName() = 0;
 
 
 
-			virtual std::vector<std::vector<std::wstring>> LayerAggregation() = 0;
+			virtual std::vector<std::vector<std::string>> LayerAggregation() = 0;
 		protected:
 			PhaseProperties waterPhaseProperties, oilPhaseProperties;
 		};

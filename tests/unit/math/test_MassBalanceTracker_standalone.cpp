@@ -73,10 +73,10 @@ TEST_CASE("MassBalanceTracker: bitwise match 2D 5x5x1 with wells",
     auto sim_old = ReservoirSimulator(np, horizon, horizon.oil, horizon.water, horizon.other);
     auto sim_new = ReservoirSimulator(np, horizon, horizon.oil, horizon.water, horizon.other);
 
-    test_helpers::add_simple_well(sim_old, horizon, L"INJ", 50.0, 250.0, 0.0, -10.0);
-    test_helpers::add_simple_well(sim_old, horizon, L"PROD", 450.0, 250.0, 5.0, 0.0);
-    test_helpers::add_simple_well(sim_new, horizon, L"INJ", 50.0, 250.0, 0.0, -10.0);
-    test_helpers::add_simple_well(sim_new, horizon, L"PROD", 450.0, 250.0, 5.0, 0.0);
+    test_helpers::add_simple_well(sim_old, horizon, "INJ", 50.0, 250.0, 0.0, -10.0);
+    test_helpers::add_simple_well(sim_old, horizon, "PROD", 450.0, 250.0, 5.0, 0.0);
+    test_helpers::add_simple_well(sim_new, horizon, "INJ", 50.0, 250.0, 0.0, -10.0);
+    test_helpers::add_simple_well(sim_new, horizon, "PROD", 450.0, 250.0, 5.0, 0.0);
 
     compare_balance(sim_old, sim_new, 0.1);
 }

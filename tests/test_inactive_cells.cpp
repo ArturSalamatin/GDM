@@ -19,7 +19,7 @@ TEST_CASE("Well skips inactive cell layer",
 
     // Скважина в центре — проходит через все 3 слоя
     // Ожидание: перфорация в слое k=1 отфильтрована
-    test_helpers::add_simple_well(sim, horizon, L"PROD", 15.0, 15.0, 1.0, 0.0);
+    test_helpers::add_simple_well(sim, horizon, "PROD", 15.0, 15.0, 1.0, 0.0);
 
     double dt = 0.1;
     sim.SingleIteration(dt, dt);
@@ -47,7 +47,7 @@ TEST_CASE("All layers inactive - well has zero production",
         numPrm, horizon, horizon.oil, horizon.water, horizon.other};
 
     // Скважина попадает в неактивную ячейку
-    test_helpers::add_simple_well(sim, horizon, L"PROD", 15.0, 15.0, 1.0, 0.0);
+    test_helpers::add_simple_well(sim, horizon, "PROD", 15.0, 15.0, 1.0, 0.0);
 
     // Guard BUG-008: SetRefWellPressure при denom=0 → P_well = avg(P_reservoir)
     double dt = 0.1;

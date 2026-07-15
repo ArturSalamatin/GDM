@@ -48,7 +48,7 @@ namespace reservoir_simulator
 	// to get the final set of open segments use AccumulatePerforations method
 
 	WellJobs::WellJobs(
-		const std::wstring& WellName, 
+		const std::string& WellName,
 		const WellJobsData& ItsJobsInLayers, 
 		const LayerAggregationTree& LayerAggregation,
 		size_t NmbrOfLayers) noexcept :
@@ -68,7 +68,7 @@ namespace reservoir_simulator
 			{// loop through every layer with jobs
 			//	auto layerName = openLayer.first; // take the layer name
 			//									  // take its id in the upscaled model
-				size_t aggrIdx = LayerAggregation.at(_wtoi(layerName.c_str()));
+				size_t aggrIdx = LayerAggregation.at(std::stoi(layerName));
 				// current layer belongs to the group aggrIdx of grouped layers
 				// thus save corresponding records for every job in this layer
 				for (size_t i = 0; i < jobs.size(); ++i)

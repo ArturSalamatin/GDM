@@ -24,14 +24,14 @@ namespace reservoir_simulator
 
 	namespace custom_warnings
 	{
-		static std::wostream& out = std::wcout;
+		static std::ostream& out = std::cout;
 		struct wNoPermeabilityYData
 		{
 			wNoPermeabilityYData()
 			{
 				out
-					<< L">>>>>There is no permeability data in Y direction. "
-					<< L"Permeability in X direction is used instead."
+					<< ">>>>>There is no permeability data in Y direction. "
+					<< "Permeability in X direction is used instead."
 					<< std::endl;
 			}
 		};
@@ -40,8 +40,8 @@ namespace reservoir_simulator
 			wNoPermeabilityZData()
 			{
 				out
-					<< L">>>>>There is no permeability data in Z direction. "
-					<< L"Permeability in X direction is used instead."
+					<< ">>>>>There is no permeability data in Z direction. "
+					<< "Permeability in X direction is used instead."
 					<< std::endl;
 			}
 		};
@@ -50,8 +50,8 @@ namespace reservoir_simulator
 			wNoPorosityData(double val)
 			{
 				out
-					<< L">>>>>There is no porosity data. "
-					<< L"Permeability value = " + std::to_wstring(val) + L" is used instead."
+					<< ">>>>>There is no porosity data. "
+					<< "Permeability value = " + std::to_string(val) + " is used instead."
 					<< std::endl;
 			}
 		};
@@ -61,9 +61,9 @@ namespace reservoir_simulator
 			wWellOperationDataNotFound(const WellName& well_name)
 			{
 				out 
-					<< L">>>>>The Well " +
+					<< ">>>>>The Well " +
 					well_name +
-					L" does not have data on perforations. It is ignored."
+					" does not have data on perforations. It is ignored."
 					<< std::endl;
 			}
 		};
@@ -72,9 +72,9 @@ namespace reservoir_simulator
 			wWellOperationDataIsEmpty(const WellName& well_name)
 			{
 				out
-					<< L">>>>>The Well " +
+					<< ">>>>>The Well " +
 					well_name +
-					L" operation data is found, but it is empty. The well is ignored."
+					" operation data is found, but it is empty. The well is ignored."
 					<< std::endl;
 			}
 		};
@@ -83,9 +83,9 @@ namespace reservoir_simulator
 			wWellMERnotFound(const WellName& well_name)
 			{
 				out
-					<< L">>>>>The Well " +
+					<< ">>>>>The Well " +
 					well_name +
-					L" does not contain information abut MER. The well is ignored.\n"
+					" does not contain information abut MER. The well is ignored.\n"
 					<< std::endl;
 			}
 		};
@@ -95,9 +95,9 @@ namespace reservoir_simulator
 			wWellinitializationFailure(const WellName& well_name, const std::exception& e)
 			{
 				out
-					<< L">>>>>The Well " +
+					<< ">>>>>The Well " +
 					well_name +
-					L" can not be initialized with message:\n"
+					" can not be initialized with message:\n"
 					<< e.what()
 					<< std::endl;
 			}
@@ -108,8 +108,8 @@ namespace reservoir_simulator
 			wNoPerforationData(const WellName& well_name)
 			{
 				out << 
-					L">>>>>The well " + well_name + 
-					L" does not contain any perforation data.\n";
+					">>>>>The well " + well_name + 
+					" does not contain any perforation data.\n";
 			}
 		};*/
 		struct wFirstPerforationMoved
@@ -118,10 +118,10 @@ namespace reservoir_simulator
 				double oldTime, double newTime)
 			{
 				out << 
-					L">>>>>Well " + well_name + 
-					L": first job date " + std::to_wstring(oldTime) + 
-					L" was moved to " + std::to_wstring(newTime) + 
-					L" to be in accordance with the MER dates.\n";
+					">>>>>Well " + well_name + 
+					": first job date " + std::to_string(oldTime) + 
+					" was moved to " + std::to_string(newTime) + 
+					" to be in accordance with the MER dates.\n";
 			}
 		};
 		struct wLastPerforationMoved
@@ -130,19 +130,19 @@ namespace reservoir_simulator
 				double oldTime, double newTime)
 			{
 				out <<
-					L">>>>>Well " + well_name + 
-					L": last job date " + std::to_wstring(oldTime) + 
-					L" was moved to " + std::to_wstring(newTime)
-					+ L" to be in accordance with the MER dates.\n";
+					">>>>>Well " + well_name + 
+					": last job date " + std::to_string(oldTime) + 
+					" was moved to " + std::to_string(newTime)
+					+ " to be in accordance with the MER dates.\n";
 			}
 		};
 		struct wNoFolderCreated
 		{
 			wNoFolderCreated()
 			{
-				out << L">>>>>Could not create folder dam//gdm.\n";
-					/*LogFileSpace::LogFile::WriteLog(L"class_ReservoirSimulator", L"method_SaveFlowField2File",
-						L"warning", L"Could not create folder dam//gdm", "");*/
+				out << ">>>>>Could not create folder dam//gdm.\n";
+					/*LogFileSpace::LogFile::WriteLog("class_ReservoirSimulator", "method_SaveFlowField2File",
+						"warning", "Could not create folder dam//gdm", "");*/
 			}
 		};
 		struct wMERDataRemoved
@@ -150,9 +150,9 @@ namespace reservoir_simulator
 			wMERDataRemoved(const WellName& well_name)
 			{
 				out << 
-					L">>>>>Well " + well_name + 
-					L" does not show any overall debit at any time frame. " + 
-					L"Its MER record made empty.\n";
+					">>>>>Well " + well_name + 
+					" does not show any overall debit at any time frame. " + 
+					"Its MER record made empty.\n";
 				//	LogFileSpace::LogFile::Well_AllMER_DataRemoved(Name());
 			}
 		};
@@ -160,7 +160,7 @@ namespace reservoir_simulator
 		{
 			wDuplicateMERrecordWithZeroDebitDeleted()
 			{
-				out << L"Duplicate MER record with zero overall debit erased.\n\n";
+				out << "Duplicate MER record with zero overall debit erased.\n\n";
 			}
 		};
 
@@ -168,78 +168,78 @@ namespace reservoir_simulator
 		{
 			wDuplicateMERrecordUnited()
 			{
-				out << L"Duplicate MER record with non-zero overall debit united into a single record.\n\n";
+				out << "Duplicate MER record with non-zero overall debit united into a single record.\n\n";
 			}
 		};
 
 		struct wMERrecordsAtSameDate
 		{
-			wMERrecordsAtSameDate(const WellName& well_name, std::map<std::wstring, float>& r1, std::map<std::wstring, float>& r2)
+			wMERrecordsAtSameDate(const WellName& well_name, std::map<std::string, float>& r1, std::map<std::string, float>& r2)
 			{
-				out << L"Well " << well_name << L" MER data:\n";
+				out << "Well " << well_name << " MER data:\n";
 				out << std::setw(8) << std::left
-					<< L"time"
+					<< "time"
 					<< std::setw(10) << std::left
-					<< L"oil_v"
+					<< "oil_v"
 					<< std::setw(10) << std::left
-					<< L"water_v"
+					<< "water_v"
 					<< std::setw(12) << std::left
-					<< L"oil_m"
+					<< "oil_m"
 					<< std::setw(12) << std::left
-					<< L"water_m"
+					<< "water_m"
 					<< std::setw(12) << std::left
-					<< L"pump_water"
+					<< "pump_water"
 					<< std::setw(11) << std::left
-					<< L"idle_time"
+					<< "idle_time"
 					<< std::setw(5) << std::left
-					<< L"type"
+					<< "type"
 					<< std::setw(8) << std::left
-					<< L"is_work"
+					<< "is_work"
 					<< std::endl;
 
 				
 				{
 					auto& m = r1;
 					out << std::setw(8) << std::left
-						<< m.at(L"time")
+						<< m.at("time")
 						<< std::setw(10) << std::left
-						<< m.at(L"oil_v")
+						<< m.at("oil_v")
 						<< std::setw(10) << std::left
-						<< m.at(L"water_v")
+						<< m.at("water_v")
 						<< std::setw(12) << std::left
-						<< m.at(L"oil_m")
+						<< m.at("oil_m")
 						<< std::setw(12) << std::left
-						<< m.at(L"water_m")
+						<< m.at("water_m")
 						<< std::setw(12) << std::left
-						<< m.at(L"pump_water")
+						<< m.at("pump_water")
 						<< std::setw(11) << std::left
-						<< m.at(L"idle_time")
+						<< m.at("idle_time")
 						<< std::setw(5) << std::left
-						<< m.at(L"type")
+						<< m.at("type")
 						<< std::setw(8) << std::left
-						<< m.at(L"is_work")
+						<< m.at("is_work")
 						<< std::endl;
 				}
 				{
 					auto& m = r2;
 					out << std::setw(8) << std::left
-						<< m.at(L"time")
+						<< m.at("time")
 						<< std::setw(10) << std::left
-						<< m.at(L"oil_v")
+						<< m.at("oil_v")
 						<< std::setw(10) << std::left
-						<< m.at(L"water_v")
+						<< m.at("water_v")
 						<< std::setw(12) << std::left
-						<< m.at(L"oil_m")
+						<< m.at("oil_m")
 						<< std::setw(12) << std::left
-						<< m.at(L"water_m")
+						<< m.at("water_m")
 						<< std::setw(12) << std::left
-						<< m.at(L"pump_water")
+						<< m.at("pump_water")
 						<< std::setw(11) << std::left
-						<< m.at(L"idle_time")
+						<< m.at("idle_time")
 						<< std::setw(5) << std::left
-						<< m.at(L"type")
+						<< m.at("type")
 						<< std::setw(8) << std::left
-						<< m.at(L"is_work")
+						<< m.at("is_work")
 						<< std::endl;
 				}
 			}
@@ -252,28 +252,28 @@ namespace reservoir_simulator
 		{
 			mWellInitializationStarted(const WellName& well_name)
 			{
-				std::wcout << L"...Well " + well_name + L" initialization started\n";
+				std::cout << "...Well " + well_name + " initialization started\n";
 			}
 		};
 		struct mWellInitializationDone
 		{
 			mWellInitializationDone(const WellName& well_name)
 			{
-				std::wcout << L"...Well " + well_name + L" initialization done\n\n";
+				std::cout << "...Well " + well_name + " initialization done\n\n";
 			}
 		};
 		struct mMERInitializationStarted
 		{
 			mMERInitializationStarted(const WellName& well_name)
 			{
-				std::wcout << L"...Initialization of MER of well " + well_name + L" started\n";
+				std::cout << "...Initialization of MER of well " + well_name + " started\n";
 			}
 		};
 		struct mMERInitializationDone
 		{
 			mMERInitializationDone(const WellName& well_name)
 			{
-				std::wcout << L"...Initialization of MER of well " + well_name + L" done\n";
+				std::cout << "...Initialization of MER of well " + well_name + " done\n";
 			}
 		};
 
@@ -282,9 +282,9 @@ namespace reservoir_simulator
 			mWellOverallTimeFrame(const WellName& well_name,
 				const mer_descriptor::TimeFrame& frame)
 			{
-				std::wcout <<
-					L"Well " + well_name + L" start date: " +
-					std::to_wstring((int)frame.start) + L"; end date: " + std::to_wstring((int)frame.end) 
+				std::cout <<
+					"Well " + well_name + " start date: " +
+					std::to_string((int)frame.start) + "; end date: " + std::to_string((int)frame.end) 
 					<< std::endl;
 			}
 		};
@@ -292,7 +292,7 @@ namespace reservoir_simulator
 		{
 			mMERnoData()
 			{
-				std::wcout << L"...Well does not have any MER data\n";
+				std::cout << "...Well does not have any MER data\n";
 			}
 		};
 
@@ -301,21 +301,21 @@ namespace reservoir_simulator
 			mCalcProgress(double curTime, size_t curStep, size_t maxStep)
 			{
 				constexpr size_t width = 23;
-				std::wcout 
+				std::cout 
 					<< std::left << std::setw(width) 
-					<<  L"Simulation progress: "
+					<<  "Simulation progress: "
 					<< std::left
 					<< std::ceil((float)curStep/(float)maxStep*1000)/1000*100
-					<< L"%\n"
+					<< "%\n"
 					<< std::left << std::setw(width)
-					<< L"Current step: "
+					<< "Current step: "
 					<< std::left
-					<< std::to_wstring(curStep)
-					<< L"\n"
+					<< std::to_string(curStep)
+					<< "\n"
 					<< std::left << std::setw(width)
-					<< L"Total steps count: "
+					<< "Total steps count: "
 					<< std::left
-					<< std::to_wstring(maxStep)
+					<< std::to_string(maxStep)
 					<< std::endl;
 			}
 		};
@@ -397,7 +397,7 @@ namespace reservoir_simulator
 			custom_warnings::wWellinitializationFailure{ well_name, e };
 		}
 
-		static void MERrecordsAtSameDate(const WellName& well_name, std::map<std::wstring, float>& r1, std::map<std::wstring, float>& r2)
+		static void MERrecordsAtSameDate(const WellName& well_name, std::map<std::string, float>& r1, std::map<std::string, float>& r2)
 		{
 			custom_warnings::wMERrecordsAtSameDate{ well_name, r1, r2 };
 		}

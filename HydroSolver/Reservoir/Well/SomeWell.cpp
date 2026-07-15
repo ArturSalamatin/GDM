@@ -66,14 +66,10 @@ namespace reservoir_simulator
 
 
 		const WellName& SomeWell::NameWide() const { return itsName; }
-		std::string SomeWell::Name() const 
+		std::string SomeWell::Name() const
 		{
-			std::string str;
-			size_t size;
-			str.resize(NameWide().length());
-			wcstombs_s(&size, &str[0], str.size() + 1, NameWide().c_str(), NameWide().size());
-			return str;; }
-		std::wstring SomeWell::Guid() const { return itsGUID; }
+			return itsName; }
+		std::string SomeWell::Guid() const { return itsGUID; }
 		double SomeWell::WellRadius() const { return itsWellRadius; }
 
 		mer_descriptor::TimeFrame SomeWell::KnownExploitationPeriod() const
@@ -104,7 +100,7 @@ namespace reservoir_simulator
 
 
 		SomeWell::SomeWell() noexcept = default;
-		SomeWell::SomeWell(const WellName& name, const std::wstring& guid,
+		SomeWell::SomeWell(const WellName& name, const std::string& guid,
 			const WellPosition& intersectionCoords,
 			std::unique_ptr<const mer_descriptor::MER_Data>&& mer,
 			const set_of_points::PerforationsOfWell& perforationsOfWell,

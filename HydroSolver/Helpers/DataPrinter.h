@@ -13,7 +13,7 @@ namespace reservoir_simulator
 	class CubePrinter
 	{
 	public:
-		CubePrinter(ReservoirInstantiator<Factory>* reservoirIntantiator, const std::wstring& path) noexcept :
+		CubePrinter(ReservoirInstantiator<Factory>* reservoirIntantiator, const std::string& path) noexcept :
 			path{path},
 			reservoirIntantiator{ reservoirIntantiator } 
 		{
@@ -21,31 +21,31 @@ namespace reservoir_simulator
 			fs::create_directories(path);
 		};
 
-		void PrintActNum(std::wstring fName = L"MatLab\\testActiveCells.txt") const
+		void PrintActNum(std::string fName = "MatLab\\testActiveCells.txt") const
 		{
 			DataPrinter<bool>(reservoirIntantiator->ActiveCells(), fName);
 		}
-		void PrintVolume(std::wstring fName = L"MatLab\\testVolumes.txt") const
+		void PrintVolume(std::string fName = "MatLab\\testVolumes.txt") const
 		{
 			DataPrinter<float>(reservoirIntantiator->Volume(), fName);
 		}
-		void PrintPoro(std::wstring fName = L"MatLab\\testPorosity.txt") const
+		void PrintPoro(std::string fName = "MatLab\\testPorosity.txt") const
 		{
 			DataPrinter<float>(reservoirIntantiator->Porosity(), fName);
 		}
-		void PrintPermX(const std::wstring& fName = L"MatLab\\testPermX.txt") const
+		void PrintPermX(const std::string& fName = "MatLab\\testPermX.txt") const
 		{
 			DataPrinter<float>(reservoirIntantiator->PermeabilityX(), fName);
 		}
-		void PrintStartOil(std::wstring fName = L"MatLab\\testStartOil.txt") const
+		void PrintStartOil(std::string fName = "MatLab\\testStartOil.txt") const
 		{
 		//	DataPrinter<float>(reservoirIntantiator->startSoil(), fName);
 		}
-		void PrintStartPressure(std::wstring fName = L"MatLab\\testStartPressure.txt") const
+		void PrintStartPressure(std::string fName = "MatLab\\testStartPressure.txt") const
 		{
 		//	DataPrinter<float>(reservoirIntantiator->startPressure(), fName);
 		}
-		void PrintPlanarMesh(std::wstring fName = L"MatLab\\testPlanarMesh.txt") const
+		void PrintPlanarMesh(std::string fName = "MatLab\\testPlanarMesh.txt") const
 		{
 			std::ofstream myfile;
 			myfile.open(path+fName, std::ios_base::out);
@@ -75,10 +75,10 @@ namespace reservoir_simulator
 
 	protected:
 		ReservoirInstantiator<Factory>* reservoirIntantiator;
-		std::wstring path;
+		std::string path;
 
 		template<typename T>
-		void DataPrinter(const SomeCube<T>& cube, const std::wstring& fName) const
+		void DataPrinter(const SomeCube<T>& cube, const std::string& fName) const
 		{
 			MakeDirectories(path + fName);
 
@@ -91,7 +91,7 @@ namespace reservoir_simulator
 			myfile.close();
 		}
 
-		void MakeDirectories(const std::wstring& fName) const
+		void MakeDirectories(const std::string& fName) const
 		{
 			namespace fs = std::filesystem;
 
@@ -111,13 +111,13 @@ namespace reservoir_simulator
 	//	WellDataPrinter(ReservoirInstantiator<Factory>* reservoirIntantiator) noexcept :
 	//		reservoirIntantiator{ reservoirIntantiator } {};
 
-	//	void PrintWellDebitLength(std::wstring fName = L"MatLab\\testWellDebits.txt") const
+	//	void PrintWellDebitLength(std::string fName = "MatLab\\testWellDebits.txt") const
 	//	{
 	//		std::ofstream myfile;
 	//		myfile.open(fName, std::ios_base::out);
 
-	//		UniversalWriter::UTF8Writer writer(L"MatLab\\testWellNames.txt");
-	//		UniversalWriter::UTF8Writer coordFile(L"MatLab\\testWellCoords.txt");
+	//		UniversalWriter::UTF8Writer writer("MatLab\\testWellNames.txt");
+	//		UniversalWriter::UTF8Writer coordFile("MatLab\\testWellCoords.txt");
 
 	//		int i = 0;
 
@@ -152,7 +152,7 @@ namespace reservoir_simulator
 	//				myfile << isGood;
 	//				if (!isGood)
 	//				{
-	//					std::wcout << L"<<<<<  " << name << std::endl;
+	//					std::cout << "<<<<<  " << name << std::endl;
 	//					f = true;
 	//				}
 	//			}
@@ -161,17 +161,17 @@ namespace reservoir_simulator
 
 	//			if (fff)
 	//			{
-	//				writer.Write(name + L'\n');
-	//				coordFile.Write(std::to_wstring(well->PosX()) + L";" +
-	//					std::to_wstring(well->PosY()) + L";" +
-	//					std::to_wstring(well->PosXnum()) + L";" +
-	//					std::to_wstring(well->PosYnum()) + L";\n");
+	//				writer.Write(name + '\n');
+	//				coordFile.Write(std::to_string(well->PosX()) + ";" +
+	//					std::to_string(well->PosY()) + ";" +
+	//					std::to_string(well->PosXnum()) + ";" +
+	//					std::to_string(well->PosYnum()) + ";\n");
 	//			}
 	//		}
 	//		myfile.close();
 	//		writer.Close();
 	//	}
-	//	void PrintWellIntersection(std::wstring fName = L"MatLab\\testWellCoords.txt") const
+	//	void PrintWellIntersection(std::string fName = "MatLab\\testWellCoords.txt") const
 	//	{
 	//		std::ofstream myfile;
 	//		myfile.open(fName, std::ios_base::out);
@@ -187,12 +187,12 @@ namespace reservoir_simulator
 	//		myfile.close();
 	//	}
 
-	//	void PrintWellDebit_selected(std::wstring fName = L"MatLab\\testWellDebits_selected.txt") const
+	//	void PrintWellDebit_selected(std::string fName = "MatLab\\testWellDebits_selected.txt") const
 	//	{
 	//		UniversalWriter::UTF8Writer writer(fName);
-	//		std::wstring result;
+	//		std::string result;
 
-	//		UniversalSCParser::UTF8SVParser parser(L"sample_wells.txt");
+	//		UniversalSCParser::UTF8SVParser parser("sample_wells.txt");
 	//		auto res = parser.Read();
 
 	//		const auto& www = reservoirIntantiator->Simulator().GetWells();
@@ -206,7 +206,7 @@ namespace reservoir_simulator
 	//			auto& well = pair.second;
 
 
-	//			std::wcout << name << res[0][0] << std::endl;
+	//			std::cout << name << res[0][0] << std::endl;
 
 
 	//			for (int i = 0; i < res.size(); i++)
@@ -224,9 +224,9 @@ namespace reservoir_simulator
 	//			for (double time = start; time < end; time += 1)
 	//			{
 	//				auto debit = well->DebitOverall(time);
-	//				result += std::to_wstring(time) + L';' + std::to_wstring(debit) + L';';
+	//				result += std::to_string(time) + ';' + std::to_string(debit) + ';';
 	//			}
-	//			result += L'\n';
+	//			result += '\n';
 	//		}
 	//		writer.Write(result);
 	//		writer.Close();

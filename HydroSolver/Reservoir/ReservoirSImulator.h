@@ -56,13 +56,13 @@ namespace reservoir_simulator
 
 		size_t nz() const;
 
-//		const std::wstring folderName = L"MatLab\\";
+//		const std::string folderName = "MatLab\\";
 
 		bool doSave;
-		std::wstring saveWaterSaturation_fName;
+		std::string saveWaterSaturation_fName;
 		// ios_base::app -- append to the end of file
 		void PrintReservoirState(std::ios_base::openmode mode) const;
-		void PrintPlanarMesh(const std::wstring fName) const;
+		void PrintPlanarMesh(const std::string fName) const;
 		void PrintWellCoords() const;
 
 		std::vector<phasePortrait::SomeFlowField> flowFields;
@@ -83,19 +83,19 @@ namespace reservoir_simulator
 		void AddFlowFieldSnapShot();
 
 
-		void SaveFlowField2File(const std::wstring& configPath, const std::wstring& fileName);
+		void SaveFlowField2File(const std::string& configPath, const std::string& fileName);
 
 
-		void SaveFlowField2File_bin(const std::wstring& configPath, const std::wstring& fileName,
+		void SaveFlowField2File_bin(const std::string& configPath, const std::string& fileName,
 			double saturation_date, double startDate, double endDate, int frameCount);
 
 
-		void SaveSaturationPressure_bin(const std::wstring& configPath, const std::wstring& fileName,
+		void SaveSaturationPressure_bin(const std::string& configPath, const std::string& fileName,
 			double saturation_date, double startDate, double endDate, int frameCount);
 
-		void LoadFlowFieldFromFile(const std::wstring& fileName);
+		void LoadFlowFieldFromFile(const std::string& fileName);
 
-		void LoadFlowFieldFromFile_bin(const std::wstring& fileName);
+		void LoadFlowFieldFromFile_bin(const std::string& fileName);
 
 		void MassBalance(double loc_tau);
 
@@ -122,11 +122,11 @@ namespace reservoir_simulator
 
 		std::vector<double> GetOverallBalance() const;
 				
-		void printPointVariable(const std::wstring fName,
+		void printPointVariable(const std::string fName,
 			const std::vector<double>& data,
 			std::ios_base::openmode mode = std::ios_base::out) const;
 
-		void printFieldVariable(const std::wstring fName,
+		void printFieldVariable(const std::string fName,
 			const std::vector<double>& data,
 			std::ios_base::openmode mode = std::ios_base::out) const;
 
