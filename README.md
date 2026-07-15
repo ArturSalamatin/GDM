@@ -13,7 +13,7 @@ GDM solves the coupled pressure–saturation equations for immiscible, incompres
 - Fully implicit Newton solver with CPR preconditioner
 - Adaptive timestep control (PI-controller)
 - 3D structured grids with linear indexing
-- 274 Catch2 tests, 6 standalone examples
+- 310 Catch2 tests, 6 standalone examples
 - Obsidian knowledge vault for decisions, debugging, validation
 
 ## Build
@@ -23,6 +23,32 @@ cmake -B build -S . -G "Visual Studio 17 2022"
 cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
+
+## Solver Configuration
+
+GDM uses [amgcl](https://amgcl.readthedocs.io/) for linear algebra. The Krylov solver is selected at compile time via the `GDM_SOLVER` CMake option:
+
+| Value | Krylov solver | Preconditioner | Notes |
+|---|---|---|---|
+| `CPR_BICGSTAB` | BiCGStab | CPR (AMG + ILU0, True-IMPES weights) | **Default.** 12–90% faster than LGMRES (RES-007) |
+| `CPR` | LGMRES | CPR (AMG + ILU0, True-IMPES weights) | Previous default. Better theoretical convergence guarantees |
+| `CPR_SA` | LGMRES | CPR (smoothed aggregation AMG + ILU0) | |
+| `CPR_DRS` | LGMRES | CPR-DRS (AMG + ILU0) | |
+| `ILU0` | LGMRES | ILU0 (no CPR) | Baseline, no pressure-specific preconditioning |
+
+To switch:
+
+```powershell
+# Fresh build with a specific solver
+cmake -B build -S . -G "Visual Studio 17 2022" -DGDM_SOLVER=CPR
+cmake --build build --config Release
+
+# Or change in an existing build
+cmake -B build -DGDM_SOLVER=CPR
+cmake --build build --config Release
+```
+
+Configuration is in `HydroSolver/Solver/Math/SolverConfig.h`. See `vault/GDM/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md` for the comparison study.
 
 ## Slash Commands (Claude Code)
 
