@@ -5,7 +5,7 @@ namespace reservoir_simulator
 {
 	static std::mutex log_write_mutex;
 
-	 WellSignals::WellSignals(const std::wstring& name, const std::vector<double> coords, const std::vector<double>& numCoords, const AnomaliesPerWellData& anomalies_)
+	 WellSignals::WellSignals(const std::string& name, const std::vector<double> coords, const std::vector<double>& numCoords, const AnomaliesPerWellData& anomalies_)
 	{
 		(*this).name = name;
 		(*this).coords = coords;
@@ -19,46 +19,46 @@ namespace reservoir_simulator
 
 		if (anomalies.empty())
 		{
-			LogFileSpace::LogFile::WriteLog(L"class_Anomaly", L"method_SetIntervals", L"warning",
-				L"No anomaly records in the time frame of interest for the well " + name + L".");
+			LogFileSpace::LogFile::WriteLog("class_Anomaly", "method_SetIntervals", "warning",
+				"No anomaly records in the time frame of interest for the well " + name + ".");
 			return;
 		}
 
 		bool isStartDateSet;
 		double startInterval, endInterval;
 
-		startInterval = anomalies[0][L"time"] - spread; // only a guess fot the first start date
-		endInterval = anomalies[0][L"time"] + spread; // only a guess for the end date
-		isStartDateSet = anomalies[0].at(L"type") == anomalyType;// extrapolate initial data point to the past
+		startInterval = anomalies[0]["time"] - spread; // only a guess fot the first start date
+		endInterval = anomalies[0]["time"] + spread; // only a guess for the end date
+		isStartDateSet = anomalies[0].at("type") == anomalyType;// extrapolate initial data point to the past
 		for (int i = 0; i < anomalies.size(); i++)
 		{
 			if (!isStartDateSet)
 			{
-				isStartDateSet = anomalies[i].at(L"type") == anomalyType;
+				isStartDateSet = anomalies[i].at("type") == anomalyType;
 				if (!isStartDateSet)
 				{
-					startInterval = anomalies[i][L"time"]; // only a guess is isStartdateSet == false at this line
-					endInterval = anomalies[i][L"time"] + spread; // only a guess for the end date
+					startInterval = anomalies[i]["time"]; // only a guess is isStartdateSet == false at this line
+					endInterval = anomalies[i]["time"] + spread; // only a guess for the end date
 				}
 				else
 				{// first anomaly in the continuous frame is encountered
 				 // hence startInterval remains from the previous non-anomaly time moment
-					endInterval = anomalies[i][L"time"] + spread; // only a guess for the end date
+					endInterval = anomalies[i]["time"] + spread; // only a guess for the end date
 				}
 			}
 			else
 			{//we already encountered an anomaly at i-1
-				isStartDateSet = anomalies[i].at(L"type") == anomalyType; // is this anomaly or not?
+				isStartDateSet = anomalies[i].at("type") == anomalyType; // is this anomaly or not?
 				if (isStartDateSet)
 				{// anomaly continues in time
-					endInterval = anomalies[i][L"time"] + spread; // only a guess for the end date
+					endInterval = anomalies[i]["time"] + spread; // only a guess for the end date
 				}
 				else
 				{// anomaly just ended
-					endInterval = anomalies[i][L"time"]; // only a guess for the end date
+					endInterval = anomalies[i]["time"]; // only a guess for the end date
 					intervals.push_back(std::make_pair(startInterval, endInterval)); // accept the interval
-					startInterval = anomalies[i][L"time"];
-					endInterval = anomalies[i][L"time"] + spread;
+					startInterval = anomalies[i]["time"];
+					endInterval = anomalies[i]["time"] + spread;
 				}
 			}
 		}
@@ -84,15 +84,15 @@ namespace reservoir_simulator
 		std::cout << std::endl;
 	}
 
-	 const std::wstring& WellSignals::Name() const { return name; }
+	 const std::string& WellSignals::Name() const { return name; }
 
 	 const std::vector<double>& WellSignals::Coords() const { return coords; }
 
 	void WellSignals::set_trajectories_fixed_time(double startSignalRollback, double endSignalRollback,
 		FlowField::FlowFieldSequence& fields, double r, const SomeWell* wellData)
 	{
-		TrajectoryInitializer data{ { L"x0", coords[0] },{ L"y0",coords[1] },{ L"r", r } ,{ L"count", 2.0 },
-			{ L"dist_abs", 5.0 },{ L"dist_rel", 5.0 },{ L"time_step", 1.0 } };
+		TrajectoryInitializer data{ { "x0", coords[0] },{ "y0",coords[1] },{ "r", r } ,{ "count", 2.0 },
+			{ "dist_abs", 5.0 },{ "dist_rel", 5.0 },{ "time_step", 1.0 } };
 
 		// loop through z-sections
 		for (int k = 0; k < fields.size(); k++)
@@ -104,7 +104,7 @@ namespace reservoir_simulator
 				auto l = wellData->PerforationLengthOverall(intervals[i].first);
 				if (l[k] > 0.0)
 				{
-					std::wstring name = wellData->Name();
+					std::string name = wellData->Name();
 					wellDomains.back().push_back(SingleWellDomain{ data,
 						TimeFrame{ intervals[i].first, intervals[i].second, startSignalRollback, endSignalRollback },
 						fields[k], Features{ name } });
@@ -112,9 +112,9 @@ namespace reservoir_simulator
 				else
 				{
 					log_write_mutex.lock();
-					LogFileSpace::LogFile::WriteLog(L"class_WellSignals", L"method_set_trajectories", L"warning",
-						L"The layer " + std::to_wstring(k) + L" is not perforated at " + std::to_wstring((int)intervals[i].first)
-						+ L" for the well " + wellData->Name() + L".");
+					LogFileSpace::LogFile::WriteLog("class_WellSignals", "method_set_trajectories", "warning",
+						"The layer " + std::to_string(k) + " is not perforated at " + std::to_string((int)intervals[i].first)
+						+ " for the well " + wellData->Name() + ".");
 					log_write_mutex.unlock();
 				}
 			}
@@ -123,28 +123,28 @@ namespace reservoir_simulator
 
 	 void WellSignals::print_well_signals_json() const
 	{
-		const std::vector<std::wstring> layerNames{ { L"d0", L"d1a", L"d1b", L"d1vgd" } };
+		const std::vector<std::string> layerNames{ { "d0", "d1a", "d1b", "d1vgd" } };
 
 		for (int k = 0; k < wellDomains.size(); k++)
 		{// loop through z-sections
 			for (int l = 0; l < wellDomains[k].size(); l++)
 			{
-				/*std::vector<std::pair<std::wstring, std::wstring>> params{
-				{L"name", Name()},
-				{L"coords", Point(numCoords[0], numCoords[1]).print_json()},
-				{L"layer", layerNames[k]},
-				{L"time", wellDomains[k][l].print_time_json()},
-				{L"contour", wellDomains[k][l].print_json()}
+				/*std::vector<std::pair<std::string, std::string>> params{
+				{"name", Name()},
+				{"coords", Point(numCoords[0], numCoords[1]).print_json()},
+				{"layer", layerNames[k]},
+				{"time", wellDomains[k][l].print_time_json()},
+				{"contour", wellDomains[k][l].print_json()}
 				};*/
-				LogFileSpace::LogFile::WriteLog(L"class_WellSignals", L"method_print_well_signals_json",
-					L"success",
-					JSON::CreateJSON::CreateObject( //std::vector<std::pair<std::wstring, std::wstring>>
+				LogFileSpace::LogFile::WriteLog("class_WellSignals", "method_print_well_signals_json",
+					"success",
+					JSON::CreateJSON::CreateObject( //std::vector<std::pair<std::string, std::string>>
 						{
-							{ L"name", Name() },
-						{ L"coords", phasePortrait::Point(numCoords[0], numCoords[1]).print_json() },
-						{ L"layer", layerNames[k] },
-						{ L"time", wellDomains[k][l].print_time_json() },
-						{ L"contour", wellDomains[k][l].print_json() }
+							{ "name", Name() },
+						{ "coords", phasePortrait::Point(numCoords[0], numCoords[1]).print_json() },
+						{ "layer", layerNames[k] },
+						{ "time", wellDomains[k][l].print_time_json() },
+						{ "contour", wellDomains[k][l].print_json() }
 						}
 					)
 				);
@@ -170,7 +170,7 @@ namespace reservoir_simulator
 	 void WellSignals::TrimAnomalies(const std::pair<double, double>& overallInterval)
 	{// anomalies of interest must be in the [startDate; endDate] time frame
 		for (int j = (int)anomalies.size() - 1; j > -1; j--)
-			if (overallInterval.first > anomalies[j][L"time"] || anomalies[j][L"time"] > overallInterval.second)
+			if (overallInterval.first > anomalies[j]["time"] || anomalies[j]["time"] > overallInterval.second)
 				anomalies.erase(anomalies.begin() + j);
 	}
 
@@ -182,40 +182,40 @@ namespace reservoir_simulator
 		// external contour
 		extTimeStart = timeFrame.interval_end; // external contour comes second;
 		extTimeEnd = extTimeStart - timeFrame.endSignalRollback; // when it started
-		data[L"start_time"] = extTimeStart;
+		data["start_time"] = extTimeStart;
 		geos_polygon ext_contour = field.FollowPhasePortrait_fixed_time(data, extTimeStart, extTimeEnd, field_time);
 		ext_contour.assign_features({
-			{ L"ext_start_time", extTimeStart, L"" },
-			{ L"ext_end_time", extTimeEnd, L"" } });
+			{ "ext_start_time", extTimeStart, "" },
+			{ "ext_end_time", extTimeEnd, "" } });
 		// internal contour
 		intTimeStart = timeFrame.interval_start; // internal contour comes first
 		intTimeEnd = intTimeStart - timeFrame.startSignalRollback; // when it started
-		data[L"start_time"] = intTimeStart;
+		data["start_time"] = intTimeStart;
 		geos_polygon int_contour = field.FollowPhasePortrait_fixed_time(data, intTimeStart, intTimeEnd, field_time);
 		int_contour.assign_features({
-			{ L"int_start_time", intTimeStart, L"" },
-			{ L"int_end_time", intTimeEnd, L"" } });
+			{ "int_start_time", intTimeStart, "" },
+			{ "int_end_time", intTimeEnd, "" } });
 
 		domain = ext_contour.combine_with(int_contour);
 		domain.assign_features({
-			{ L"layer", 0.0, field.layer_name() },
-			{ L"well_name",0.0, features.well_name },
-			{ L"field_time",field_time,L"" } });
+			{ "layer", 0.0, field.layer_name() },
+			{ "well_name",0.0, features.well_name },
+			{ "field_time",field_time,"" } });
 	}
 	 void SingleWellDomain::print_geo_json(GeoJsonEngine& sraka) const
 	{
 		domain.print_geo_json(sraka);
 	}
-	 std::wstring SingleWellDomain::print_json() const
+	 std::string SingleWellDomain::print_json() const
 	{
 		return JSON::CreateJSON::CreateArray({ domain.print_json() });
 	}
-	 std::wstring SingleWellDomain::print_time_json() const
+	 std::string SingleWellDomain::print_time_json() const
 	{
-		return JSON::CreateJSON::CreateArray({ std::to_wstring(extTimeStart), std::to_wstring(extTimeEnd),
-			std::to_wstring(intTimeStart), std::to_wstring(intTimeEnd) });
+		return JSON::CreateJSON::CreateArray({ std::to_string(extTimeStart), std::to_string(extTimeEnd),
+			std::to_string(intTimeStart), std::to_string(intTimeEnd) });
 	}
-	 Anomalies::Anomalies(const std::map<std::wstring, SomeWell*>& wells, const std::wstring& anomalyPath)
+	 Anomalies::Anomalies(const std::map<std::string, SomeWell*>& wells, const std::string& anomalyPath)
 	{
 		(*this).wells = wells;
 		(*this).anomalyData.Push(anomalyPath);
@@ -228,7 +228,7 @@ namespace reservoir_simulator
 
 		// loop through wells
 		for (int i = 0; i < well_data.size(); i++) {
-			std::wstring wellName = well_data[i].Name;
+			std::string wellName = well_data[i].Name;
 
 			AnomaliesPerWellData wellAnomalies_All = anomalyData.GetDataPerWell(wellName);
 			if (!wellAnomalies_All.empty())
@@ -241,8 +241,8 @@ namespace reservoir_simulator
 						wellAnomalies_All);
 				}
 				else
-					LogFileSpace::LogFile::WriteLog(L"class_ReservoirInstantiator", L"method_TraceAnomalies",
-						L"warning", L"No hydrodynamic data for well " + wellName);
+					LogFileSpace::LogFile::WriteLog("class_ReservoirInstantiator", "method_TraceAnomalies",
+						"warning", "No hydrodynamic data for well " + wellName);
 			}
 		}
 		instantiate(overallInterval, spread, anomalyType);
@@ -277,10 +277,10 @@ namespace reservoir_simulator
 	 void Anomalies::print_json()
 	{
 		// start result sending
-		LogFileSpace::LogFile::WriteLog(L"main", L"anomaly_sender", L"success",
+		LogFileSpace::LogFile::WriteLog("main", "anomaly_sender", "success",
 			JSON::CreateJSON::CreateArray(
-				{ JSON::CreateJSON::CreateObject({ { L"name", L"domain" } ,{ L"dimension", L"4" } ,
-					{ L"names", JSON::CreateJSON::CreateArray({ L"d0", L"d1a", L"d1b", L"d1vgd" }) } }) }));
+				{ JSON::CreateJSON::CreateObject({ { "name", "domain" } ,{ "dimension", "4" } ,
+					{ "names", JSON::CreateJSON::CreateArray({ "d0", "d1a", "d1b", "d1vgd" }) } }) }));
 
 		for (const auto& anom : relevantAnomalies)
 		{
@@ -289,7 +289,7 @@ namespace reservoir_simulator
 			anom.print_well_signals_json();
 		}
 	}
-	 void Anomalies::print_geo_json(const std::wstring& filename)
+	 void Anomalies::print_geo_json(const std::string& filename)
 	{
 		GeoJsonEngine sraka(filename);
 		for (const auto& anom : relevantAnomalies)

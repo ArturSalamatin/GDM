@@ -334,7 +334,7 @@ public:
     // Get a string value from INI file, returning default_value if not found.
     std::string Get(std::string section, std::string name,
                     std::string default_value) const;
-    std::wstring GetWide(std::string section, std::string name,
+    std::string GetWide(std::string section, std::string name,
         std::string default_value) const;
 
     // Get an integer (long) value from INI file, returning default_value if
@@ -404,11 +404,9 @@ inline std::string INIReader::Get(std::string section, std::string name, std::st
     return _values.count(key) ? _values.at(key) : default_value;
 }
 
-inline std::wstring INIReader::GetWide(std::string section, std::string name, std::string default_value) const
+inline std::string INIReader::GetWide(std::string section, std::string name, std::string default_value) const
 {
-    auto temp = INIReader::Get(section, name, default_value);
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    return converter.from_bytes(temp);
+    return INIReader::Get(section, name, default_value);
 }
 
 inline long INIReader::GetInteger(std::string section, std::string name, long default_value) const
