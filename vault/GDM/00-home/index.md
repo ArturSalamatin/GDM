@@ -117,6 +117,7 @@ date: 2026-06-27
 - [[команда plan-validate для планирования валидации]]
 - [[команда plan-research для планирования экспериментов]]
 - [[команда implement для реализации планов]]
+- [[переход с LGMRES на BiCGStab как default солвер]]
 
 #### Тестирование (`knowledge/decisions/`)
 - [[юнит-тесты уровень 0 нулевые зависимости]]
@@ -223,3 +224,4 @@ date: 2026-06-27
 - [[2026-07-08 amgcl-patches-debt-052]]
 - [[2026-07-09 solver-factory-debt-053]]
 - [[2026-07-13 feat-011-sw0-diagonal-regularization]]
+- [[2026-07-15 res-007-bicgstab-vs-lgmres]]
