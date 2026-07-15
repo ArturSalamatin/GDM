@@ -95,6 +95,7 @@ Desktop.ini
 # Include vault/ with all contents (override global patterns)
 !vault/
 !vault/**
+vault/GDM/.obsidian/
 
 test_connections.txt
 test_diagValues.txt
