@@ -31,7 +31,7 @@ static auto reference_fill_row(
                   std::vector<std::array<double,4>>,
                   std::array<double,2>>
 {
-    const auto& cell = grid[l];
+    const auto& cell = grid[static_cast<int>(l)];
     auto neighbours = grid.GetNeighboursPointer(static_cast<int>(l));
     const auto& areas = grid.CommonEdgeArea(static_cast<int>(l));
     int nNeib = static_cast<int>(neighbours.size());
