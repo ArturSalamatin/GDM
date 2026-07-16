@@ -88,6 +88,10 @@ target_compile_definitions(gdm_core PUBLIC AMGCL_NO_BOOST)
 if(AMGCL_PROFILING)
     target_compile_definitions(gdm_core PUBLIC AMGCL_PROFILING)
 endif()
+option(GDM_DUMP_DEBUG "Enable debug file dumps to results/debug/<exe>/" OFF)
+if(GDM_DUMP_DEBUG)
+    target_compile_definitions(gdm_core PUBLIC GDM_DUMP_DEBUG)
+endif()
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(gdm_core PUBLIC OpenMP::OpenMP_CXX)
@@ -98,6 +102,7 @@ endif()
 # =============================================================================
 add_executable(gdm src/main.cpp)
 target_link_libraries(gdm PRIVATE gdm_core)
+target_compile_definitions(gdm PRIVATE GDM_EXE_NAME="gdm")
 
 # =============================================================================
 # gdm_tests — Catch2
@@ -116,6 +121,7 @@ add_executable(gdm_tests
     tests/test_inactive_cells.cpp
 )
 target_link_libraries(gdm_tests PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_tests PRIVATE GDM_EXE_NAME="gdm_tests")
 
 # =============================================================================
 # gdm_benchmark — AMGCL configuration benchmark (separate binary)
@@ -125,6 +131,7 @@ add_executable(gdm_benchmark
     tests/test_solver_comparison.cpp
 )
 target_link_libraries(gdm_benchmark PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_benchmark PRIVATE GDM_EXE_NAME="gdm_benchmark")
 
 # =============================================================================
 # gdm_unit_level0 — unit tests, zero internal dependencies (STL only)
@@ -138,6 +145,7 @@ add_executable(gdm_unit_level0
     tests/unit/wells/test_Segment.cpp
 )
 target_link_libraries(gdm_unit_level0 PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_unit_level0 PRIVATE GDM_EXE_NAME="gdm_unit_level0")
 
 include(CTest)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
@@ -167,6 +175,7 @@ add_executable(gdm_unit_level1
     tests/unit/geometry/test_MathRoutines.cpp
 )
 target_link_libraries(gdm_unit_level1 PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_unit_level1 PRIVATE GDM_EXE_NAME="gdm_unit_level1")
 catch_discover_tests(gdm_unit_level1
     TEST_PREFIX "unit.level1."
     PROPERTIES TIMEOUT 30
@@ -185,6 +194,7 @@ add_executable(gdm_unit_level2
     tests/unit/reservoir/test_BinaryIO.cpp
 )
 target_link_libraries(gdm_unit_level2 PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_unit_level2 PRIVATE GDM_EXE_NAME="gdm_unit_level2")
 catch_discover_tests(gdm_unit_level2
     TEST_PREFIX "unit.level2."
     PROPERTIES TIMEOUT 60
@@ -199,6 +209,7 @@ add_executable(gdm_unit_level3
     tests/unit/wells/test_WellJobs.cpp
 )
 target_link_libraries(gdm_unit_level3 PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_unit_level3 PRIVATE GDM_EXE_NAME="gdm_unit_level3")
 catch_discover_tests(gdm_unit_level3
     TEST_PREFIX "unit.level3."
     PROPERTIES TIMEOUT 60
@@ -217,6 +228,7 @@ add_executable(gdm_unit_level4
     tests/unit/math/test_TimeIntegrator_standalone.cpp
 )
 target_link_libraries(gdm_unit_level4 PRIVATE gdm_core Catch2::Catch2WithMain)
+target_compile_definitions(gdm_unit_level4 PRIVATE GDM_EXE_NAME="gdm_unit_level4")
 catch_discover_tests(gdm_unit_level4
     TEST_PREFIX "unit.level4."
     PROPERTIES TIMEOUT 120
@@ -239,6 +251,7 @@ set(EXAMPLE_NAMES
 foreach(ex IN LISTS EXAMPLE_NAMES)
     add_executable(${ex} examples/${ex}.cpp)
     target_link_libraries(${ex} PRIVATE gdm_core)
+    target_compile_definitions(${ex} PRIVATE GDM_EXE_NAME="${ex}")
 endforeach()
 
 add_custom_target(run_examples
