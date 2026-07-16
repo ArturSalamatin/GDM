@@ -22,7 +22,7 @@ namespace {
 
 // --- Scalar solve function for experimental configurations ---
 template<typename SolverType>
-SolveResult solve_with_scalar(LinearProblem& lp, int maxIter, typename SolverType::params& prm)
+SolveResult solve_with_scalar(LinearProblem& lp, size_t maxIter, typename SolverType::params& prm)
 {
     prm.solver.maxiter = maxIter;
 

@@ -67,7 +67,7 @@ namespace reservoir_simulator
 
 			void ResetProblem();
 
-			SolveResult Solve(int maxIter);
+			SolveResult Solve(size_t maxIter);
 
 			size_t CellCount() const { return cellNmbr; }
 			size_t RhsSize() const { return rhsSize; }
