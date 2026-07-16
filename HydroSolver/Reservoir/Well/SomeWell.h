@@ -174,10 +174,11 @@ namespace reservoir_simulator
 				double nextTimeMoment) = 0;
 
 
+#ifdef GDM_DUMP_DEBUG
 			void PrintWell() const;
 			std::string OutputPath() const;
-
 			void PrintWellMERDebit() const;
+#endif
 
 			template<typename stream>
 			void PrintWellDebitLength(stream& myfile) const
