@@ -162,7 +162,9 @@ namespace reservoir_simulator
 			reservoir_simulator::MessageFactory::WellOverallTimeFrame(NameWide(), KnownExploitationPeriod());
 			mer_Data->CleanMER_record();
 			reservoir_simulator::MessageFactory::WellOverallTimeFrame(NameWide(), KnownExploitationPeriod());
+#ifdef GDM_DUMP_DEBUG
 			mer_Data->PrintMER("inside_well");
+#endif
 			reservoir_simulator::MessageFactory::MERInitializationDone(NameWide());
 		}
 

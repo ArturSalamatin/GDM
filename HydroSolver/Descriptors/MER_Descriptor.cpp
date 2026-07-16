@@ -1,6 +1,7 @@
 #include <fstream>
 #include "MER_Descriptor.h"
 #include "../Data/ExceptionFactory.h"
+#include "../Helpers/DebugDump.h"
 
 namespace reservoir_simulator
 {
@@ -174,14 +175,16 @@ namespace reservoir_simulator
 				}
 			}
 			//	initialize_MER(itsData);
+#ifdef GDM_DUMP_DEBUG
 			PrintMER();
+#endif
 		}
 
+#ifdef GDM_DUMP_DEBUG
 		void MER_Data::PrintMER() const
 		{
 			std::ofstream myfile;
-			std::string str{ "test_MER_" + Name() + ".txt" };
-			myfile.open(str);
+			myfile.open(debug_dump::DebugDump::path("test_MER_" + Name() + ".txt"));
 			sendMER2Stream(myfile);
 			myfile.close();
 		}
@@ -189,11 +192,11 @@ namespace reservoir_simulator
 		void MER_Data::PrintMER(const std::string& str0) const
 		{
 			std::ofstream myfile;
-			std::string str{ "test_MER_" + Name() + str0 + ".txt" };
-			myfile.open(str);
+			myfile.open(debug_dump::DebugDump::path("test_MER_" + Name() + str0 + ".txt"));
 			sendMER2Stream(myfile);
 			myfile.close();
 		}
+#endif
 
 		std::string MER_Data::Name() const
 		{

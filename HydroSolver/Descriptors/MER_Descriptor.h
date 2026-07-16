@@ -89,8 +89,10 @@ namespace reservoir_simulator
 
 			std::string Name() const;
 
+#ifdef GDM_DUMP_DEBUG
 			void PrintMER() const;
 			void PrintMER(const std::string& str) const;
+#endif
 
 		protected:
 			mutable double itsBeginOfCurPeriod = std::numeric_limits<double>::min();
