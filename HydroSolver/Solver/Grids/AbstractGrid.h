@@ -275,6 +275,7 @@ namespace reservoir_simulator
 					}
 				}
 			}
+			// print connectivityGraph to file
 #ifdef GDM_DUMP_DEBUG
 			void printConnectivity()
 			{

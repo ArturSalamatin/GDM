@@ -14,6 +14,7 @@ namespace reservoir_simulator
 
 		/////////////////// SparsityPattern
 #ifdef GDM_DUMP_DEBUG
+		// print connectivityGraph to file
 		void SparsityPattern::printPattern()
 		{
 			std::ofstream myfile{ debug_dump::DebugDump::path("test_SparsityPattern.txt") };
@@ -21,6 +22,7 @@ namespace reservoir_simulator
 			myfile.close();
 		}
 
+		// print indices of val-vector with diagonal blocks
 		void SparsityPattern::printDiagonalBlocks()
 		{
 			std::ofstream myfile{ debug_dump::DebugDump::path("test_SparsityPattern_DiagBlocks.txt") };
@@ -28,6 +30,7 @@ namespace reservoir_simulator
 			myfile.close();
 		}
 
+		// print indices of val-vector with off-diagonal blocks
 		void SparsityPattern::printOffDiagBlocks()
 		{
 			std::ofstream myfile{ debug_dump::DebugDump::path("test_SparsityPattern_OffDiagBlocks.txt") };
