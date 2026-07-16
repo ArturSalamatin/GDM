@@ -118,7 +118,7 @@ namespace reservoir_simulator
 		}
 
 		MER_Data::MER_Data(const WellName& name,
-			const SingleWell_MER_Data& itsData) noexcept :
+			const SingleWell_MER_Data& itsData) :
 			itsName{ name },
 			MER_records{ itsData }
 		{

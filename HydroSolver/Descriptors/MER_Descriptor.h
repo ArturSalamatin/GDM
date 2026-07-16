@@ -75,7 +75,7 @@ namespace reservoir_simulator
 		public:
 			MER_Data() noexcept = default;
 			MER_Data(const WellName& name,
-				const SingleWell_MER_Data& itsData) noexcept;
+				const SingleWell_MER_Data& itsData);
 			/*void initialize_MER(const SingleWell_MER_Data& itsData)
 			{
 				MER_records = itsData;
