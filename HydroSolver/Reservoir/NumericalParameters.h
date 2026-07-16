@@ -64,7 +64,7 @@ namespace reservoir_simulator
 		size_t WastedTrialsCount() const { return wastedTrialsCount; }
 		size_t MaxNewtonIterationNmbr() const { return newtonMaxIterNmbr; }
 		double CurrentAMG_Error() const { return AMG_curError; }
-		size_t CurrentAMG_maxSolverIterationCount() const { return (int)round(AMG_maxSolverIterCount); }
+		size_t CurrentAMG_maxSolverIterationCount() const { return static_cast<size_t>(round(AMG_maxSolverIterCount)); }
 		size_t CurrentAMG_IterationsCount() const { return AMG_currentIterationCount; }
 		bool CurrentANG_IsAccuracyReached() const
 		{

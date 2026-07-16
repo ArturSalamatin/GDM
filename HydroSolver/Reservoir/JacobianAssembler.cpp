@@ -82,7 +82,7 @@ namespace reservoir_simulator
 			OilMobilitySum = 0.0,
 			WaterMobilitySum = 0.0;
 
-		for (int neibCount = 0; neibCount < neighbourCells.size(); neibCount++)
+		for (size_t neibCount = 0; neibCount < neighbourCells.size(); neibCount++)
 		{
 			const TwoPhaseFlowCell& neighbourCell = *neighbourCells[neibCount];
 
@@ -134,7 +134,7 @@ namespace reservoir_simulator
 			blDiag[2] += bwCell->DensityWater() * f_water * c1 * p_grad;
 			blOffDiag[2] += bwCell->DensityWater() * f_water * c3 * p_grad;
 
-			problem.AddOffDiagBlock(l, neibCount, blOffDiag);
+			problem.AddOffDiagBlock(l, static_cast<int>(neibCount), blOffDiag);
 		}
 
 		blDiag[1] -= OilMobilitySum;

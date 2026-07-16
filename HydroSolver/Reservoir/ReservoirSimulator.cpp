@@ -165,7 +165,7 @@ namespace reservoir_simulator
 		ReservoirSimulator::GetFlowFieldsPtr(double multiplier) const
 	{
 		phasePortrait::SomeFlowField::SequencePtr vec;
-		for (int k = 0; k < nz(); k++)
+		for (size_t k = 0; k < nz(); k++)
 		{
 			vec.push_back(std::make_shared<phasePortrait::SomeFlowField>(flowFields[k]));
 			vec[k]->SetMutiplier(multiplier);
@@ -190,7 +190,7 @@ namespace reservoir_simulator
 	{
 		std::vector<double> WaterSaturation;
 		WaterSaturation.reserve(Grid.TotalCellsNmbr());
-		for (int l = 0; l < Grid.TotalCellsNmbr(); l++)
+		for (size_t l = 0; l < Grid.TotalCellsNmbr(); l++)
 			WaterSaturation.push_back(Grid[Grid.ConvertGlobal2Local(l)].SWater());
 		return WaterSaturation;
 	}
@@ -199,7 +199,7 @@ namespace reservoir_simulator
 	{
 		std::vector<double> p;
 		p.reserve(Grid.TotalCellsNmbr());
-		for (int l = 0; l < Grid.TotalCellsNmbr(); l++)
+		for (size_t l = 0; l < Grid.TotalCellsNmbr(); l++)
 			p.push_back(Grid[Grid.ConvertGlobal2Local(l)].P());
 		return p;
 	}
@@ -438,7 +438,7 @@ namespace reservoir_simulator
 		std::vector<std::vector<std::vector<double>>> j_X, j_Y;
 		std::tie(jOil_X, jOil_Y, j_X, j_Y) = OverallFluxes();
 
-		for (int k = 0, l = 0; k < Grid.Nz(); k++)
+		for (size_t k = 0; k < Grid.Nz(); k++)
 		{
 			flowFields[k].add_snapshot(numPrm.CurrentTimeMoment(), std::move(j_X[k]), std::move(j_Y[k])); // time is in days
 		}
@@ -486,7 +486,7 @@ namespace reservoir_simulator
 		const std::vector<size_t> grid_dim{ Grid.Nx(), Grid.Ny(), Grid.Nz() };
 		wstream.write(reinterpret_cast<const char*>(&grid_dim[0]), grid_dim.size() * sizeof(size_t));
 		// write every z-cross-section one-by-one
-		for (int k = 0; k < flowFields.size(); k++)
+		for (size_t k = 0; k < flowFields.size(); k++)
 			flowFields[k].write(wstream);
 		wstream.close();
 	}
@@ -520,7 +520,7 @@ namespace reservoir_simulator
 		const std::vector<size_t> grid_dim{ Grid.Nx(), Grid.Ny(), Grid.Nz() };
 		wstream.write(reinterpret_cast<const char*>(&grid_dim[0]), grid_dim.size() * sizeof(size_t));
 		// write every z-cross-section one-by-one
-		for (int k = 0; k < flowFields.size(); k++)
+		for (size_t k = 0; k < flowFields.size(); k++)
 			flowFields[k].write(wstream);
 		wstream.close();
 

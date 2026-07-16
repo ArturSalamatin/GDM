@@ -64,7 +64,7 @@ private:
 		auto parser = UniversalSCParser::CP1251SVParser(path);
 		auto data = parser.Read();
 
-		for (int t = 0; t < data.size(); t++)
+		for (size_t t = 0; t < data.size(); t++)
 		{
 			int l = 0;
 			result.push_back(std::vector<std::vector<std::vector<double>>>{});
