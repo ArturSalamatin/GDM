@@ -1,6 +1,7 @@
 #include "../../stdafx.h"
 #include "LinearProblem.h"
 #include "MatrixCSR.h"
+#include "../../Helpers/DebugDump.h"
 
 namespace reservoir_simulator
 {
@@ -16,10 +17,11 @@ namespace reservoir_simulator
 			return *matrix.get();
 		}
 
+#ifdef GDM_DUMP_DEBUG
 		void LinearProblem::PrintRHS() const
 		{
 			std::ofstream myfile;
-			myfile.open("test_RHS.txt");
+			myfile.open(debug_dump::DebugDump::path("test_RHS.txt"));
 			myfile.precision(std::numeric_limits< double >::max_digits10);
 
 			size_t mSize = B * cellNmbr;
@@ -44,7 +46,7 @@ namespace reservoir_simulator
 		void LinearProblem::PrintCorrections() const
 		{
 			std::ofstream myfile;
-			myfile.open("test_Corrections.txt");
+			myfile.open(debug_dump::DebugDump::path("test_Corrections.txt"));
 
 			size_t mSize = B * cellNmbr;
 
@@ -55,6 +57,7 @@ namespace reservoir_simulator
 
 			myfile.close();
 		}
+#endif
 
 		// nummber of equations per cell
 		unsigned char LinearProblem::EqNmbr() const { return B; }

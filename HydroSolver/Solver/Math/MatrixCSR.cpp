@@ -1,6 +1,9 @@
-#include <fstream>
 #include "MatrixCSR.h"
 #include "CRSStructure.h"
+#ifdef GDM_DUMP_DEBUG
+#include <fstream>
+#include "../../Helpers/DebugDump.h"
+#endif
 
 namespace reservoir_simulator
 {
@@ -84,10 +87,11 @@ namespace reservoir_simulator
 			return dense;
 		}
 
+#ifdef GDM_DUMP_DEBUG
 		void MatrixCSR::PrintCRS() const
 		{
 			std::ofstream myfile;
-			myfile.open("test_Matrix.txt");
+			myfile.open(debug_dump::DebugDump::path("test_Matrix.txt"));
 			sendCRS2Stream(myfile);
 			myfile.close();
 		}
@@ -95,10 +99,11 @@ namespace reservoir_simulator
 		void MatrixCSR::PrintDiagBlocks() const
 		{
 			std::ofstream myfile;
-			myfile.open("test_diagValues.txt");
+			myfile.open(debug_dump::DebugDump::path("test_diagValues.txt"));
 			sendDiagVals2Stream(myfile);
 			myfile.close();
 		}
+#endif
 
 	} // linear_problem
 } // reservoir_simulator

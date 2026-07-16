@@ -42,10 +42,11 @@ namespace reservoir_simulator
 		public:
 			const MatrixCSR& Matrix() const;
 			MatrixCSR& Matrix();
+#ifdef GDM_DUMP_DEBUG
 			void Print() const;
 			void PrintRHS() const;
-
 			void PrintCorrections() const;
+#endif
 
 			// nummber of equations per cell
 			unsigned char EqNmbr() const;

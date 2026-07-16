@@ -19,12 +19,11 @@ namespace reservoir_simulator
 			unsigned char eqNmbr; // nmbr of equations per grid cell
 			size_t blockSize; // number of non-zero elements in the unit block
 
-			// print connectivityGraph to file
+#ifdef GDM_DUMP_DEBUG
 			void printPattern();
-			// print indices of val-vector with diagonal blocks
 			void printDiagonalBlocks();
-			// print indices of val-vector with off-diagonal blocks
 			void printOffDiagBlocks();
+#endif
 
 			std::vector<size_t> row_raw, col_raw; // matrix pattern for cells only. No wells.
 			std::vector<size_t> diagBlocks_raw; // indices in value array with elements of diagonal blocks

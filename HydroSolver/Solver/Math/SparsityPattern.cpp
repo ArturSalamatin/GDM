@@ -1,7 +1,10 @@
 
 #include <numeric>
-#include <fstream>
 #include "SparsityPattern.h"
+#ifdef GDM_DUMP_DEBUG
+#include <fstream>
+#include "../../Helpers/DebugDump.h"
+#endif
 
 namespace reservoir_simulator
 {
@@ -10,29 +13,28 @@ namespace reservoir_simulator
 
 
 		/////////////////// SparsityPattern
-		// print connectivityGraph to file
+#ifdef GDM_DUMP_DEBUG
 		void SparsityPattern::printPattern()
 		{
-			std::ofstream myfile{ "test_SparsityPattern.txt" };
+			std::ofstream myfile{ debug_dump::DebugDump::path("test_SparsityPattern.txt") };
 			printPattern2Stream(myfile, row_raw, col_raw);
 			myfile.close();
 		}
 
-		// print indices of val-vector with diagonal blocks
 		void SparsityPattern::printDiagonalBlocks()
 		{
-			std::ofstream myfile{ "test_SparsityPattern_DiagBlocks.txt" };
+			std::ofstream myfile{ debug_dump::DebugDump::path("test_SparsityPattern_DiagBlocks.txt") };
 			printDiagBlocks2Stream(myfile, blockPattern, diagBlocks_raw, row_raw.size());
 			myfile.close();
 		}
 
-		// print indices of val-vector with off-diagonal blocks
 		void SparsityPattern::printOffDiagBlocks()
 		{
-			std::ofstream myfile{ "test_SparsityPattern_OffDiagBlocks.txt" };
+			std::ofstream myfile{ debug_dump::DebugDump::path("test_SparsityPattern_OffDiagBlocks.txt") };
 			printOffDiagBlocks2Stream(myfile, blockPattern, offDiagBlocks_raw);
 			myfile.close();
 		}
+#endif
 
 		size_t SparsityPattern::TotalNmbrOfBlocks() const { return totalNmbrOfBlocks; }
 
