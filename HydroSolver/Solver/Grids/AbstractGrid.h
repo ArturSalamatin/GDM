@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Cells/AbstractCells.h"
 #include "GridDescriptors.h"
+#include "../../Helpers/DebugDump.h"
 
 namespace reservoir_simulator
 {
@@ -201,7 +202,9 @@ namespace reservoir_simulator
 				Cells = std::move(cells);
 				CellsInactive = std::move(cellsInactive);
 				SetConnectivityGraph_3D(active_cells);
+#ifdef GDM_DUMP_DEBUG
 				printConnectivity();
+#endif
 			}
 
 			void SetConnectivityGraph_3D(const std::vector<bool>& active_cells)
@@ -273,10 +276,11 @@ namespace reservoir_simulator
 				}
 			}
 			// print connectivityGraph to file
+#ifdef GDM_DUMP_DEBUG
 			void printConnectivity()
 			{
 				std::ofstream myfile;
-				myfile.open("test_connections.txt");
+				myfile.open(debug_dump::DebugDump::path("test_connections.txt"));
 
 				for (int l = 0; l < activeCellsNmbr; l++)
 				{
@@ -287,6 +291,7 @@ namespace reservoir_simulator
 					myfile << std::endl;
 				}
 			}
+#endif
 
 			const ProcessCell& operator() (size_t i, size_t j, size_t k) const
 			{

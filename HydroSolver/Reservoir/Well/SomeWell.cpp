@@ -1,4 +1,5 @@
 #include "SomeWell.h"
+#include "../../Helpers/DebugDump.h"
 
 namespace reservoir_simulator
 {
@@ -77,13 +78,13 @@ namespace reservoir_simulator
 			return mer_Data->knownExploitationPeriod();
 		}
 
+#ifdef GDM_DUMP_DEBUG
 		void SomeWell::PrintWellMERDebit() const
 		{
-			std::ofstream myFile{ OutputPath() + "//well_MER_debit.txt"};
+			std::ofstream myFile{ OutputPath() + "/well_MER_debit.txt"};
 			PrintWellDebitLength(myFile);
 			myFile.close();
 		}
-
 
 		void SomeWell::PrintWell() const
 		{
@@ -94,8 +95,9 @@ namespace reservoir_simulator
 
 		std::string SomeWell::OutputPath() const
 		{
-			return "WellTestData//" + Name();
+			return debug_dump::DebugDump::dir("WellTestData") + Name();
 		}
+#endif
 
 
 
@@ -150,7 +152,9 @@ namespace reservoir_simulator
 			BringLastPerforationToLastMER();
 			reservoir_simulator::MessageFactory::WellInitializationDone(NameWide());
 
+#ifdef GDM_DUMP_DEBUG
 			PrintWell();
+#endif
 		}
 
 		void SomeWell::initialize_MER_data(std::unique_ptr<const mer_descriptor::MER_Data>&& mer)
@@ -162,7 +166,9 @@ namespace reservoir_simulator
 			reservoir_simulator::MessageFactory::WellOverallTimeFrame(NameWide(), KnownExploitationPeriod());
 			mer_Data->CleanMER_record();
 			reservoir_simulator::MessageFactory::WellOverallTimeFrame(NameWide(), KnownExploitationPeriod());
+#ifdef GDM_DUMP_DEBUG
 			mer_Data->PrintMER("inside_well");
+#endif
 			reservoir_simulator::MessageFactory::MERInitializationDone(NameWide());
 		}
 

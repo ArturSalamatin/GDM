@@ -64,8 +64,10 @@ namespace reservoir_simulator
 
 			std::vector<std::vector<double>> toDense() const;
 
+#ifdef GDM_DUMP_DEBUG
 			void PrintCRS() const;
 			void PrintDiagBlocks() const;
+#endif
 
 		private:
 

@@ -5,6 +5,7 @@
 #include "buckley_leverett_analytical.h"
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
@@ -504,7 +505,8 @@ TEST_CASE("BL validation: CSV export for visual check",
         }
     }
 
-    std::ofstream csv("bl_validation_profile.csv");
+    std::filesystem::create_directories("results/validation");
+    std::ofstream csv("results/validation/bl_validation_profile.csv");
     csv << "x,Sw_GDM,Sw_analytical\n";
     for (size_t i = 0; i < Nx; ++i)
         csv << x_centers[i] << "," << Sw_gdm[i] << "," << Sw_analytical[i] << "\n";
@@ -516,6 +518,6 @@ TEST_CASE("BL validation: CSV export for visual check",
         sum_sq += diff * diff;
     }
     double L2 = std::sqrt(sum_sq * hx / Lx);
-    INFO("CSV written to bl_validation_profile.csv, L2 = " << L2);
+    INFO("CSV written to results/validation/bl_validation_profile.csv, L2 = " << L2);
     CHECK(true);
 }
