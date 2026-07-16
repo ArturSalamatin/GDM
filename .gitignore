@@ -9,16 +9,9 @@ HydroSolver/AMGSolver/
 x64
 MatLab
 Support
-test_connections.txt
-test_diagValues.txt
-test_Matrix.txt
-test_MER_*.txt
-test_MER_*inside_well.txt
-test_SparsityPattern_DiagBlocks.txt
-test_SparsityPattern_OffDiagBlocks.txt
-test_SparsityPattern.txt
-WellTestData/INJ/well_MER_debit.txt
-bl_validation_profile.csv
+# Debug dump artifacts (legacy, normally in results/)
+test_*.txt
+WellTestData/
 
 
 # Archives
@@ -97,39 +90,3 @@ Desktop.ini
 !vault/**
 vault/GDM/.obsidian/
 
-test_connections.txt
-test_diagValues.txt
-test_Matrix.txt
-test_SparsityPattern_DiagBlocks.txt
-test_SparsityPattern_OffDiagBlocks.txt
-test_SparsityPattern.txt
-WellTestData/P1/well_MER_debit.txt
-WellTestData/P2/well_MER_debit.txt
-WellTestData/P3/well_MER_debit.txt
-WellTestData/P4/well_MER_debit.txt
-WellTestData/PROD/well_MER_debit.txt
-WellTestData/INJ-1/well_MER_debit.txt
-WellTestData/INJ-2/well_MER_debit.txt
-WellTestData/INJ-3/well_MER_debit.txt
-WellTestData/PROD-1/well_MER_debit.txt
-WellTestData/PROD-2/well_MER_debit.txt
-WellTestData/PROD-3/well_MER_debit.txt
-WellTestData/PROD-4/well_MER_debit.txt
-WellTestData/INJ_A/well_MER_debit.txt
-WellTestData/INJ_B/well_MER_debit.txt
-HydroSolver/test_connections.txt
-HydroSolver/test_Corrections.txt
-HydroSolver/test_diagValues.txt
-HydroSolver/test_Matrix.txt
-HydroSolver/test_MER_273802.txt
-HydroSolver/test_MER_273802inside_well.txt
-HydroSolver/test_MER_273803.txt
-HydroSolver/test_MER_273803inside_well.txt
-HydroSolver/test_MER_273804.txt
-HydroSolver/test_MER_273804inside_well.txt
-HydroSolver/test_MER_274367.txt
-HydroSolver/test_MER_274367inside_well.txt
-HydroSolver/test_RHS.txt
-HydroSolver/test_SparsityPattern_DiagBlocks.txt
-HydroSolver/test_SparsityPattern_OffDiagBlocks.txt
-HydroSolver/test_SparsityPattern.txt
