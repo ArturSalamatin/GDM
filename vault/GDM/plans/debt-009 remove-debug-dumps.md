@@ -6,7 +6,7 @@ date: 2026-07-16
 issue: DEBT-009
 github: 30
 branch: refactor/debt-009/remove-debug-dumps
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-16
   round: 2
