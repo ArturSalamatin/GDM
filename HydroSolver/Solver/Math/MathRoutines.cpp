@@ -53,15 +53,15 @@
 {
 	double hx = mesh[1] - mesh[0]; // get mesh step
 	double x0 = mesh[0]; // get origin
-	return std::floor((queryX - x0) / hx); // get the lower index
+	return static_cast<int>(std::floor((queryX - x0) / hx));
 }
 
  int math_routines::MathRoutines::LowerPointNonUniformMesh(const std::vector<double>& mesh, double queryX)
 {
 	if (queryX < mesh[0] || queryX > mesh.back())
-		return NAN;
+		return -1;
 	auto iter = std::distance(mesh.begin(), upper_bound(mesh.begin(), mesh.end(), queryX)) - 1;
-	return iter;
+	return static_cast<int>(iter);
 }
 
  std::array<double, 3> math_routines::MathRoutines::prod(std::array<double, 3> arr, double s)
