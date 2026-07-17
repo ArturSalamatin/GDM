@@ -27,7 +27,7 @@ namespace reservoir_simulator
 			WellEnvironment() noexcept;
 			WellEnvironment(const WellPosition& intersectionCoords,
 				const std::vector<const cell::TwoPhaseFlowCell*>& cells_,
-				const std::vector<size_t>& itsLocalIDs) noexcept;
+				const std::vector<size_t>& itsLocalIDs);
 
 		protected:
 			std::vector<double> factor; // l*2*pi/log(rApp/rWell)
@@ -165,7 +165,7 @@ namespace reservoir_simulator
 				std::unique_ptr<const mer_descriptor::MER_Data>&& mer,
 				const set_of_points::PerforationsOfWell& perforationsOfWell,
 				const std::vector<const cell::TwoPhaseFlowCell*>& cells_,
-				const std::vector<size_t>& itsLocalIDs, double itsAppWellRadius) noexcept;
+				const std::vector<size_t>& itsLocalIDs, double itsAppWellRadius);
 
 			void initialize_MER_data(
 				std::unique_ptr<const mer_descriptor::MER_Data>&& mer);

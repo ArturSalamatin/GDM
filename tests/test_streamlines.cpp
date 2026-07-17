@@ -67,10 +67,10 @@ static void export_streamlines_csv(
     std::ofstream ofs(path);
     ofs << "trajectory_id,point_id,t,x,y\n";
     for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i)
-        for (size_t j = 0; j < portrait[i].size(); ++j)
+        for (size_t j = 0; j < portrait[static_cast<int>(i)].size(); ++j)
             ofs << i << "," << j << ","
-                << portrait[i][j].t() << ","
-                << portrait[i][j].x() << "," << portrait[i][j].y() << "\n";
+                << portrait[static_cast<int>(i)][j].t() << ","
+                << portrait[static_cast<int>(i)][j].x() << "," << portrait[static_cast<int>(i)][j].y() << "\n";
 }
 
 static void export_velocity_csv(
@@ -142,23 +142,23 @@ TEST_CASE("Streamlines: single injector radial",
     SECTION("trajectories are not empty") {
         for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i) {
             INFO("trajectory " << i);
-            REQUIRE(portrait[i].size() >= 2);
+            REQUIRE(portrait[static_cast<int>(i)].size() >= 2);
         }
     }
 
     SECTION("all points are finite and within domain") {
         for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i)
-            for (size_t j = 0; j < portrait[i].size(); ++j) {
+            for (size_t j = 0; j < portrait[static_cast<int>(i)].size(); ++j) {
                 INFO("traj=" << i << " pt=" << j);
-                REQUIRE(std::isfinite(portrait[i][j].x()));
-                REQUIRE(std::isfinite(portrait[i][j].y()));
+                REQUIRE(std::isfinite(portrait[static_cast<int>(i)][j].x()));
+                REQUIRE(std::isfinite(portrait[static_cast<int>(i)][j].y()));
             }
     }
 
     SECTION("trajectories move outward from injector") {
         for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i) {
-            double r_start = std::hypot(portrait[i][0].x() - cx, portrait[i][0].y() - cy);
-            double r_end   = std::hypot(portrait[i].end_point().x() - cx, portrait[i].end_point().y() - cy);
+            double r_start = std::hypot(portrait[static_cast<int>(i)][0].x() - cx, portrait[static_cast<int>(i)][0].y() - cy);
+            double r_end   = std::hypot(portrait[static_cast<int>(i)].end_point().x() - cx, portrait[static_cast<int>(i)].end_point().y() - cy);
             INFO("trajectory " << i << ": r_start=" << r_start << " r_end=" << r_end);
             CHECK(r_end >= r_start);
         }
@@ -215,24 +215,24 @@ TEST_CASE("Streamlines: two wells",
     SECTION("trajectories are not empty") {
         for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i) {
             INFO("trajectory " << i);
-            REQUIRE(portrait[i].size() >= 2);
+            REQUIRE(portrait[static_cast<int>(i)].size() >= 2);
         }
     }
 
     SECTION("all points are finite") {
         for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i)
-            for (size_t j = 0; j < portrait[i].size(); ++j) {
+            for (size_t j = 0; j < portrait[static_cast<int>(i)].size(); ++j) {
                 INFO("traj=" << i << " pt=" << j);
-                REQUIRE(std::isfinite(portrait[i][j].x()));
-                REQUIRE(std::isfinite(portrait[i][j].y()));
+                REQUIRE(std::isfinite(portrait[static_cast<int>(i)][j].x()));
+                REQUIRE(std::isfinite(portrait[static_cast<int>(i)][j].y()));
             }
     }
 
     SECTION("trajectories advance toward producer") {
         double min_dist = std::numeric_limits<double>::max();
         for (size_t i = 0; i < portrait.NumberOfTrajectories(); ++i) {
-            double d = std::hypot(portrait[i].end_point().x() - prod_x,
-                                  portrait[i].end_point().y() - prod_y);
+            double d = std::hypot(portrait[static_cast<int>(i)].end_point().x() - prod_x,
+                                  portrait[static_cast<int>(i)].end_point().y() - prod_y);
             min_dist = std::min(min_dist, d);
         }
         double start_dist = std::hypot(inj_x - prod_x, inj_y - prod_y);

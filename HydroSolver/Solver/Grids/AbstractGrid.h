@@ -38,7 +38,7 @@ namespace reservoir_simulator
 //#ifdef	USE_PARALLEL
 //#pragma omp parallel for
 //#endif
-				for (int l = 0; l < ActiveCellsNmbr(); l++)
+				for (size_t l = 0; l < ActiveCellsNmbr(); l++)
 					Cells[l].AcceptState();
 			}
 			void ReverseState()
@@ -46,7 +46,7 @@ namespace reservoir_simulator
 //#ifdef	USE_PARALLEL
 //#pragma omp parallel for
 //#endif
-				for (int l = 0; l < ActiveCellsNmbr(); l++)
+				for (size_t l = 0; l < ActiveCellsNmbr(); l++)
 					Cells[l].ReverseState();
 			}
 			void UpdateState(const std::vector<double>& corrections, int eqNmbr)
@@ -54,14 +54,14 @@ namespace reservoir_simulator
 //#ifdef	USE_PARALLEL
 //#pragma omp parallel for
 //#endif
-				for (int l = 0; l < ActiveCellsNmbr(); l++)
+				for (size_t l = 0; l < ActiveCellsNmbr(); l++)
 					Cells[l].UpdateState(corrections, l * eqNmbr);
 			}
 
 			const std::vector<ProcessCell*> GetNeighboursPointer(int l)
 			{
 				std::vector<ProcessCell*> neighbours;
-				for (int neighbourIdx = 0; neighbourIdx < connectivityGraph[l].size(); neighbourIdx++)
+				for (size_t neighbourIdx = 0; neighbourIdx < connectivityGraph[l].size(); neighbourIdx++)
 				{
 
 					neighbours.push_back(&(Cells[connectivityGraph[l][neighbourIdx]]));
@@ -136,7 +136,7 @@ namespace reservoir_simulator
 				cell_idx_Local2Global.reserve(totalCellNmbr);
 				/* loop through every cell, and assemble the
 				 * local/global indices vectors */
-				for (int l = 0, l0 = -1; l < totalCellNmbr; l++)
+				for (size_t l = 0; l < totalCellNmbr; l++)
 				{
 					if ((active_cells[l]))
 					{

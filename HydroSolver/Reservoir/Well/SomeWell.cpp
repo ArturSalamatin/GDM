@@ -9,7 +9,7 @@ namespace reservoir_simulator
 
 		WellEnvironment::WellEnvironment(const WellPosition& intersectionCoords,
 			const std::vector<const cell::TwoPhaseFlowCell*>& cells_,
-			const std::vector<size_t>& itsLocalIDs) noexcept :
+			const std::vector<size_t>& itsLocalIDs) :
 			WellTrajectory{ intersectionCoords, cells_ }, ItsLocalIDs{ itsLocalIDs } 
 		{ }
 
@@ -107,7 +107,7 @@ namespace reservoir_simulator
 			std::unique_ptr<const mer_descriptor::MER_Data>&& mer,
 			const set_of_points::PerforationsOfWell& perforationsOfWell,
 			const std::vector<const cell::TwoPhaseFlowCell*>& cells_,
-			const std::vector<size_t>& itsLocalIDs, double itsAppWellRadius) noexcept
+			const std::vector<size_t>& itsLocalIDs, double itsAppWellRadius)
 			: WellEnvironment(intersectionCoords, cells_, itsLocalIDs),
 			itsName(name), itsGUID(guid), itsApparentWellRadius(itsAppWellRadius),
 			ItsAccumulatedPerforations(perforationsOfWell)

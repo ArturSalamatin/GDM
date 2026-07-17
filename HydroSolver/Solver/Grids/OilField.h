@@ -38,7 +38,7 @@ namespace reservoir_simulator
 			using base::totalCellNmbr;
 
 		protected:
-			TwoPhaseFlowCell MakeCell(const int l, const std::vector<double>& permeability, const std::vector<double>& porosity,
+			TwoPhaseFlowCell MakeCell(const size_t l, const std::vector<double>& permeability, const std::vector<double>& porosity,
 				const double resOilSaturation, const double resWaterSaturation,
 				const std::vector<double>& s_water, const std::vector<double>& p,
 				const std::vector<double>& X, const std::vector<double>& Y, const std::vector<double>& Z,

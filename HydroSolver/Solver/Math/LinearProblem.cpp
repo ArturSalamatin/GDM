@@ -111,7 +111,7 @@ namespace reservoir_simulator
 			std::fill(solutionCorrections.begin(), solutionCorrections.end(), 0.0);
 		}
 
-		SolveResult LinearProblem::Solve(int maxIter)
+		SolveResult LinearProblem::Solve(size_t maxIter)
 		{
 			prm.solver.maxiter = maxIter;
 

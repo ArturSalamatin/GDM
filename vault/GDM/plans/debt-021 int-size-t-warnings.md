@@ -6,7 +6,7 @@ date: 2026-07-16
 issue: DEBT-021
 github: 31
 branch: refactor/debt-021/int-size-t-warnings
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-16
   round: 4
