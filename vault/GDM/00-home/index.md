@@ -67,6 +67,7 @@ date: 2026-06-27
 - [[debt-021 int-size-t-warnings]] — DEBT-021: int переменные цикла итерируют по size_t границам (warnings C4267/C4297)
 - [[bug-022 mathroutines-nan-ub]] — BUG-022: return NAN из функции int — UB в LowerPointNonUniformMesh
 - [[debt-022 activecellsnmbr-size-t]] — DEBT-022: activeCellsNmbr int → size_t в AbstractGrid
+- [[debt-028 neibidx-size-t]] — DEBT-028: int neibIdx → size_t в LinearProblem::AddOffDiagBlock
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
