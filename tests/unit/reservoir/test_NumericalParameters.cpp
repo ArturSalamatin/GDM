@@ -89,3 +89,49 @@ TEST_CASE("NumericalParameters: PI controller increase_schemeTau path",
     np.increase_schemeTau();
     CHECK(np.CurrentSchemeTau() > tau_before);
 }
+
+struct TestableNumericalParameters : NumericalParameters {
+    void set_AMG_maxSolverIterCount(int val) { AMG_maxSolverIterCount = val; }
+    int get_AMG_maxSolverIterCount() const { return AMG_maxSolverIterCount; }
+    double get_AMG_maxSolverIterAccum() const { return AMG_maxSolverIterAccum; }
+};
+
+TEST_CASE("NumericalParameters: AMG iter count adaptation with accumulator",
+          "[unit][level2][reservoir][NumericalParameters]") {
+    TestableNumericalParameters np;
+
+    CHECK(np.CurrentAMG_maxSolverIterationCount() == 45);
+    CHECK(np.get_AMG_maxSolverIterAccum() == Approx(0.0));
+
+    np.set_AMG_maxSolverIterCount(20);
+    CHECK(np.CurrentAMG_maxSolverIterationCount() == 20);
+
+    np.set_currentAMG_Error(1.0);
+    np.update_currentAMGState({10, 0.5, true});
+    CHECK(np.get_AMG_maxSolverIterCount() == 20);
+    CHECK(np.get_AMG_maxSolverIterAccum() == Approx(0.4));
+
+    np.set_currentAMG_Error(0.5);
+    np.update_currentAMGState({10, 0.3, true});
+    CHECK(np.get_AMG_maxSolverIterCount() == 20);
+    CHECK(np.get_AMG_maxSolverIterAccum() == Approx(0.8));
+
+    np.set_currentAMG_Error(0.3);
+    np.update_currentAMGState({10, 0.2, true});
+    CHECK(np.get_AMG_maxSolverIterCount() == 21);
+    CHECK(np.get_AMG_maxSolverIterAccum() == Approx(0.2));
+
+    np.set_AMG_maxSolverIterCount(45);
+    np.set_currentAMG_Error(1.0);
+    np.update_currentAMGState({10, 0.5, true});
+    CHECK(np.get_AMG_maxSolverIterCount() == 45);
+
+    np.set_AMG_maxSolverIterCount(10);
+    np.set_currentAMG_Error(0.0);
+    np.update_currentAMGState({10, 0.8, true});
+    CHECK(np.get_AMG_maxSolverIterCount() == 15);
+
+    np.set_currentAMG_maxSolverIterationCount();
+    CHECK(np.CurrentAMG_maxSolverIterationCount() == 45);
+    CHECK(np.get_AMG_maxSolverIterAccum() == Approx(0.0));
+}
