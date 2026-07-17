@@ -167,12 +167,12 @@ namespace reservoir_simulator
 			Matrix().AddDiagBlock(l, data);
 		}
 
-		void LinearProblem::AddOffDiagBlock(size_t l, int neibIdx, std::vector<double>& data)
+		void LinearProblem::AddOffDiagBlock(size_t l, size_t neibIdx, std::vector<double>& data)
 		{
 			Matrix().AddOffDiagBlock(l, neibIdx, data);
 		}
 
-		void LinearProblem::AddOffDiagBlock(size_t l, int neibIdx, const double* data)
+		void LinearProblem::AddOffDiagBlock(size_t l, size_t neibIdx, const double* data)
 		{
 			Matrix().AddOffDiagBlock(l, neibIdx, data);
 		}

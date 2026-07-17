@@ -134,7 +134,7 @@ namespace reservoir_simulator
 			blDiag[2] += bwCell->DensityWater() * f_water * c1 * p_grad;
 			blOffDiag[2] += bwCell->DensityWater() * f_water * c3 * p_grad;
 
-			problem.AddOffDiagBlock(l, static_cast<int>(neibCount), blOffDiag);
+			problem.AddOffDiagBlock(l, neibCount, blOffDiag);
 		}
 
 		blDiag[1] -= OilMobilitySum;

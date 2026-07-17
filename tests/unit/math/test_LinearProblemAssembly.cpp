@@ -43,7 +43,7 @@ static void run_lp_test(int nx, int ny, int nz, Layout layout)
         expected_rhs[gi(l, 0)] += rhs[0];
         expected_rhs[gi(l, 1)] += rhs[1];
 
-        for (int ni = 0; ni < static_cast<int>(graph[l].size()); ni++) {
+        for (size_t ni = 0; ni < graph[l].size(); ni++) {
             int neib = graph[l][ni];
             double obase = (l + 1) * 100.0 + (neib + 1) * 10.0;
             std::array<double,4> off = {obase+1, obase+2, obase+3, obase+4};
@@ -111,7 +111,7 @@ TEST_CASE("LinearProblem::Solve returns finite error and converged=true",
         lp.AddDiagBlock(i, diag, rhs);
     }
     for (size_t i = 0; i < 3; ++i) {
-        for (int ni = 0; ni < static_cast<int>(graph[i].size()); ++ni) {
+        for (size_t ni = 0; ni < graph[i].size(); ++ni) {
             double off[4] = {-1.0, 0.0, 0.0, -1.0};
             lp.AddOffDiagBlock(i, ni, off);
         }
@@ -134,7 +134,7 @@ TEST_CASE("LinearProblem::Solve converged=true when maxIter sufficient",
         lp.AddDiagBlock(i, diag, rhs);
     }
     for (size_t i = 0; i < 3; ++i) {
-        for (int ni = 0; ni < static_cast<int>(graph[i].size()); ++ni) {
+        for (size_t ni = 0; ni < graph[i].size(); ++ni) {
             double off[4] = {-1.0, 0.0, 0.0, -1.0};
             lp.AddOffDiagBlock(i, ni, off);
         }
