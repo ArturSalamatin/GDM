@@ -6,7 +6,7 @@ date: 2026-07-17
 issue: DEBT-026
 github: 36
 branch: refactor/debt-026/addoffdiagblock-const
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-17
   findings: 0 / 0 / 0
