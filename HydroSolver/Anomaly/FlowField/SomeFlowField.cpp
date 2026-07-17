@@ -89,7 +89,7 @@ namespace reservoir_simulator
 			SomeFlowField::print() const
 		{
 			char buffer[40];
-			snprintf(buffer, 40, "%u;", field.size());
+			snprintf(buffer, 40, "%zu;", field.size());
 			std::string result = buffer;
 
 			for (int t = 0; t < field.size(); t++)
@@ -102,7 +102,7 @@ namespace reservoir_simulator
 
 		void SomeFlowField::write(std::ofstream& wstream)
 		{
-			int n = field.size();
+			auto n = static_cast<int>(field.size());
 			wstream.write(reinterpret_cast<const char*>(&n), sizeof(n));
 			for (int t = 0; t < field.size(); t++)
 				field[t].write(wstream);
