@@ -18,20 +18,25 @@ namespace reservoir_simulator
 		update_isAMG_itertationSuccessfull(std::get<2>(AMGstate) && isfinite(newAMG_error));
 		update_overallCurIterCount(CurrentAMG_IterationsCount());
 
-		if (newAMG_error < CurrentAMG_Error())
-			AMG_maxSolverIterCount += 0.4;
+		if (newAMG_error < CurrentAMG_Error()) {
+			AMG_maxSolverIterAccum += 0.4;
+			if (AMG_maxSolverIterAccum >= 1.0) {
+				AMG_maxSolverIterCount += 1;
+				AMG_maxSolverIterAccum -= 1.0;
+			}
+		}
 
 
 		/*if (newAMG_error / CurrentAMG_Error() < 1.1 && CurrentAMG_maxSolverIterationCount() > 5.0)
 			AMG_maxSolverIterCount -= 3;*/
 
 		if (newAMG_error > 0.7)
-			AMG_maxSolverIterCount = std::max(15.0, AMG_maxSolverIterCount);
+			AMG_maxSolverIterCount = std::max(15, AMG_maxSolverIterCount);
 
 		AMG_curError = newAMG_error;
 
 
-		AMG_maxSolverIterCount = std::min(AMG_maxSolverIterCount, 45.0);
+		AMG_maxSolverIterCount = std::min(AMG_maxSolverIterCount, AMG_MAXSOLVERITERCOUNT);
 
 
 #ifdef DEBUG_SALAMATIN

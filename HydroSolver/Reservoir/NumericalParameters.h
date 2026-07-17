@@ -18,7 +18,7 @@ namespace reservoir_simulator
 	{
 	protected:
 		static constexpr double factor = 0.15;
-		static constexpr size_t AMG_MAXSOLVERITERCOUNT = 45;
+		static constexpr int AMG_MAXSOLVERITERCOUNT = 45;
 		bool isSuccessfulTrial = true;
 
 		double newtonTol = 1E-4;
@@ -27,7 +27,8 @@ namespace reservoir_simulator
 		size_t newtonMaxIterNmbr = 12; // maximum number of iterations in the Newton loop
 		size_t curNmbrOfSolverIterations = 0;
 
-		double AMG_maxSolverIterCount = AMG_MAXSOLVERITERCOUNT; // initial maximum number of iterations allowed in the AMG::Solver
+		int AMG_maxSolverIterCount = AMG_MAXSOLVERITERCOUNT; // initial maximum number of iterations allowed in the AMG::Solver
+		double AMG_maxSolverIterAccum = 0.0;
 		double AMG_curError = 0.0;
 		size_t AMG_currentIterationCount = 0;
 		bool AMG_isIterationSuccessfull = true;
@@ -64,7 +65,7 @@ namespace reservoir_simulator
 		size_t WastedTrialsCount() const { return wastedTrialsCount; }
 		size_t MaxNewtonIterationNmbr() const { return newtonMaxIterNmbr; }
 		double CurrentAMG_Error() const { return AMG_curError; }
-		size_t CurrentAMG_maxSolverIterationCount() const { return static_cast<size_t>(round(AMG_maxSolverIterCount)); }
+		size_t CurrentAMG_maxSolverIterationCount() const { return static_cast<size_t>(AMG_maxSolverIterCount); }
 		size_t CurrentAMG_IterationsCount() const { return AMG_currentIterationCount; }
 		bool CurrentANG_IsAccuracyReached() const
 		{
@@ -93,7 +94,7 @@ namespace reservoir_simulator
 		void set_initial_schemeTau(double tau_) { schemeTau = tau_; }
 		void set_currentAMG_Error(double err) { AMG_curError = err; }
 		void set_currentNewtonIterationCount(size_t curNewtonIter) { currentNewtonIterationCount = curNewtonIter; }
-		void set_currentAMG_maxSolverIterationCount() { AMG_maxSolverIterCount = AMG_MAXSOLVERITERCOUNT; }
+		void set_currentAMG_maxSolverIterationCount() { AMG_maxSolverIterCount = AMG_MAXSOLVERITERCOUNT; AMG_maxSolverIterAccum = 0.0; }
 		void increase_schemeTau();
 		void decrease_schemeTau();
 		void update_wastedTrialsCount() { wastedTrialsCount++; }

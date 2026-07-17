@@ -62,12 +62,14 @@ date: 2026-06-27
 - [[debt-057 time-integrator]] — DEBT-057: выделить TimeIntegrator из ReservoirSimulator (этап 4 DEBT-003)
 - [[res-007 bicgstab-vs-lgmres]] — RES-007: CPR+BiCGStab vs CPR+LGMRES — может ли BiCGStab стать default
 - [[debt-004 remove-db-factories]] — DEBT-004: удаление мёртвых DB-фабрик и PostgreSQL-зависимого слоя
+- [[debt-026 addoffdiagblock-const]] — DEBT-026: const-correctness для AddOffDiagBlock
 - [[debt-002 wstring-to-string]] — DEBT-002: wstring → string (UTF-8) в ядре
 - [[debt-009 remove-debug-dumps]] — DEBT-009: убрать отладочные дампы test_*.txt из production-кода
 - [[debt-021 int-size-t-warnings]] — DEBT-021: int переменные цикла итерируют по size_t границам (warnings C4267/C4297)
 - [[bug-022 mathroutines-nan-ub]] — BUG-022: return NAN из функции int — UB в LowerPointNonUniformMesh
 - [[debt-022 activecellsnmbr-size-t]] — DEBT-022: activeCellsNmbr int → size_t в AbstractGrid
 - [[debt-028 neibidx-size-t]] — DEBT-028: int neibIdx → size_t в LinearProblem::AddOffDiagBlock
+- [[debt-039 amg-itercount-type]] — DEBT-039: double AMG_maxSolverIterCount → int + дробный аккумулятор
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
