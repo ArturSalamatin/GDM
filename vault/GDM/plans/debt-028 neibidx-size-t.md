@@ -6,7 +6,7 @@ date: 2026-07-17
 issue: DEBT-028
 github: 34
 branch: refactor/debt-028/neibidx-size-t
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-17
   round: 1
