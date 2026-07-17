@@ -28,8 +28,8 @@ namespace reservoir_simulator
 			std::vector<long int> cell_idx_Global2Local; // stored values are cell idx in local indexing format, when inactive cells are also counted; some elements are -1
 			std::vector<bool> IsCellActive; // shows whether the cell is active or not
 
-			int activeCellsNmbr = 0; // number of active cells; size of connectivityGraph
-			int inActiveCellsNmbr = 0; // number of NOTactive cells
+			size_t activeCellsNmbr = 0; // number of active cells; size of connectivityGraph
+			size_t inActiveCellsNmbr = 0; // number of NOTactive cells
 			size_t totalCellNmbr = 0; // total number of cells
 		public:
 
@@ -141,13 +141,13 @@ namespace reservoir_simulator
 					if ((active_cells[l]))
 					{
 						cell_idx_Local2Global.push_back(l);
-						cell_idx_Global2Local[l] = activeCellsNmbr;
+						cell_idx_Global2Local[l] = static_cast<long int>(activeCellsNmbr);
 						activeCellsNmbr++;
 					}
 					else
 					{
 						inActiveCellsNmbr++;
-						cell_idx_Global2Local[l] = -inActiveCellsNmbr;
+						cell_idx_Global2Local[l] = -static_cast<long int>(inActiveCellsNmbr);
 					}
 				}
 				cell_idx_Local2Global.shrink_to_fit();
@@ -209,7 +209,7 @@ namespace reservoir_simulator
 
 			void SetConnectivityGraph_3D(const std::vector<bool>& active_cells)
 			{
-				int N = activeCellsNmbr;
+				size_t N = activeCellsNmbr;
 			//	connectivityGraph.clear();
 				connectivityGraph.reserve(N);
 			//	commonEdgeArea.clear(); 
@@ -282,7 +282,7 @@ namespace reservoir_simulator
 				std::ofstream myfile;
 				myfile.open(debug_dump::DebugDump::path("test_connections.txt"));
 
-				for (int l = 0; l < activeCellsNmbr; l++)
+				for (size_t l = 0; l < activeCellsNmbr; l++)
 				{
 					for (auto neighbourId : connectivityGraph[l])
 					{
