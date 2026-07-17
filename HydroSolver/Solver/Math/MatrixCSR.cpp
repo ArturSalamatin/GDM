@@ -40,7 +40,7 @@ namespace reservoir_simulator
 			CopyBlock(valueOffset, value, data, crs_->DiagBlocks());
 		}
 
-		void MatrixCSR::AddOffDiagBlock(size_t l, size_t neibIdx, std::vector<double>& data)
+		void MatrixCSR::AddOffDiagBlock(size_t l, size_t neibIdx, const std::vector<double>& data)
 		{
 			size_t valueOffset = crs_->ElementsAboveBlockRow()[l] + (neibIdx - l) * NmbrOfNonZerosPerUnitBlock();
 			CopyBlock(valueOffset, value, data, crs_->OffDiagBlocks());

@@ -76,7 +76,7 @@ namespace reservoir_simulator
 
 			void AddDiagBlock(size_t l, const std::vector<double>& data, const std::vector<double>& dataRHS);
 			void AddDiagBlock(size_t l, const double* data, const double* dataRHS);
-			void AddOffDiagBlock(size_t l, size_t neibIdx, std::vector<double>& data);
+			void AddOffDiagBlock(size_t l, size_t neibIdx, const std::vector<double>& data);
 			void AddOffDiagBlock(size_t l, size_t neibIdx, const double* data);
 		};
 	} // linear_problem
