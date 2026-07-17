@@ -116,6 +116,18 @@ TEST_CASE("LowerPointNonUniformMesh: query at first node",
     CHECK(MathRoutines::LowerPointNonUniformMesh(mesh, 0.0) == 0);
 }
 
+TEST_CASE("LowerPointNonUniformMesh: query below mesh returns negative",
+          "[unit][level1][geometry][MathRoutines]") {
+    std::vector<double> mesh = {0.0, 0.5, 1.5, 4.0, 10.0};
+    CHECK(MathRoutines::LowerPointNonUniformMesh(mesh, -1.0) < 0);
+}
+
+TEST_CASE("LowerPointNonUniformMesh: query above mesh returns negative",
+          "[unit][level1][geometry][MathRoutines]") {
+    std::vector<double> mesh = {0.0, 0.5, 1.5, 4.0, 10.0};
+    CHECK(MathRoutines::LowerPointNonUniformMesh(mesh, 15.0) < 0);
+}
+
 // --- InterpFieldConstTime ---
 
 TEST_CASE("InterpFieldConstTime: interpolates on 3x3 grid",
