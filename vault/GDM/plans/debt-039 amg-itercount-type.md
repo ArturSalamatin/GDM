@@ -6,7 +6,7 @@ date: 2026-07-17
 issue: DEBT-039
 github: 35
 branch: refactor/debt-039/amg-iter-count-type
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-17
   round: 3
