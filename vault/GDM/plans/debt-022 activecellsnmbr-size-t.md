@@ -6,7 +6,7 @@ date: 2026-07-17
 issue: DEBT-022
 github: 33
 branch: refactor/debt-022/activecellsnmbr-size-t
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-17
   round: 2
