@@ -6,7 +6,7 @@ date: 2026-07-17
 issue: BUG-022
 github: 32
 branch: fix/bug-022/mathroutines-nan-ub
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-17
   round: 1
