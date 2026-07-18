@@ -13,17 +13,17 @@ using Catch::Approx;
 static void run_lp_test(int nx, int ny, int nz, Layout layout)
 {
     auto graph = make_grid_graph(nx, ny, nz);
-    int ncells = static_cast<int>(graph.size());
-    constexpr int B = 2;
+    size_t ncells = graph.size();
+    constexpr size_t B = 2;
 
     LinearProblem lp(layout, 1e-6, 1e-6, graph, fullBlock2());
 
     std::map<std::pair<int,int>, std::array<double,4>> blocks;
     std::vector<double> expected_rhs(ncells * B, 0.0);
 
-    auto gi = [&](int cell, int var) -> size_t {
+    auto gi = [&](size_t cell, size_t var) -> size_t {
         if (layout == Layout::Blocked)
-            return (size_t)var * ncells + cell;
+            return var * ncells + cell;
         else if (layout == Layout::InterleavedPSw) {
             unsigned char perm[] = {1, 0};
             return cell * B + perm[var];
@@ -32,13 +32,13 @@ static void run_lp_test(int nx, int ny, int nz, Layout layout)
             return cell * B + var;
     };
 
-    for (int l = 0; l < ncells; l++) {
+    for (size_t l = 0; l < ncells; l++) {
         double base = (l + 1) * 10.0;
         std::array<double,4> diag = {base+1, base+2, base+3, base+4};
         std::array<double,2> rhs = {base+5, base+6};
 
         lp.AddDiagBlock(l, diag.data(), rhs.data());
-        blocks[{l, l}] = diag;
+        blocks[{static_cast<int>(l), static_cast<int>(l)}] = diag;
 
         expected_rhs[gi(l, 0)] += rhs[0];
         expected_rhs[gi(l, 1)] += rhs[1];
@@ -49,7 +49,7 @@ static void run_lp_test(int nx, int ny, int nz, Layout layout)
             std::array<double,4> off = {obase+1, obase+2, obase+3, obase+4};
 
             lp.AddOffDiagBlock(l, ni, off.data());
-            blocks[{l, neib}] = off;
+            blocks[{static_cast<int>(l), neib}] = off;
         }
     }
 

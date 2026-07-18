@@ -58,7 +58,7 @@ namespace reservoir_simulator
 					Cells[l].UpdateState(corrections, l * eqNmbr);
 			}
 
-			const std::vector<ProcessCell*> GetNeighboursPointer(int l)
+			const std::vector<ProcessCell*> GetNeighboursPointer(size_t l)
 			{
 				std::vector<ProcessCell*> neighbours;
 				for (size_t neighbourIdx = 0; neighbourIdx < connectivityGraph[l].size(); neighbourIdx++)
@@ -70,7 +70,7 @@ namespace reservoir_simulator
 				return neighbours;
 			}
 
-			const std::vector<double>& CommonEdgeArea(int l)
+			const std::vector<double>& CommonEdgeArea(size_t l)
 			{
 				return commonEdgeArea[l];
 			}
