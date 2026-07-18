@@ -4,16 +4,16 @@ namespace reservoir_simulator
 {
 	namespace phasePortrait
 	{   
-		std::vector<double> create_uniform_mesh(double h, int n, double start)
+		std::vector<double> create_uniform_mesh(double h, size_t n, double start)
 		{
 			std::vector<double> mesh;
 			mesh.push_back(start);
-			for (int i = 1; i < n; i++)
+			for (size_t i = 1; i < n; i++)
 				mesh.push_back(mesh.back() + h);
 			return mesh;
 		}
 
-		std::vector<std::vector<double>> create_uniform_mesh_2D(double hx, int nx, double startx, double hy, int ny, double starty)
+		std::vector<std::vector<double>> create_uniform_mesh_2D(double hx, size_t nx, double startx, double hy, size_t ny, double starty)
 		{
 			std::vector<std::vector<double>> mesh;
 			mesh.emplace_back(std::move(create_uniform_mesh(hx, nx, startx)));
