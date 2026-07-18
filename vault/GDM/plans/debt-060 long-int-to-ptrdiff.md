@@ -6,7 +6,7 @@ date: 2026-07-18
 issue: DEBT-060
 github: 41
 branch: refactor/debt-060/long-int-to-ptrdiff
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-18
   pass: 2
