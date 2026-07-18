@@ -52,7 +52,7 @@ namespace reservoir_simulator
 
 		auto res = problem.Solve(numPrm.CurrentAMG_maxSolverIterationCount());
 		numPrm.update_currentAMGState(
-			{ static_cast<int>(res.iters), res.error, res.converged });
+			{ res.iters, res.error, res.converged });
 
 		profile.n_amg_solves++;
 		profile.total_amg_iters += res.iters;

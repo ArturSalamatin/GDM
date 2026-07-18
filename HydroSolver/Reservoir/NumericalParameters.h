@@ -103,7 +103,7 @@ namespace reservoir_simulator
 		void update_currentMoment();
 		void update_currentIntegrationTau(double tau) {}
 		void update_currentNewtonIterationCount() { ++currentNewtonIterationCount; }
-		void update_currentAMGState(const std::tuple<int, double, bool>& AMGstate);
+		void update_currentAMGState(const std::tuple<size_t, double, bool>& AMGstate);
 		void update_isSuccesfullNewtonTrial(bool f) { isSuccessfulTrial = f && CurrentANG_IsAccuracyReached(); update_currentNewtonIterationCount(); }
 		void update_isAMG_itertationSuccessfull(bool f) { AMG_isIterationSuccessfull = f; }
 
