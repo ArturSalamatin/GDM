@@ -32,8 +32,8 @@ namespace IRCGEngine {
 			_ny = (std::get<3>(bounds) - std::get<2>(bounds)) / dy;
 		}
 //		virtual void Add(geos::geom::Point* p, float value);
-		virtual void Add(std::pair<float, float> p, float value);
-		virtual void Write();
+		void Add(std::pair<float, float> p, float value) override;
+		void Write() override;
 	private:
 		float _dx = 0;
 		float _dy = 0;
@@ -51,8 +51,8 @@ namespace IRCGEngine {
 			Buffer += L"X\tY\tZ\n";
 		}
 //		virtual void Add(geos::geom::Point* p, float value);
-		virtual void Add(std::pair<float, float> p, float value);
-		virtual void Write();
+		void Add(std::pair<float, float> p, float value) override;
+		void Write() override;
 	private:
 		std::wstring Buffer;
 	};

@@ -97,6 +97,8 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(gdm_core PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
+target_compile_options(gdm_core PRIVATE /w34263)
+
 # =============================================================================
 # gdm — executable, инициализация через C++ API
 # =============================================================================

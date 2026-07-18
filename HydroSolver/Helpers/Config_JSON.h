@@ -65,14 +65,14 @@ namespace reservoir_simulator
 					throw std::runtime_error(std::string{ "Read config error. " + std::string{e.what()} }.data());
 				}
 			}
-			virtual  std::string GetWideProjectPath() {
+			std::string GetWideProjectPath() override {
 				auto result = GetLeave("model", "path");
 				if (result.back() != '\\')
 					result += '\\';
 				return  result;
 			}
 
-			virtual std::vector<std::vector<std::string>> LayerAggregation()
+			std::vector<std::vector<std::string>> LayerAggregation() override
 			{
 				auto val = values["model"]->Value()["layer_aggregation"]->Value();
 				std::vector < std::vector < std::string>> layers;
@@ -94,8 +94,8 @@ namespace reservoir_simulator
 				return layers;
 			}
 
-			virtual double ExtBoundaryPressure() { return UnitsConversionFactors::pressureConversion * GetValue("common_properties", "external_bundary_pressure"); }
-			virtual PhaseProperties WaterPhaseProperties()
+			double ExtBoundaryPressure() override { return UnitsConversionFactors::pressureConversion * GetValue("common_properties", "external_bundary_pressure"); }
+			PhaseProperties WaterPhaseProperties()
 			{
 				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "0"),
 					UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "0"),
@@ -103,7 +103,7 @@ namespace reservoir_simulator
 					UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "0"),
 					UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "0"));
 			}
-			virtual PhaseProperties OilPhaseProperties()
+			PhaseProperties OilPhaseProperties()
 			{
 				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "1"),
 					UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "1"),
@@ -111,34 +111,34 @@ namespace reservoir_simulator
 					UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "1"),
 					UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "1"));
 			}
-			virtual double RequiredNewtonTol() { return GetValue("scheme_parameters", "required_Newton_Tolerance"); }
-			virtual double g() { return GetValue("common_properties", "freeFall_acceleration"); }
-			virtual double StartTimeStep() { return GetValue("scheme_parameters", "initial_time_step"); }
+			double RequiredNewtonTol() { return GetValue("scheme_parameters", "required_Newton_Tolerance"); }
+			double g() { return GetValue("common_properties", "freeFall_acceleration"); }
+			double StartTimeStep() override { return GetValue("scheme_parameters", "initial_time_step"); }
 
 
-			virtual double VelocityMultiplier() { return GetValue("trajectories", "velocity_multiplier"); }
-			virtual double InitialTrajectoryDistance()
+			double VelocityMultiplier() { return GetValue("trajectories", "velocity_multiplier"); }
+			double InitialTrajectoryDistance()
 			{
 				auto val = GetValue("trajectories", "start_distance");
 				val = (val < 0.0) ? 0.5 : val;
 				return val;
 			}
 			//		virtual double TrajectoryCount() { return GetValue("trajectories", "number_of_trajectories_from_well"); }
-			virtual double StartSignalRollbackTime() { return GetValue("trajectories", "start_signal_rollback_time"); }
-			virtual double EndSignalRollbackTime() { return GetValue("trajectories", "end_signal_rollback_time"); }
+			double StartSignalRollbackTime() { return GetValue("trajectories", "start_signal_rollback_time"); }
+			double EndSignalRollbackTime() { return GetValue("trajectories", "end_signal_rollback_time"); }
 
-			virtual int NewtonMaxIterCount() { return (int)GetValue("scheme_parameters", "newton_max_iteration_count"); }
-			virtual double AMG_RelTol() { return GetValue("scheme_parameters", "AMG_RelTol"); }
-			virtual double AMG_AbsTol() { return GetValue("scheme_parameters", "AMG_AbsTol"); }
-			virtual std::string WaterSaturation_fileName() { return folderName + GetLeave("save_files", "water_saturation"); }
-			virtual std::string OilSaturation_fileName() { return folderName + GetLeave("save_files", "oil_saturation"); }
-			virtual std::string Pressure_fileName() { return folderName + GetLeave("save_files", "pressure"); }
-			virtual std::string OverallBalance_fileName() { return folderName + GetLeave("save_files", "overall_oil_balance"); }
+			int NewtonMaxIterCount() { return (int)GetValue("scheme_parameters", "newton_max_iteration_count"); }
+			double AMG_RelTol() { return GetValue("scheme_parameters", "AMG_RelTol"); }
+			double AMG_AbsTol() { return GetValue("scheme_parameters", "AMG_AbsTol"); }
+			std::string WaterSaturation_fileName() override { return folderName + GetLeave("save_files", "water_saturation"); }
+			std::string OilSaturation_fileName() override { return folderName + GetLeave("save_files", "oil_saturation"); }
+			std::string Pressure_fileName() override { return folderName + GetLeave("save_files", "pressure"); }
+			std::string OverallBalance_fileName() override { return folderName + GetLeave("save_files", "overall_oil_balance"); }
 
 
-			virtual double MinCellThickness() { return GetValue("common_properties", "min_cell_thickness"); }
-			virtual double MinPorosity() { return GetValue("common_properties", "min_cell_porosity"); }
-			virtual double MinPermeability() { return UnitsConversionFactors::permeabilityConversion * GetValue("common_properties", "min_cell_permeability"); }
+			double MinCellThickness() { return GetValue("common_properties", "min_cell_thickness"); }
+			double MinPorosity() { return GetValue("common_properties", "min_cell_porosity"); }
+			double MinPermeability() { return UnitsConversionFactors::permeabilityConversion * GetValue("common_properties", "min_cell_permeability"); }
 
 			std::string GetLeave(std::string section, std::string name)
 			{
