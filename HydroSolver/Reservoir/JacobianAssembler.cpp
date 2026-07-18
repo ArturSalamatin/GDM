@@ -155,7 +155,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 
 						if (l < 0)
 						{
@@ -216,7 +216,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 
 						if (l < 0)
 						{
@@ -279,7 +279,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k += nz - 1)
 					{
-						long int l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 
 						if (l < 0)
 						{

@@ -204,7 +204,7 @@ static void build_reference(
                 size_t i = (iStep == 0) ? 0 : nx - 1;
                 for (size_t k = 0; k < nz; k++) {
                     size_t globalIdx = nx * ny * k + nx * j + i;
-                    long int l = grid.ConvertGlobal2Local(globalIdx);
+                    ptrdiff_t l = grid.ConvertGlobal2Local(globalIdx);
                     if (l < 0) continue;
                     auto [bd, br] = reference_boundary_block(grid[l], refP, 0);
                     add_diag(static_cast<size_t>(l), bd, br);
@@ -217,7 +217,7 @@ static void build_reference(
                 size_t j = (jStep == 0) ? 0 : ny - 1;
                 for (size_t k = 0; k < nz; k++) {
                     size_t globalIdx = nx * ny * k + nx * j + i;
-                    long int l = grid.ConvertGlobal2Local(globalIdx);
+                    ptrdiff_t l = grid.ConvertGlobal2Local(globalIdx);
                     if (l < 0) continue;
                     auto [bd, br] = reference_boundary_block(grid[l], refP, 1);
                     add_diag(static_cast<size_t>(l), bd, br);
@@ -601,7 +601,7 @@ static void run_jacobian_consistency_test(int nx, int ny, int nz, Layout layout)
 
     const auto& crs = sim.MyProblem.GetCRS();
     std::vector<double> dx(N, 0.0);
-    for (int l = 0; l < ncells; l++) {
+    for (size_t l = 0; l < ncells; l++) {
         dx[crs.GlobalIndex(l, 0)] = dSw;
         dx[crs.GlobalIndex(l, 1)] = dP;
         double corr[] = {dSw, dP};
@@ -701,7 +701,7 @@ TEST_CASE("JacobianAssembly: J*dx approx dF second order convergence",
 
         const auto& crs = sim.MyProblem.GetCRS();
         std::vector<double> dx(N, 0.0);
-        for (int l = 0; l < ncells; l++) {
+        for (size_t l = 0; l < ncells; l++) {
             dx[crs.GlobalIndex(l, 0)] = dSw;
             dx[crs.GlobalIndex(l, 1)] = dP;
             double corr[] = {dSw, dP};
