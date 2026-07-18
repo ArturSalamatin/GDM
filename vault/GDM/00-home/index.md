@@ -70,6 +70,7 @@ date: 2026-06-27
 - [[debt-022 activecellsnmbr-size-t]] — DEBT-022: activeCellsNmbr int → size_t в AbstractGrid
 - [[debt-028 neibidx-size-t]] — DEBT-028: int neibIdx → size_t в LinearProblem::AddOffDiagBlock
 - [[debt-039 amg-itercount-type]] — DEBT-039: double AMG_maxSolverIterCount → int + дробный аккумулятор
+- [[debt-037 override-specifiers]] — DEBT-037: добавить override ко всем переопределённым виртуальным методам
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
