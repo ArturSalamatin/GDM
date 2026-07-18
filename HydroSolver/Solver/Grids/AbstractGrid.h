@@ -1,4 +1,5 @@
 #pragma once
+#include <concepts>
 #include <fstream>
 #include "Cells/AbstractCells.h"
 #include "GridDescriptors.h"
@@ -74,9 +75,9 @@ namespace reservoir_simulator
 			{
 				return commonEdgeArea[l];
 			}
-			// returns the cell according to its local index
-			// idx < 0 stands for inactive cells
-			const ProcessCell& operator [] (int idx) const
+			// idx < 0 stands for inactive cells, idx >= 0 for active
+			template<std::signed_integral T>
+			const ProcessCell& operator [] (T idx) const
 			{
 				if (idx < 0)
 					return CellsInactive[-(idx + 1)];
@@ -84,23 +85,8 @@ namespace reservoir_simulator
 					return Cells[idx];
 			}
 
-			ProcessCell& operator [] (int idx)
-			{
-				if (idx < 0)
-					return CellsInactive[-(idx + 1)];
-				else
-					return Cells[idx];
-			}
-
-			const ProcessCell& operator [] (long int idx) const
-			{
-				if (idx < 0)
-					return CellsInactive[-(idx + 1)];
-				else
-					return Cells[idx];
-			}
-
-			ProcessCell& operator [] (long int idx)
+			template<std::signed_integral T>
+			ProcessCell& operator [] (T idx)
 			{
 				if (idx < 0)
 					return CellsInactive[-(idx + 1)];
