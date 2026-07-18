@@ -190,7 +190,7 @@ namespace reservoir_simulator
 
 			size_t NumberOfTrajectories() const { return trajectoryEnsemble.size(); }
 
-			const reservoir_simulator::phasePortrait::Trajectory& operator[] (int i) const {
+			const reservoir_simulator::phasePortrait::Trajectory& operator[] (size_t i) const {
 				return trajectoryEnsemble[i];
 			}
 

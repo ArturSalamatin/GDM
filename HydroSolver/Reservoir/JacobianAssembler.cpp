@@ -61,10 +61,9 @@ namespace reservoir_simulator
 		OilField& grid, LinearProblem& problem)
 	{
 		constexpr int blockSize = B * B;
-		const int li = static_cast<int>(l);
-		const TwoPhaseFlowCell& cell = grid[li];
-		const std::vector<TwoPhaseFlowCell*> neighbourCells = grid.GetNeighboursPointer(li);
-		const std::vector<double>& commonEdgeArea = grid.CommonEdgeArea(li);
+		const TwoPhaseFlowCell& cell = grid[l];
+		const std::vector<TwoPhaseFlowCell*> neighbourCells = grid.GetNeighboursPointer(l);
+		const std::vector<double>& commonEdgeArea = grid.CommonEdgeArea(l);
 
 		double blDiag[blockSize] = {};
 		const auto& prevMass = cell.PreviousState_Mass_ref();
@@ -156,7 +155,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 
 						if (l < 0)
 						{
@@ -217,7 +216,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 
 						if (l < 0)
 						{
@@ -280,7 +279,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k += nz - 1)
 					{
-						long int l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 
 						if (l < 0)
 						{

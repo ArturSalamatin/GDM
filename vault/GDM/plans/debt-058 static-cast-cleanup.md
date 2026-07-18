@@ -6,7 +6,7 @@ date: 2026-07-18
 issue: DEBT-058
 github: 39
 branch: refactor/debt-058/static-cast-cleanup
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-18
   findings: 0 / 0 / 0

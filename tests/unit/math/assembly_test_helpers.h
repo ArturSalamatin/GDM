@@ -48,12 +48,12 @@ inline void place_block(
     std::vector<std::vector<double>>& dense,
     int cell_row, int cell_col,
     const std::array<double, 4>& block,
-    Layout layout, int ncells)
+    Layout layout, size_t ncells)
 {
-    constexpr int B = 2;
-    auto gi = [&](int cell, int var) -> size_t {
+    constexpr size_t B = 2;
+    auto gi = [&](size_t cell, size_t var) -> size_t {
         if (layout == Layout::Blocked)
-            return (size_t)var * ncells + cell;
+            return var * ncells + cell;
         else if (layout == Layout::InterleavedPSw) {
             unsigned char perm[] = {1, 0};
             return cell * B + perm[var];
@@ -62,18 +62,18 @@ inline void place_block(
             return cell * B + var;
     };
 
-    for (int r = 0; r < B; r++)
-        for (int c = 0; c < B; c++)
+    for (size_t r = 0; r < B; r++)
+        for (size_t c = 0; c < B; c++)
             dense[gi(cell_row, r)][gi(cell_col, c)] += block[r * B + c];
 }
 
 // Build expected dense matrix from a map of (cell_row, cell_col) -> block.
 inline std::vector<std::vector<double>> build_dense_from_blocks(
-    int ncells, Layout layout,
+    size_t ncells, Layout layout,
     const std::vector<std::vector<int>>& graph,
     const std::map<std::pair<int,int>, std::array<double,4>>& blocks)
 {
-    constexpr int B = 2;
+    constexpr size_t B = 2;
     size_t N = ncells * B;
     std::vector<std::vector<double>> dense(N, std::vector<double>(N, 0.0));
     for (auto& [key, block] : blocks)
@@ -163,10 +163,10 @@ inline void check_finite(const std::vector<double>& v, const char* name)
 // Check expected number of nonzeros.
 // For full 2×2 blocks: nnz = B² × (ncells + 2×edges)
 inline void check_nnz_count(
-    const MatrixCSR& m, int ncells,
+    const MatrixCSR& m, size_t ncells,
     const std::vector<std::vector<int>>& graph)
 {
-    constexpr int B = 2;
+    constexpr size_t B = 2;
     size_t edges = 0;
     for (auto& neib : graph)
         edges += neib.size();

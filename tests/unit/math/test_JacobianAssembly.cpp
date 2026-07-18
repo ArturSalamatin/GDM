@@ -31,10 +31,10 @@ static auto reference_fill_row(
                   std::vector<std::array<double,4>>,
                   std::array<double,2>>
 {
-    const auto& cell = grid[static_cast<int>(l)];
-    auto neighbours = grid.GetNeighboursPointer(static_cast<int>(l));
-    const auto& areas = grid.CommonEdgeArea(static_cast<int>(l));
-    int nNeib = static_cast<int>(neighbours.size());
+    const auto& cell = grid[l];
+    auto neighbours = grid.GetNeighboursPointer(l);
+    const auto& areas = grid.CommonEdgeArea(l);
+    size_t nNeib = neighbours.size();
 
     std::array<double,4> blDiag = {};
     const auto prevMass = cell.PreviousState_Mass();
@@ -51,7 +51,7 @@ static auto reference_fill_row(
     double oilMobSum = 0.0, waterMobSum = 0.0;
     std::vector<std::array<double,4>> offDiags(nNeib, {0,0,0,0});
 
-    for (int ni = 0; ni < nNeib; ni++) {
+    for (size_t ni = 0; ni < nNeib; ni++) {
         const auto& neibCell = *neighbours[ni];
         double dp = cell.P() - neibCell.P();
         double p_grad = areas[ni] * dp;
@@ -152,46 +152,46 @@ static void build_reference(
     std::vector<double>& refRhs)
 {
     OilField& grid = sim.Grid;
-    int ncells = static_cast<int>(grid.ActiveCellsNmbr());
-    int nx = static_cast<int>(grid.Nx());
-    int ny = static_cast<int>(grid.Ny());
-    int nz = static_cast<int>(grid.Nz());
-    constexpr int B = 2;
+    size_t ncells = grid.ActiveCellsNmbr();
+    size_t nx = grid.Nx();
+    size_t ny = grid.Ny();
+    size_t nz = grid.Nz();
+    constexpr size_t B = 2;
     size_t N = ncells * B;
 
     refDense.assign(N, std::vector<double>(N, 0.0));
     refRhs.assign(N, 0.0);
 
-    auto gi = [&](int cell, int var) -> size_t {
+    auto gi = [&](size_t cell, size_t var) -> size_t {
         if (layout == Layout::Blocked)
-            return (size_t)var * ncells + cell;
+            return var * ncells + cell;
         else if (layout == Layout::InterleavedPSw)
             return cell * B + (1 - var);
         else
             return cell * B + var;
     };
 
-    auto add_diag = [&](int l, const std::array<double,4>& block, const std::array<double,2>& r) {
-        for (int row = 0; row < B; row++)
-            for (int col = 0; col < B; col++)
+    auto add_diag = [&](size_t l, const std::array<double,4>& block, const std::array<double,2>& r) {
+        for (size_t row = 0; row < B; row++)
+            for (size_t col = 0; col < B; col++)
                 refDense[gi(l, row)][gi(l, col)] += block[row * B + col];
         refRhs[gi(l, 0)] += r[0];
         refRhs[gi(l, 1)] += r[1];
     };
 
-    auto add_offdiag = [&](int l, int neib, const std::array<double,4>& block) {
-        for (int row = 0; row < B; row++)
-            for (int col = 0; col < B; col++)
+    auto add_offdiag = [&](size_t l, size_t neib, const std::array<double,4>& block) {
+        for (size_t row = 0; row < B; row++)
+            for (size_t col = 0; col < B; col++)
                 refDense[gi(l, row)][gi(neib, col)] += block[row * B + col];
     };
 
     auto graph = grid.GetConnectivityGraph();
 
-    for (int l = 0; l < ncells; l++) {
+    for (size_t l = 0; l < ncells; l++) {
         auto [diag, offDiags, rhs] = reference_fill_row(grid, l, tau);
         add_diag(l, diag, rhs);
-        for (int ni = 0; ni < static_cast<int>(offDiags.size()); ni++) {
-            int neib = graph[l][ni];
+        for (size_t ni = 0; ni < offDiags.size(); ni++) {
+            size_t neib = graph[l][ni];
             add_offdiag(l, neib, offDiags[ni]);
         }
     }
@@ -199,28 +199,28 @@ static void build_reference(
     // Boundary conditions
     double refP = sim.RefPressure;
     if (nx > 1) {
-        for (int j = 0; j < ny; j++)
+        for (size_t j = 0; j < ny; j++)
             for (int iStep = 0; iStep < 2; iStep++) {
-                int i = (iStep == 0) ? 0 : nx - 1;
-                for (int k = 0; k < nz; k++) {
-                    size_t globalIdx = static_cast<size_t>(nx * ny * k + nx * j + i);
-                    long int l = grid.ConvertGlobal2Local(globalIdx);
+                size_t i = (iStep == 0) ? 0 : nx - 1;
+                for (size_t k = 0; k < nz; k++) {
+                    size_t globalIdx = nx * ny * k + nx * j + i;
+                    ptrdiff_t l = grid.ConvertGlobal2Local(globalIdx);
                     if (l < 0) continue;
                     auto [bd, br] = reference_boundary_block(grid[l], refP, 0);
-                    add_diag(static_cast<int>(l), bd, br);
+                    add_diag(static_cast<size_t>(l), bd, br);
                 }
             }
     }
     if (ny > 1) {
-        for (int i = 0; i < nx; i++)
+        for (size_t i = 0; i < nx; i++)
             for (int jStep = 0; jStep < 2; jStep++) {
-                int j = (jStep == 0) ? 0 : ny - 1;
-                for (int k = 0; k < nz; k++) {
-                    size_t globalIdx = static_cast<size_t>(nx * ny * k + nx * j + i);
-                    long int l = grid.ConvertGlobal2Local(globalIdx);
+                size_t j = (jStep == 0) ? 0 : ny - 1;
+                for (size_t k = 0; k < nz; k++) {
+                    size_t globalIdx = nx * ny * k + nx * j + i;
+                    ptrdiff_t l = grid.ConvertGlobal2Local(globalIdx);
                     if (l < 0) continue;
                     auto [bd, br] = reference_boundary_block(grid[l], refP, 1);
-                    add_diag(static_cast<int>(l), bd, br);
+                    add_diag(static_cast<size_t>(l), bd, br);
                 }
             }
     }
@@ -238,7 +238,7 @@ static void run_invariant_test(int nx, int ny, int nz, Layout layout)
 
     auto dense = sim.MyProblem.Matrix().toDense();
     auto& m = sim.MyProblem.Matrix();
-    int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
+    size_t ncells = sim.Grid.ActiveCellsNmbr();
     auto graph = sim.Grid.GetConnectivityGraph();
 
     check_sparsity_symmetric(m);
@@ -474,15 +474,15 @@ TEST_CASE("JacobianAssembly: uniform grid identical interior diag blocks",
 static void run_perturbed_jacobian_test(int nx, int ny, int nz, Layout layout)
 {
     auto sim = make_sim(nx, ny, nz, layout);
-    int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
+    size_t ncells = sim.Grid.ActiveCellsNmbr();
 
     // Accept initial state as previous
     sim.Grid.AcceptState();
 
     // Perturb: create pressure gradient across x-direction
-    int nx_grid = static_cast<int>(sim.Grid.Nx());
-    for (int l = 0; l < ncells; l++) {
-        int i = l % nx_grid;
+    size_t nx_grid = sim.Grid.Nx();
+    for (size_t l = 0; l < ncells; l++) {
+        size_t i = l % nx_grid;
         double dSw = 0.02 * (i - nx_grid / 2.0) / nx_grid;
         double dP = 1e5 * (i - nx_grid / 2.0) / nx_grid;
         double corr[] = {dSw, dP};
@@ -575,15 +575,15 @@ static void run_jacobian_consistency_test(int nx, int ny, int nz, Layout layout)
     double tau = 86400.0;
 
     auto sim = make_sim(nx, ny, nz, layout);
-    int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
+    size_t ncells = sim.Grid.ActiveCellsNmbr();
     size_t N = ncells * B;
 
     sim.Grid.AcceptState();
 
     // Perturb to a non-trivial base state x₀ where dp > 0 at boundaries
-    int nx_grid = static_cast<int>(sim.Grid.Nx());
-    for (int l = 0; l < ncells; l++) {
-        int i = l % nx_grid;
+    size_t nx_grid = sim.Grid.Nx();
+    for (size_t l = 0; l < ncells; l++) {
+        size_t i = l % nx_grid;
         double dSw_base = 0.01 * (i + 1.0) / nx_grid;
         double dP_base  = 5e4 * (i + 1.0) / nx_grid;
         double corr[] = {dSw_base, dP_base};
@@ -601,7 +601,7 @@ static void run_jacobian_consistency_test(int nx, int ny, int nz, Layout layout)
 
     const auto& crs = sim.MyProblem.GetCRS();
     std::vector<double> dx(N, 0.0);
-    for (int l = 0; l < ncells; l++) {
+    for (size_t l = 0; l < ncells; l++) {
         dx[crs.GlobalIndex(l, 0)] = dSw;
         dx[crs.GlobalIndex(l, 1)] = dP;
         double corr[] = {dSw, dP};
@@ -681,15 +681,15 @@ TEST_CASE("JacobianAssembly: J*dx approx dF second order convergence",
         double dP  = eps * 1e4;
 
         auto sim = make_sim(nx, ny, nz, layout);
-        int ncells = static_cast<int>(sim.Grid.ActiveCellsNmbr());
-        int nx_grid = static_cast<int>(sim.Grid.Nx());
+        size_t ncells = sim.Grid.ActiveCellsNmbr();
+        size_t nx_grid = sim.Grid.Nx();
         size_t N = ncells * B;
 
         sim.Grid.AcceptState();
 
         // Non-trivial base state (dp > 0 at boundaries)
-        for (int l = 0; l < ncells; l++) {
-            int i = l % nx_grid;
+        for (size_t l = 0; l < ncells; l++) {
+            size_t i = l % nx_grid;
             double corr_base[] = {0.01 * (i + 1.0) / nx_grid,
                                   5e4 * (i + 1.0) / nx_grid};
             sim.Grid[l].UpdateState(corr_base);
@@ -701,7 +701,7 @@ TEST_CASE("JacobianAssembly: J*dx approx dF second order convergence",
 
         const auto& crs = sim.MyProblem.GetCRS();
         std::vector<double> dx(N, 0.0);
-        for (int l = 0; l < ncells; l++) {
+        for (size_t l = 0; l < ncells; l++) {
             dx[crs.GlobalIndex(l, 0)] = dSw;
             dx[crs.GlobalIndex(l, 1)] = dP;
             double corr[] = {dSw, dP};

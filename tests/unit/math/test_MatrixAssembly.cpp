@@ -13,24 +13,24 @@ using Catch::Approx;
 static void run_assembly_test(int nx, int ny, int nz, Layout layout)
 {
     auto graph = make_grid_graph(nx, ny, nz);
-    int ncells = static_cast<int>(graph.size());
+    size_t ncells = graph.size();
     MatrixCSR m(layout, 2, ncells, graph, fullBlock2());
 
     std::map<std::pair<int,int>, std::array<double,4>> blocks;
 
-    for (int l = 0; l < ncells; l++) {
+    for (size_t l = 0; l < ncells; l++) {
         double base = (l + 1) * 10.0;
         std::array<double,4> diag = {base+1, base+2, base+3, base+4};
         m.AddDiagBlock(l, diag.data());
-        blocks[{l, l}] = diag;
+        blocks[{static_cast<int>(l), static_cast<int>(l)}] = diag;
 
-        for (int ni = 0; ni < static_cast<int>(graph[l].size()); ni++) {
+        for (size_t ni = 0; ni < graph[l].size(); ni++) {
             int neib = graph[l][ni];
             double obase = (l + 1) * 100.0 + (neib + 1) * 10.0;
             std::array<double,4> off = {obase+1, obase+2, obase+3, obase+4};
             std::vector<double> voff(off.begin(), off.end());
             m.AddOffDiagBlock(l, ni, voff);
-            blocks[{l, neib}] = off;
+            blocks[{static_cast<int>(l), neib}] = off;
         }
     }
 

@@ -8,8 +8,8 @@ namespace reservoir_simulator
 {
 	namespace phasePortrait
 	{
-		std::vector<double> create_uniform_mesh(double h, int n, double start);
-		std::vector<std::vector<double>> create_uniform_mesh_2D(double hx, int nx, double startx, double hy, int ny, double starty);
+		std::vector<double> create_uniform_mesh(double h, size_t n, double start);
+		std::vector<std::vector<double>> create_uniform_mesh_2D(double hx, size_t nx, double startx, double hy, size_t ny, double starty);
 
 		class Mesh_1D
 		{
@@ -69,7 +69,7 @@ namespace reservoir_simulator
 		{
 		public:
 			PorosityField(const PorosityField&) = default;
-			PorosityField(double x0, int nx, double hx, double y0, int ny, double hy, std::vector<std::vector<double>>&& porosity)
+			PorosityField(double x0, size_t nx, double hx, double y0, size_t ny, double hy, std::vector<std::vector<double>>&& porosity)
 				: SomeField2D{ std::move(porosity), std::move(create_uniform_mesh_2D(hx, nx, x0 + hx / 2.0, hy, ny, y0 + hy / 2.0)) }
 			{}
 		};
@@ -78,7 +78,7 @@ namespace reservoir_simulator
 		class FlowFieldComponentX : public SomeField2D
 		{
 		public:
-			FlowFieldComponentX(double x0, int nx, double hx, double y0, int ny, double hy, std::vector<std::vector<double>>&& v)
+			FlowFieldComponentX(double x0, size_t nx, double hx, double y0, size_t ny, double hy, std::vector<std::vector<double>>&& v)
 				: SomeField2D{ std::move(v), std::move(create_uniform_mesh_2D(hx, nx + 1, x0, hy, ny, y0 + hy / 2.0)) }
 			{}
 		};
@@ -86,7 +86,7 @@ namespace reservoir_simulator
 		class FlowFieldComponentY : public SomeField2D
 		{
 		public:
-			FlowFieldComponentY(double x0, int nx, double hx, double y0, int ny, double hy, std::vector<std::vector<double>>&& v)
+			FlowFieldComponentY(double x0, size_t nx, double hx, double y0, size_t ny, double hy, std::vector<std::vector<double>>&& v)
 				: SomeField2D{ std::move(v), std::move(create_uniform_mesh_2D(hx, nx, x0 + hx / 2.0, hy, ny + 1, y0)) }
 			{}
 		};
@@ -103,8 +103,8 @@ namespace reservoir_simulator
 			double V(double x, double y) { return V(phasePortrait::Point(x, y)); }
 			double V(const phasePortrait::Point& P);
 			FlowFieldSnapshot(double t_,
-				double x0, int nx, double hx,
-				double y0, int ny, double hy,
+				double x0, size_t nx, double hx,
+				double y0, size_t ny, double hy,
 				std::vector<std::vector<double>>&& vx_,
 				std::vector<std::vector<double>>&& vy_)
 				: time{ t_ }, vxField{ x0, nx, hx, y0, ny, hy ,std::move(vx_) }, vyField{ x0, nx, hx, y0, ny, hy, std::move(vy_) }
@@ -133,7 +133,7 @@ namespace reservoir_simulator
 
 		protected:
 			double x0, y0; // mesh corner, origin
-			int nx, ny; // number of cells in every direction
+			size_t nx, ny; // number of cells in every direction
 			double hx, hy; // uniform steps in every diretction
 
 			std::vector<FlowFieldSnapshot> field;
@@ -149,7 +149,7 @@ namespace reservoir_simulator
 				field.emplace_back(t, x0, nx, hx, y0, ny, hy, std::move(vx), std::move(vy));
 			}
 
-			SomeFlowField(double x0_, int nx_, double hx_, double y0_, int ny_, double hy_,
+			SomeFlowField(double x0_, size_t nx_, double hx_, double y0_, size_t ny_, double hy_,
 				std::vector<std::vector<double>>&& poro_) :x0{ x0_ }, y0{ y0_ }, nx{ nx_ }, ny{ ny_ }, hx{ hx_ }, hy{ hy_ }, 
 				poro{ x0, nx, hx, y0, ny, hy, std::move(poro_) }{ }
 

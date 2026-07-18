@@ -227,7 +227,7 @@ BenchmarkResult run_benchmark(const std::string& config_name,
                     sim.numPrm.CurrentAMG_maxSolverIterationCount());
                 chrono_solve += std::chrono::duration<double>(clock::now() - ts0).count();
                 sim.numPrm.update_currentAMGState(
-                    {static_cast<int>(res.iters), res.error, res.converged});
+                    {res.iters, res.error, res.converged});
 
                 profile.n_amg_solves++;
                 profile.total_amg_iters += res.iters;
@@ -369,7 +369,7 @@ BenchmarkResult run_benchmark_scalar(const std::string& config_name,
                     sim.numPrm.CurrentAMG_maxSolverIterationCount(), prm);
                 chrono_solve += std::chrono::duration<double>(clock::now() - ts0).count();
                 sim.numPrm.update_currentAMGState(
-                    {static_cast<int>(res.iters), res.error, res.converged});
+                    {res.iters, res.error, res.converged});
 
                 profile.n_amg_solves++;
                 profile.total_amg_iters += res.iters;

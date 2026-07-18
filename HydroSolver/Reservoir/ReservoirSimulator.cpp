@@ -128,15 +128,15 @@ namespace reservoir_simulator
 
 		for (size_t l = 0; l < well_local_position.size(); ++l)
 		{
-			long int cellIdx = Grid.ConvertTriple2Local(ItsGlobalIDs[l]);
+			ptrdiff_t cellIdx = Grid.ConvertTriple2Local(ItsGlobalIDs[l]);
 			bool isActive = cellIdx >= 0;
 			ActiveCells.push_back(isActive);
 			if (isActive) {
 				well_local_position[l] = static_cast<size_t>(cellIdx);
-				cells_[l] = &(Grid[static_cast<int>(cellIdx)]);
+				cells_[l] = &(Grid[cellIdx]);
 			} else {
 				well_local_position[l] = 0;
-				cells_[l] = &(Grid[0]);
+				cells_[l] = &(Grid[size_t{0}]);
 			}
 		}
 
@@ -350,14 +350,14 @@ namespace reservoir_simulator
 	{
 		double result = 0.0;
 		for (size_t l = 0; l < ActiveCellsNmbr; ++l)
-			result += Grid[static_cast<int>(l)].OilMass();
+			result += Grid[l].OilMass();
 		return result;
 	}
 	double ReservoirSimulator::WaterTotal() const
 	{
 		double result = 0.0;
 		for (size_t l = 0; l < ActiveCellsNmbr; ++l)
-			result += Grid[static_cast<int>(l)].WaterMass();
+			result += Grid[l].WaterMass();
 		return result;
 	}
 	double ReservoirSimulator::OilDebitTotal() const
@@ -626,7 +626,7 @@ namespace reservoir_simulator
 						// lowest boundary
 						size_t j = 0; // lowest cell
 						size_t l_Global = nx * ny * k + nx * j + i;
-						long int l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
 						if (l_Local > -1)
 						{ // the cell is active
 							const TwoPhaseFlowCell& cell = Grid[l_Local];
@@ -661,8 +661,8 @@ namespace reservoir_simulator
 						for (size_t j = 0; j < ny - 1; j++)
 						{
 							size_t l_Global = nx * ny * k + nx * j + i;
-							long int l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
-							long int l_Local_Neighbour = Grid.ConvertGlobal2Local(l_Global + nx);// local index of the cell, adjucent to the current one
+							ptrdiff_t l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
+							ptrdiff_t l_Local_Neighbour = Grid.ConvertGlobal2Local(l_Global + nx);// local index of the cell, adjucent to the current one
 
 							if ((l_Local > -1) && (l_Local_Neighbour > -1))
 							{   // both cells are active
@@ -700,7 +700,7 @@ namespace reservoir_simulator
 						// uppertmost boundary
 						size_t j = ny - 1; // uppermost cell
 						size_t l_Global = nx * ny * k + nx * j + i;
-						long int l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
 						if (l_Local > -1)
 						{ // the cell is active
 							const TwoPhaseFlowCell& cell = Grid[l_Local];
@@ -757,7 +757,7 @@ namespace reservoir_simulator
 						// leftmost boundary
 						size_t i = 0; // leftmost cell
 						size_t l_Global = nx * ny * k + nx * j + i;
-						long int l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
 						if (l_Local > -1)
 						{ // the cell is active
 							const TwoPhaseFlowCell& cell = Grid[l_Local];
@@ -792,8 +792,8 @@ namespace reservoir_simulator
 						for (size_t i = 0; i < nx - 1; i++)
 						{
 							size_t l_Global = nx * ny * k + nx * j + i;
-							long int l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
-							long int l_Local_Neighbour = Grid.ConvertGlobal2Local(l_Global + 1);// local index of the cell, adjucent to the current one
+							ptrdiff_t l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
+							ptrdiff_t l_Local_Neighbour = Grid.ConvertGlobal2Local(l_Global + 1);// local index of the cell, adjucent to the current one
 
 							if ((l_Local > -1) && (l_Local_Neighbour > -1))
 							{   // both cells are active
@@ -829,7 +829,7 @@ namespace reservoir_simulator
 						// rightmost boundary
 						size_t i = nx - 1; // rightmost cell
 						size_t l_Global = nx * ny * k + nx * j + i;
-						long int l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l_Local = Grid.ConvertGlobal2Local(l_Global); // local index of the cell, inactive cells are not counted
 						if (l_Local > -1)
 						{ // the cell is active
 							const TwoPhaseFlowCell& cell = Grid[l_Local];
@@ -884,7 +884,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i); // local index of the cell, inactive cells are not counted
 
 						if (l < 0)
 						{// skip cells that are not active
@@ -926,7 +926,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i); // local index of the cell, inactive cells are not counted
 
 						if (l < 0)
 						{// skip cells that are not active
@@ -967,7 +967,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k += nz - 1)
 					{
-						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i); // local index of the cell, inactive cells are not counted
+						ptrdiff_t l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i); // local index of the cell, inactive cells are not counted
 
 						if (l < 0)
 						{// skip cells that are not active
@@ -1014,7 +1014,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 						if (l < 0) continue;
 
 						const TwoPhaseFlowCell& cell = Grid[l];
@@ -1043,7 +1043,7 @@ namespace reservoir_simulator
 				{
 					for (size_t k = 0; k < nz; k++)
 					{
-						long int l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
+						ptrdiff_t l = Grid.ConvertGlobal2Local(nx * ny * k + nx * j + i);
 						if (l < 0) continue;
 
 						const TwoPhaseFlowCell& cell = Grid[l];

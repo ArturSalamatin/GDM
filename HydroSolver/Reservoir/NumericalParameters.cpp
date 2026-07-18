@@ -11,7 +11,7 @@ namespace reservoir_simulator
 		: newtonTol(nTol), newtonMaxIterNmbr(nCount), AMG_AbsTol(amg_AbsTol), AMG_RelTol(amg_RelTol) {}
 	NumericalParameters::NumericalParameters() noexcept { }
 
-	void NumericalParameters::update_currentAMGState(const std::tuple<int, double, bool>& AMGstate)
+	void NumericalParameters::update_currentAMGState(const std::tuple<size_t, double, bool>& AMGstate)
 	{
 		AMG_currentIterationCount = std::get<0>(AMGstate);
 		double newAMG_error = std::get<1>(AMGstate);
@@ -31,7 +31,7 @@ namespace reservoir_simulator
 			AMG_maxSolverIterCount -= 3;*/
 
 		if (newAMG_error > 0.7)
-			AMG_maxSolverIterCount = std::max(15, AMG_maxSolverIterCount);
+			AMG_maxSolverIterCount = std::max(size_t{15}, AMG_maxSolverIterCount);
 
 		AMG_curError = newAMG_error;
 

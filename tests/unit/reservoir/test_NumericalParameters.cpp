@@ -91,8 +91,8 @@ TEST_CASE("NumericalParameters: PI controller increase_schemeTau path",
 }
 
 struct TestableNumericalParameters : NumericalParameters {
-    void set_AMG_maxSolverIterCount(int val) { AMG_maxSolverIterCount = val; }
-    int get_AMG_maxSolverIterCount() const { return AMG_maxSolverIterCount; }
+    void set_AMG_maxSolverIterCount(size_t val) { AMG_maxSolverIterCount = val; }
+    size_t get_AMG_maxSolverIterCount() const { return AMG_maxSolverIterCount; }
     double get_AMG_maxSolverIterAccum() const { return AMG_maxSolverIterAccum; }
 };
 

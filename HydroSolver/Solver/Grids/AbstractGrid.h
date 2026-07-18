@@ -25,7 +25,7 @@ namespace reservoir_simulator
 
 			// inactive cells are always assumed
 			std::vector<size_t> cell_idx_Local2Global; // stored values are cell idx in global indexing format, when inactive cells are not counted
-			std::vector<long int> cell_idx_Global2Local; // stored values are cell idx in local indexing format, when inactive cells are also counted; some elements are -1
+			std::vector<ptrdiff_t> cell_idx_Global2Local; // stored values are cell idx in local indexing format, when inactive cells are also counted; some elements are -1
 			std::vector<bool> IsCellActive; // shows whether the cell is active or not
 
 			size_t activeCellsNmbr = 0; // number of active cells; size of connectivityGraph
@@ -58,7 +58,7 @@ namespace reservoir_simulator
 					Cells[l].UpdateState(corrections, l * eqNmbr);
 			}
 
-			const std::vector<ProcessCell*> GetNeighboursPointer(int l)
+			const std::vector<ProcessCell*> GetNeighboursPointer(size_t l)
 			{
 				std::vector<ProcessCell*> neighbours;
 				for (size_t neighbourIdx = 0; neighbourIdx < connectivityGraph[l].size(); neighbourIdx++)
@@ -70,13 +70,12 @@ namespace reservoir_simulator
 				return neighbours;
 			}
 
-			const std::vector<double>& CommonEdgeArea(int l)
+			const std::vector<double>& CommonEdgeArea(size_t l)
 			{
 				return commonEdgeArea[l];
 			}
-			// returns the cell according to its local index
-			// idx < 0 stands for inactive cells
-			const ProcessCell& operator [] (int idx) const
+			// idx < 0 stands for inactive cells, idx >= 0 for active
+			const ProcessCell& operator [] (ptrdiff_t idx) const
 			{
 				if (idx < 0)
 					return CellsInactive[-(idx + 1)];
@@ -84,12 +83,22 @@ namespace reservoir_simulator
 					return Cells[idx];
 			}
 
-			ProcessCell& operator [] (int idx)
+			ProcessCell& operator [] (ptrdiff_t idx)
 			{
 				if (idx < 0)
 					return CellsInactive[-(idx + 1)];
 				else
 					return Cells[idx];
+			}
+
+			const ProcessCell& operator [] (size_t idx) const
+			{
+				return Cells[idx];
+			}
+
+			ProcessCell& operator [] (size_t idx)
+			{
+				return Cells[idx];
 			}
 
 			/*	const std::vector<ProcessCell>& GetActiveCells()
@@ -102,7 +111,7 @@ namespace reservoir_simulator
 					return CellsInactive;
 				}*/
 
-			long int ConvertGlobal2Local(size_t idx) const
+			ptrdiff_t ConvertGlobal2Local(size_t idx) const
 			{
 				return cell_idx_Global2Local[idx];
 			}
@@ -130,7 +139,7 @@ namespace reservoir_simulator
 			{}
 			SomeGrid(const std::vector<bool>& active_cells)
 				:Cells{}, CellsInactive{}, IsCellActive{ active_cells },
-				cell_idx_Global2Local{ std::vector<long int>(active_cells.size(), -1) }
+				cell_idx_Global2Local{ std::vector<ptrdiff_t>(active_cells.size(), -1) }
 			{
 				totalCellNmbr = active_cells.size();
 				cell_idx_Local2Global.reserve(totalCellNmbr);
@@ -141,13 +150,13 @@ namespace reservoir_simulator
 					if ((active_cells[l]))
 					{
 						cell_idx_Local2Global.push_back(l);
-						cell_idx_Global2Local[l] = static_cast<long int>(activeCellsNmbr);
+						cell_idx_Global2Local[l] = static_cast<ptrdiff_t>(activeCellsNmbr);
 						activeCellsNmbr++;
 					}
 					else
 					{
 						inActiveCellsNmbr++;
-						cell_idx_Global2Local[l] = -static_cast<long int>(inActiveCellsNmbr);
+						cell_idx_Global2Local[l] = -static_cast<ptrdiff_t>(inActiveCellsNmbr);
 					}
 				}
 				cell_idx_Local2Global.shrink_to_fit();
@@ -180,7 +189,7 @@ namespace reservoir_simulator
 			size_t Ny() const { return grid_size.Ny; }
 			size_t Nz() const { return grid_size.Nz; }
 
-			long int ConvertTriple2Local(const std::vector<size_t>& idx) const
+			ptrdiff_t ConvertTriple2Local(const std::vector<size_t>& idx) const
 			{
 				return ConvertGlobal2Local(Nx() * Ny() * idx[2] + Nx() * idx[1] + idx[0]);
 			}
@@ -235,28 +244,28 @@ namespace reservoir_simulator
 								//}
 								if (j > 0 && active_cells[l - Nx()])
 								{// the cell, previous in Y direction
-									connections.push_back(cell_idx_Global2Local[l - Nx()]);
+									connections.push_back(static_cast<int>(cell_idx_Global2Local[l - Nx()]));
 									faces.push_back(Cells[cell_idx_Global2Local[l]].StepX() /
 										Cells[cell_idx_Global2Local[l]].StepY() *
 										(Cells[cell_idx_Global2Local[l - Nx()]].StepZ() + Cells[cell_idx_Global2Local[l]].StepZ()) / 2);
 								}
 								if (i > 0 && active_cells[l - 1])
 								{// the cell, previous in X direction
-									connections.push_back(cell_idx_Global2Local[l - 1]);
+									connections.push_back(static_cast<int>(cell_idx_Global2Local[l - 1]));
 									faces.push_back(Cells[cell_idx_Global2Local[l]].StepY() /
 										Cells[cell_idx_Global2Local[l]].StepX() *
 										(Cells[cell_idx_Global2Local[l - 1]].StepZ() + Cells[cell_idx_Global2Local[l]].StepZ()) / 2);
 								}
 								if (i < Nx() - 1 && active_cells[l + 1])
 								{// the cell, following in X direction
-									connections.push_back(cell_idx_Global2Local[l + 1]);
+									connections.push_back(static_cast<int>(cell_idx_Global2Local[l + 1]));
 									faces.push_back(Cells[cell_idx_Global2Local[l]].StepY() /
 										Cells[cell_idx_Global2Local[l]].StepX() *
 										(Cells[cell_idx_Global2Local[l + 1]].StepZ() + Cells[cell_idx_Global2Local[l]].StepZ()) / 2);
 								}
 								if (j < Ny() - 1 && active_cells[l + Nx()])
 								{// the cell, following in Y direction
-									connections.push_back(cell_idx_Global2Local[l + Nx()]);
+									connections.push_back(static_cast<int>(cell_idx_Global2Local[l + Nx()]));
 									faces.push_back(Cells[cell_idx_Global2Local[l]].StepX() /
 										Cells[cell_idx_Global2Local[l]].StepY() *
 										(Cells[cell_idx_Global2Local[l + Nx()]].StepZ() + Cells[cell_idx_Global2Local[l]].StepZ()) / 2);
@@ -295,8 +304,8 @@ namespace reservoir_simulator
 
 			const ProcessCell& operator() (size_t i, size_t j, size_t k) const
 			{
-				long int idx = ConvertTriple2Local(std::vector<size_t>{i, j, k});
-				return (*this)[static_cast<int>(idx)];
+				ptrdiff_t idx = ConvertTriple2Local(std::vector<size_t>{i, j, k});
+				return (*this)[idx];
 			}
 		};
 	} // grid

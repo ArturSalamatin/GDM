@@ -52,7 +52,7 @@ namespace reservoir_simulator
 
 		auto res = problem.Solve(numPrm.CurrentAMG_maxSolverIterationCount());
 		numPrm.update_currentAMGState(
-			{ static_cast<int>(res.iters), res.error, res.converged });
+			{ res.iters, res.error, res.converged });
 
 		profile.n_amg_solves++;
 		profile.total_amg_iters += res.iters;
@@ -70,11 +70,12 @@ namespace reservoir_simulator
 #endif
 		for (int l = 0; l < grid.ActiveCellsNmbr(); l++)
 		{
+			size_t sl = l;
 			double corr[B];
 			problem.UnpackCellCorrections(l, corr);
-			grid[l].UpdateState(corr);
+			grid[sl].UpdateState(corr);
 
-			const std::vector<double>& stateVaiables = grid[l].GetVariableFieldProperties();
+			const std::vector<double>& stateVaiables = grid[sl].GetVariableFieldProperties();
 
 			int i = 0; // saturation
 			f[B * l + i] =

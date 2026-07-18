@@ -23,11 +23,11 @@
 
  double math_routines::MathRoutines::InterpFieldConstTime(const reservoir_simulator::phasePortrait::Point& queryP, const std::vector<double>& x_mesh, const std::vector<double>& y_mesh, const std::vector<std::vector<double>>& field)
 {
-	int x_idx = MathRoutines::LowerPointUniformMesh(x_mesh, queryP.x());
-	if (x_idx < 0 || x_idx > x_mesh.size() - 2)
+	ptrdiff_t x_idx = MathRoutines::LowerPointUniformMesh(x_mesh, queryP.x());
+	if (x_idx < 0 || x_idx > static_cast<ptrdiff_t>(x_mesh.size()) - 2)
 		return NAN;
-	int y_idx = MathRoutines::LowerPointUniformMesh(y_mesh, queryP.y());
-	if (y_idx < 0 || y_idx > y_mesh.size() - 2)
+	ptrdiff_t y_idx = MathRoutines::LowerPointUniformMesh(y_mesh, queryP.y());
+	if (y_idx < 0 || y_idx > static_cast<ptrdiff_t>(y_mesh.size()) - 2)
 		return NAN;
 
 
@@ -49,19 +49,19 @@
 	return (A[0] * vals[2] + A[1] * vals[3] + A[2] * vals[0] + A[3] * vals[1]) / A0;
 }
 
- int math_routines::MathRoutines::LowerPointUniformMesh(const std::vector<double>& mesh, double queryX)
+ ptrdiff_t math_routines::MathRoutines::LowerPointUniformMesh(const std::vector<double>& mesh, double queryX)
 {
 	double hx = mesh[1] - mesh[0]; // get mesh step
 	double x0 = mesh[0]; // get origin
-	return static_cast<int>(std::floor((queryX - x0) / hx));
+	return static_cast<ptrdiff_t>(std::floor((queryX - x0) / hx));
 }
 
- int math_routines::MathRoutines::LowerPointNonUniformMesh(const std::vector<double>& mesh, double queryX)
+ ptrdiff_t math_routines::MathRoutines::LowerPointNonUniformMesh(const std::vector<double>& mesh, double queryX)
 {
 	if (queryX < mesh[0] || queryX > mesh.back())
 		return -1;
 	auto iter = std::distance(mesh.begin(), upper_bound(mesh.begin(), mesh.end(), queryX)) - 1;
-	return static_cast<int>(iter);
+	return iter;
 }
 
  std::array<double, 3> math_routines::MathRoutines::prod(std::array<double, 3> arr, double s)
