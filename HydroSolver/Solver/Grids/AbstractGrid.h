@@ -92,6 +92,32 @@ namespace reservoir_simulator
 					return Cells[idx];
 			}
 
+			const ProcessCell& operator [] (long int idx) const
+			{
+				if (idx < 0)
+					return CellsInactive[-(idx + 1)];
+				else
+					return Cells[idx];
+			}
+
+			ProcessCell& operator [] (long int idx)
+			{
+				if (idx < 0)
+					return CellsInactive[-(idx + 1)];
+				else
+					return Cells[idx];
+			}
+
+			const ProcessCell& operator [] (size_t idx) const
+			{
+				return Cells[idx];
+			}
+
+			ProcessCell& operator [] (size_t idx)
+			{
+				return Cells[idx];
+			}
+
 			/*	const std::vector<ProcessCell>& GetActiveCells()
 				{
 					return Cells;
@@ -296,7 +322,7 @@ namespace reservoir_simulator
 			const ProcessCell& operator() (size_t i, size_t j, size_t k) const
 			{
 				long int idx = ConvertTriple2Local(std::vector<size_t>{i, j, k});
-				return (*this)[static_cast<int>(idx)];
+				return (*this)[idx];
 			}
 		};
 	} // grid
