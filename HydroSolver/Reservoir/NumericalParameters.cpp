@@ -31,7 +31,7 @@ namespace reservoir_simulator
 			AMG_maxSolverIterCount -= 3;*/
 
 		if (newAMG_error > 0.7)
-			AMG_maxSolverIterCount = std::max(15, AMG_maxSolverIterCount);
+			AMG_maxSolverIterCount = std::max(size_t{15}, AMG_maxSolverIterCount);
 
 		AMG_curError = newAMG_error;
 

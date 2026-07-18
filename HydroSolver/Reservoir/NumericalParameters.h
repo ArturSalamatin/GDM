@@ -18,7 +18,7 @@ namespace reservoir_simulator
 	{
 	protected:
 		static constexpr double factor = 0.15;
-		static constexpr int AMG_MAXSOLVERITERCOUNT = 45;
+		static constexpr size_t AMG_MAXSOLVERITERCOUNT = 45;
 		bool isSuccessfulTrial = true;
 
 		double newtonTol = 1E-4;
@@ -27,7 +27,7 @@ namespace reservoir_simulator
 		size_t newtonMaxIterNmbr = 12; // maximum number of iterations in the Newton loop
 		size_t curNmbrOfSolverIterations = 0;
 
-		int AMG_maxSolverIterCount = AMG_MAXSOLVERITERCOUNT; // initial maximum number of iterations allowed in the AMG::Solver
+		size_t AMG_maxSolverIterCount = AMG_MAXSOLVERITERCOUNT; // initial maximum number of iterations allowed in the AMG::Solver
 		double AMG_maxSolverIterAccum = 0.0;
 		double AMG_curError = 0.0;
 		size_t AMG_currentIterationCount = 0;
@@ -65,7 +65,7 @@ namespace reservoir_simulator
 		size_t WastedTrialsCount() const { return wastedTrialsCount; }
 		size_t MaxNewtonIterationNmbr() const { return newtonMaxIterNmbr; }
 		double CurrentAMG_Error() const { return AMG_curError; }
-		size_t CurrentAMG_maxSolverIterationCount() const { return static_cast<size_t>(AMG_maxSolverIterCount); }
+		size_t CurrentAMG_maxSolverIterationCount() const { return AMG_maxSolverIterCount; }
 		size_t CurrentAMG_IterationsCount() const { return AMG_currentIterationCount; }
 		bool CurrentANG_IsAccuracyReached() const
 		{
