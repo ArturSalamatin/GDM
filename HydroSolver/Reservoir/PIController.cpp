@@ -5,13 +5,14 @@ namespace reservoir_simulator
 
 double PIController::ComputeMultiplier(size_t newton_iters, bool success)
 {
+    const double inv_max = 1.0 / params_.max_iters;
     double e_n;
     if (!success)
         e_n = 1.0;
     else
-        e_n = static_cast<double>(newton_iters) / params_.max_iters;
+        e_n = newton_iters * inv_max;
 
-    double e_target = static_cast<double>(params_.target_iters) / params_.max_iters;
+    double e_target = params_.target_iters * inv_max;
 
     double mult;
     if (prev_error_ < 0) {
