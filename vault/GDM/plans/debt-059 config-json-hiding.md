@@ -6,7 +6,7 @@ date: 2026-07-18
 issue: DEBT-059
 github: 38
 branch: refactor/debt-059/config-json-hiding
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-18
   round: 4
