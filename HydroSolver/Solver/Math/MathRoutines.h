@@ -47,9 +47,9 @@ namespace math_routines
 		static double BilinearInterp(const reservoir_simulator::phasePortrait::Point& queryP, 
 			const std::array<reservoir_simulator::phasePortrait::Point, 4>& P, const std::array<double, 4>& vals);
 
-		static int LowerPointUniformMesh(const std::vector<double>& mesh, double queryX);
+		static ptrdiff_t LowerPointUniformMesh(const std::vector<double>& mesh, double queryX);
 
-		static int LowerPointNonUniformMesh(const std::vector<double>& mesh, double queryX);
+		static ptrdiff_t LowerPointNonUniformMesh(const std::vector<double>& mesh, double queryX);
 
 		// integration routines
 	public:

@@ -68,7 +68,7 @@ namespace reservoir_simulator
 			auto lowT_idx = math_routines::MathRoutines::LowerPointNonUniformMesh(time, queryT);
 			if (lowT_idx < 0)
 				return {0.0, 0.0};
-			if (lowT_idx == time.size() - 1)
+			if (lowT_idx == static_cast<ptrdiff_t>(time.size()) - 1)
 				lowT_idx--;
 			auto upT_idx = lowT_idx + 1;
 			auto lowT = time[lowT_idx], upT = time[upT_idx];
