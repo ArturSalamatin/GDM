@@ -238,17 +238,17 @@ namespace WellDataHandler {
 
 	class PerfData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_perf);
 	};
 	class GISData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_gis_file);
 	};
 	class MerData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_mer);
 
 		void PushManualy(
@@ -274,7 +274,7 @@ namespace WellDataHandler {
 		/// </param>
 		/// <param name="name">Имя скважины</param>
 		/// <returns>Значение</returns>
-		virtual float GetValue(int id, std::wstring name) override;
+		float GetValue(int id, std::wstring name) override;
 	
 		std::map<std::wstring, float> CumOil;
 		std::map<std::wstring, float> CumWater;
@@ -289,28 +289,28 @@ namespace WellDataHandler {
 	};
 	class GDISData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_gdis);
 	};
 	class WCData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_wc);
 	};
 	class GeoChemData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_gc);
 	};
 	class FECData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_fec);
 		std::vector<std::wstring> GetWellsPerPeriod(int start, int stop);
 	};
 	class AnomData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		virtual void Push(std::wstring path_to_anom);
 	};
 	class DataHandleUtils
@@ -353,13 +353,13 @@ namespace WellDataHandler {
 
 	class RaschData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		void Push(std::wstring path_to_rasch);
 	};
 
 	class WellCoordData : public IData {
 	public:
-		virtual void Push(std::wstring path, std::wstring name);
+		void Push(std::wstring path, std::wstring name) override;
 		void Push(std::wstring path_to_rasch);
 
 		std::vector<std::wstring>& GetWellsName()
