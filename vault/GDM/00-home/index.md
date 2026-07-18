@@ -72,6 +72,7 @@ date: 2026-06-27
 - [[debt-028 neibidx-size-t]] — DEBT-028: int neibIdx → size_t в LinearProblem::AddOffDiagBlock
 - [[debt-039 amg-itercount-type]] — DEBT-039: double AMG_maxSolverIterCount → int + дробный аккумулятор
 - [[debt-037 override-specifiers]] — DEBT-037: добавить override ко всем переопределённым виртуальным методам
+- [[val-039 pi-controller-breakthrough]] — VAL-039: PI-контроллер через breakthrough (1D + five-spot)
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
@@ -129,6 +130,7 @@ date: 2026-06-27
 - [[команда plan-research для планирования экспериментов]]
 - [[команда implement для реализации планов]]
 - [[переход с LGMRES на BiCGStab как default солвер]]
+- [[индексация через size_t и ptrdiff_t а не long]]
 
 #### Тестирование (`knowledge/decisions/`)
 - [[юнит-тесты уровень 0 нулевые зависимости]]
