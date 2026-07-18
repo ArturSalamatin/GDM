@@ -143,8 +143,8 @@ namespace UniversalSCParser {
 	class CP1251FileParser : public IFileParser {
 	public:
 		CP1251FileParser(std::wstring Path) : IFileParser(Path) {}
-		virtual std::wstring Read();
-		virtual std::vector<wchar_t> ReadArray();
+		std::wstring Read() override;
+		std::vector<wchar_t> ReadArray() override;
 	};
 
 	/*class UTF16LEFileParser : public IFileParser {
@@ -157,8 +157,8 @@ namespace UniversalSCParser {
 	class UTF8FileParser : public IFileParser {
 	public:
 		UTF8FileParser(std::wstring Path) : IFileParser(Path) {};
-		virtual std::wstring Read();
-		virtual std::vector<wchar_t> ReadArray();
+		std::wstring Read() override;
+		std::vector<wchar_t> ReadArray() override;
 	};
 
 	class SVParser {

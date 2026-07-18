@@ -18,9 +18,9 @@ namespace reservoir_simulator
 			static const int permPower = 3;
 			static const int nmbrOfConstantFieldProperties = 9;
 
-			virtual void ApplyPhysicalConstraints();
+			void ApplyPhysicalConstraints() override;
 
-			virtual void UpdateDependentFieldProperties()
+			void UpdateDependentFieldProperties() override
 			{
 				ApplyPhysicalConstraints();
 
@@ -55,7 +55,7 @@ namespace reservoir_simulator
 				}
 			}
 			
-			virtual void SetPreviousStateDependentFieldProperties();
+			void SetPreviousStateDependentFieldProperties() override;
 		public:
 
 			const std::vector<double> PreviousState_Mass() const;

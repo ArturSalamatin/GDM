@@ -26,7 +26,7 @@ namespace UniversalWriter {
 				Write(header);
 			}*/
 		}
-		virtual void Write(std::wstring content);
+		void Write(std::wstring content) override;
 	};
 
 	/*class ASCIWriter : public ISVWriter

@@ -148,20 +148,20 @@ namespace JSON {
 	{
 	public:
 		JValue(std::string&& src) : IJObject(std::move(src)) {}
-		virtual std::map<std::string, std::unique_ptr<IJObject>> Value();
+		std::map<std::string, std::unique_ptr<IJObject>> Value() override;
 	};
 
 	class JArray : public IJObject
 	{
 	public:
 		JArray(std::string&& src) : IJObject(std::move(src)) {}
-		virtual std::map<std::string, std::unique_ptr<IJObject>> Value();
+		std::map<std::string, std::unique_ptr<IJObject>> Value() override;
 	};
 
 	class JObject : public IJObject {
 	public:
 		JObject(std::string&& src) : IJObject(std::move(src)) {}
-		virtual std::map<std::string, std::unique_ptr<IJObject>> Value();
+		std::map<std::string, std::unique_ptr<IJObject>> Value() override;
 	};
 
 	class JSONParser {
