@@ -143,7 +143,7 @@ namespace reservoir_simulator
 				}
 			}
 
-			std::erase(offDiagBlocks_raw, static_cast<size_t>(0));
+			std::erase(offDiagBlocks_raw, size_t{0});
 
 			elementsAboveBlockRow = std::vector<size_t>(cellNmbr, 0);
 			for (size_t l = 1; l < cellNmbr; l++)
@@ -155,7 +155,7 @@ namespace reservoir_simulator
 
 		SparsityPattern::SparsityPattern(const unsigned char eqNmbr_, const size_t cellNmbr, const std::vector<std::vector<int>>& connectivityGraph) :
 			SparsityPattern(eqNmbr_, cellNmbr, connectivityGraph,
-				std::vector<bool>(static_cast<size_t>(eqNmbr_) * eqNmbr_, true)) {}
+				std::vector<bool>(size_t{eqNmbr_} * eqNmbr_, true)) {}
 
 		// number of non-zero elements in the matrix
 
