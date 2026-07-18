@@ -29,6 +29,39 @@ namespace reservoir_simulator
 					saturation_field_date = PathUtils::Utils::ConvertDateToExcelDate(GetLeave("temporal_parameters", "saturation_field_date"));
 					number_of_snapshots = (int)GetValue("temporal_parameters", "number_of_snapshots");
 					anomaly_detection_interval = GetValue("anomaly", "anomaly_detection_interval");
+
+					// SchemeParamaters fields
+					requiredNewtonTol = GetValue("scheme_parameters", "required_Newton_Tolerance");
+					newtonMaxIterCount = static_cast<size_t>(GetValue("scheme_parameters", "newton_max_iteration_count"));
+					amg_RelTol = GetValue("scheme_parameters", "AMG_RelTol");
+					amg_AbsTol = GetValue("scheme_parameters", "AMG_AbsTol");
+					minCellThickness = GetValue("common_properties", "min_cell_thickness");
+					minPorosity = GetValue("common_properties", "min_cell_porosity");
+					minPermeability = UnitsConversionFactors::permeabilityConversion * GetValue("common_properties", "min_cell_permeability");
+
+					// AnomalyDetectionProperties fields (remaining)
+					veclocity_multiplier = GetValue("trajectories", "velocity_multiplier");
+					{
+						auto val = GetValue("trajectories", "start_distance");
+						initTrajectoryDistance = (val < 0.0) ? 0.5 : val;
+					}
+					startSignalRollbackTime = GetValue("trajectories", "start_signal_rollback_time");
+					endSignalRollbackTime = GetValue("trajectories", "end_signal_rollback_time");
+
+					// Config fields
+					waterPhaseProperties = PhaseProperties(
+						UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "0"),
+						UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "0"),
+						UnitsConversionFactors::compressibilityConversion * GetValue("phase_properties", "compressibility", "0"),
+						UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "0"),
+						UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "0"));
+					oilPhaseProperties = PhaseProperties(
+						UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "1"),
+						UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "1"),
+						UnitsConversionFactors::compressibilityConversion * GetValue("phase_properties", "compressibility", "1"),
+						UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "1"),
+						UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "1"));
+
 					// at least two snapshopts must be saved, thus we can show the progress bar
 					if (number_of_snapshots < 2)
 					{
@@ -95,50 +128,17 @@ namespace reservoir_simulator
 			}
 
 			double ExtBoundaryPressure() override { return UnitsConversionFactors::pressureConversion * GetValue("common_properties", "external_bundary_pressure"); }
-			PhaseProperties WaterPhaseProperties()
-			{
-				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "0"),
-					UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "0"),
-					UnitsConversionFactors::compressibilityConversion * GetValue("phase_properties", "compressibility", "0"),
-					UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "0"),
-					UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "0"));
-			}
-			PhaseProperties OilPhaseProperties()
-			{
-				return PhaseProperties(UnitsConversionFactors::viscosityConversion * GetValue("phase_properties", "viscosity", "1"),
-					UnitsConversionFactors::densityConversion * GetValue("phase_properties", "density", "1"),
-					UnitsConversionFactors::compressibilityConversion * GetValue("phase_properties", "compressibility", "1"),
-					UnitsConversionFactors::saturationConversion * GetValue("phase_properties", "residual", "1"),
-					UnitsConversionFactors::pressureConversion * GetValue("phase_properties", "reference_pressure_for_compressibility", "1"));
-			}
-			double RequiredNewtonTol() { return GetValue("scheme_parameters", "required_Newton_Tolerance"); }
-			double g() { return GetValue("common_properties", "freeFall_acceleration"); }
+
 			double StartTimeStep() override { return GetValue("scheme_parameters", "initial_time_step"); }
 
 
-			double VelocityMultiplier() { return GetValue("trajectories", "velocity_multiplier"); }
-			double InitialTrajectoryDistance()
-			{
-				auto val = GetValue("trajectories", "start_distance");
-				val = (val < 0.0) ? 0.5 : val;
-				return val;
-			}
 			//		virtual double TrajectoryCount() { return GetValue("trajectories", "number_of_trajectories_from_well"); }
-			double StartSignalRollbackTime() { return GetValue("trajectories", "start_signal_rollback_time"); }
-			double EndSignalRollbackTime() { return GetValue("trajectories", "end_signal_rollback_time"); }
 
-			int NewtonMaxIterCount() { return (int)GetValue("scheme_parameters", "newton_max_iteration_count"); }
-			double AMG_RelTol() { return GetValue("scheme_parameters", "AMG_RelTol"); }
-			double AMG_AbsTol() { return GetValue("scheme_parameters", "AMG_AbsTol"); }
 			std::string WaterSaturation_fileName() override { return folderName + GetLeave("save_files", "water_saturation"); }
 			std::string OilSaturation_fileName() override { return folderName + GetLeave("save_files", "oil_saturation"); }
 			std::string Pressure_fileName() override { return folderName + GetLeave("save_files", "pressure"); }
 			std::string OverallBalance_fileName() override { return folderName + GetLeave("save_files", "overall_oil_balance"); }
 
-
-			double MinCellThickness() { return GetValue("common_properties", "min_cell_thickness"); }
-			double MinPorosity() { return GetValue("common_properties", "min_cell_porosity"); }
-			double MinPermeability() { return UnitsConversionFactors::permeabilityConversion * GetValue("common_properties", "min_cell_permeability"); }
 
 			std::string GetLeave(std::string section, std::string name)
 			{
