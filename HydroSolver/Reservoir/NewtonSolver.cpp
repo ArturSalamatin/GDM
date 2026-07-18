@@ -70,11 +70,12 @@ namespace reservoir_simulator
 #endif
 		for (int l = 0; l < grid.ActiveCellsNmbr(); l++)
 		{
+			size_t sl = l;
 			double corr[B];
 			problem.UnpackCellCorrections(l, corr);
-			grid[l].UpdateState(corr);
+			grid[sl].UpdateState(corr);
 
-			const std::vector<double>& stateVaiables = grid[l].GetVariableFieldProperties();
+			const std::vector<double>& stateVaiables = grid[sl].GetVariableFieldProperties();
 
 			int i = 0; // saturation
 			f[B * l + i] =
