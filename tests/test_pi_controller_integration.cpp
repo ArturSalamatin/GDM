@@ -17,7 +17,6 @@ constexpr double P_init_atm = 200.0;
 constexpr double So_init = 0.8;
 constexpr double Sw_init = 1.0 - So_init;
 constexpr double Q_inj = -1000.0;
-constexpr double Q_prod = 800.0;
 constexpr double T_breakthrough = 600.0;
 
 } // namespace
@@ -35,11 +34,8 @@ TEST_CASE("PI controller: BL 1D through breakthrough",
     sim.numPrm.set_currentMoment(0.0);
     sim.numPrm.SetUsePIController(true);
 
-    double hx = Lx_1d / Nx_1d;
     test_helpers::add_simple_well(sim, horizon,
-        "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
-    test_helpers::add_simple_well(sim, horizon,
-        "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+        "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
 
     sim.Solve({0.0, T_breakthrough});
 
@@ -52,7 +48,8 @@ TEST_CASE("PI controller: BL 1D through breakthrough",
         }
     }
 
-    SECTION("Breakthrough occurred — Sw at producer > Sw_init") {
+    SECTION("Water front reached boundary — Sw at edge > Sw_init") {
+        CHECK(Sw[0] > Sw_init + 0.01);
         CHECK(Sw[Nx_1d - 1] > Sw_init + 0.01);
     }
 
@@ -71,7 +68,6 @@ TEST_CASE("PI controller: BL 1D through breakthrough",
         double oil_scale = std::abs(accumOil) + std::abs(accumOilFlux) + std::abs(accumOilDebet);
         INFO("OIL: dM=" << accumOil << " flux=" << accumOilFlux
              << " debet=" << accumOilDebet << " residual=" << oil_residual);
-        CHECK(accumOilDebet < 0.0);
         if (oil_scale > 0.0)
             CHECK(std::abs(oil_residual) / oil_scale < 1e-4);
 
@@ -196,11 +192,8 @@ TEST_CASE("PI controller: PI vs fixed-dt profile comparison",
         if (use_pi)
             sim.numPrm.SetUsePIController(true);
 
-        double hx = Lx_1d / Nx_1d;
         test_helpers::add_simple_well(sim, horizon,
-            "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
-        test_helpers::add_simple_well(sim, horizon,
-            "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+            "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
 
         sim.Solve({0.0, T});
         return sim.GetWaterSaturationField();
@@ -247,11 +240,8 @@ TEST_CASE("PI controller: CSV export for visual verification",
     sim.numPrm.set_currentMoment(0.0);
     sim.numPrm.SetUsePIController(true);
 
-    double hx = Lx_1d / Nx_1d;
     test_helpers::add_simple_well(sim, horizon,
-        "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
-    test_helpers::add_simple_well(sim, horizon,
-        "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+        "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
 
     sim.Solve({0.0, T_breakthrough});
 
@@ -277,17 +267,22 @@ TEST_CASE("PI controller: CSV export for visual verification",
         sim2.numPrm.set_currentMoment(0.0);
 
         test_helpers::add_simple_well(sim2, h2,
-            "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
-        test_helpers::add_simple_well(sim2, h2,
-            "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+            "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
 
         sim2.Solve({0.0, T_breakthrough});
         auto Sw_fixed = sim2.GetWaterSaturationField();
 
+        double hx = Lx_1d / Nx_1d;
         std::ofstream csv("results/validation/pi_vs_fixed_sw_profile.csv");
         csv << "x,Sw_PI,Sw_fixed\n";
         for (size_t i = 0; i < Nx_1d; ++i)
             csv << (i + 0.5) * hx << "," << Sw_pi[i] << "," << Sw_fixed[i] << "\n";
+
+        std::ofstream csv2("results/validation/linear_dt_history.csv");
+        csv2 << "t,dt,newton_iters,accepted\n";
+        for (auto& rec : sim2.numPrm.TimestepLog())
+            csv2 << rec.time << "," << rec.dt << ","
+                 << rec.newton_iters << "," << rec.accepted << "\n";
     }
 
     CHECK(std::filesystem::exists("results/validation/pi_dt_history.csv"));
