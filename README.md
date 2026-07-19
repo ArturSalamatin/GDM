@@ -24,6 +24,33 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
+## Examples and Visualization
+
+The project includes standalone simulation scenarios (`examples/`) and Python visualization scripts (`scripts/`).
+
+| Directory | Contents |
+|---|---|
+| `examples/` | Standalone executables — configure a simulation case, run the time loop, export CSV snapshots to `results/` |
+| `tests/simulation_cases/` | Reusable case classes (grid, wells, PVT) shared by tests and examples |
+| `scripts/` | Python scripts for field animations and convergence plots |
+
+### Running examples
+
+```powershell
+# Single example (run from project root)
+.\build\Release\ex_five_spot.exe
+
+# All examples
+cmake --build build --config Release --target run_examples
+
+# All examples + generate animations
+cmake --build build --config Release --target animate
+```
+
+Available examples: `ex_single_injector`, `ex_two_well`, `ex_five_spot`, `ex_variable_debit`, `ex_3d_completions`, `ex_benchmark_51x51x4`, `ex_benchmark_series_cpr`, `ex_benchmark_series_ts`.
+
+Results are written to `results/<case_name>/` as per-timestep CSV files (columns: `i,j,Sw,P_atm`). The `animate` target calls `scripts/animate_fields.py` (2D) and `scripts/animate_3d_fields.py` (3D) to produce animations from these CSVs.
+
 ## Solver Configuration
 
 GDM uses [amgcl](https://amgcl.readthedocs.io/) for linear algebra. The Krylov solver is selected at compile time via the `GDM_SOLVER` CMake option:
