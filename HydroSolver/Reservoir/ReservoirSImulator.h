@@ -155,6 +155,7 @@ namespace reservoir_simulator
 
 		double OilTotal() const;
 		double WaterTotal() const;
+		const MassBalanceTracker& BalanceTracker() const { return balance_tracker_; }
 		double OilDebitTotal() const;
 		double WaterDebitTotal() const;
 		double OilContourFlux() const;

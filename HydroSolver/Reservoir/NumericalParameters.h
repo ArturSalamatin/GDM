@@ -14,6 +14,13 @@ namespace reservoir_simulator
 	};
 
 
+	struct TimestepRecord {
+		double time;
+		double dt;
+		size_t newton_iters;
+		bool accepted;
+	};
+
 	class NumericalParameters
 	{
 	protected:
@@ -42,6 +49,8 @@ namespace reservoir_simulator
 
 		PIController pi_controller_{PIControllerParams{.max_iters = 65}};
 		bool use_pi_controller_ = false;
+
+		std::vector<TimestepRecord> timestep_log_;
 
 	public:
 		double AMG_RelTol = 1E-2;
@@ -113,6 +122,9 @@ namespace reservoir_simulator
 		}
 		void SetUsePIController(bool f) { use_pi_controller_ = f; }
 		bool UsesPIController() const { return use_pi_controller_; }
+
+		const std::vector<TimestepRecord>& TimestepLog() const { return timestep_log_; }
+		void ClearTimestepLog() { timestep_log_.clear(); }
 
 	public:
 
