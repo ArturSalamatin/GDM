@@ -7,7 +7,7 @@ date: 2026-07-18
 issue: VAL-039
 github: 40
 branch: val/val-039/pi-controller-breakthrough
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-19
   round: 10
