@@ -7,7 +7,7 @@ date: 2026-07-19
 issue: VAL-040
 github: 42
 branch: val/val-040/perf-regression-baseline
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-19
   pass: 7

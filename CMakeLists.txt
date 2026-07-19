@@ -132,6 +132,7 @@ target_compile_definitions(gdm_tests PRIVATE GDM_EXE_NAME="gdm_tests")
 add_executable(gdm_benchmark
     tests/test_amgcl_benchmark.cpp
     tests/test_solver_comparison.cpp
+    tests/test_perf_regression.cpp
 )
 target_link_libraries(gdm_benchmark PRIVATE gdm_core Catch2::Catch2WithMain)
 target_compile_definitions(gdm_benchmark PRIVATE GDM_EXE_NAME="gdm_benchmark")
