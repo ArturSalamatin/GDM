@@ -50,8 +50,10 @@ namespace reservoir_simulator
 	}
 
 
-	void NumericalParameters::update_currentMoment() 
+	void NumericalParameters::update_currentMoment()
 	{
+		timestep_log_.push_back({currentMoment, CurrentIntegrationStep(),
+			currentNewtonIterationCount, true});
 		currentMoment += CurrentIntegrationStep();
 
 #ifdef DEBUG_SALAMATIN
@@ -106,6 +108,8 @@ namespace reservoir_simulator
 		}
 	}
 	void NumericalParameters::decrease_schemeTau() {
+		timestep_log_.push_back({currentMoment, CurrentIntegrationStep(),
+			currentNewtonIterationCount, false});
 		if (use_pi_controller_) {
 			double mult = pi_controller_.ComputeMultiplier(
 				CurrentNewtonIterationCount(), false);

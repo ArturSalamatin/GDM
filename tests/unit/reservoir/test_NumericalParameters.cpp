@@ -135,3 +135,36 @@ TEST_CASE("NumericalParameters: AMG iter count adaptation with accumulator",
     CHECK(np.CurrentAMG_maxSolverIterationCount() == 45);
     CHECK(np.get_AMG_maxSolverIterAccum() == Approx(0.0));
 }
+
+TEST_CASE("NumericalParameters: TimestepLog records accepted steps",
+          "[unit][level2][reservoir][NumericalParameters]") {
+    NumericalParameters np;
+    np.set_initial_schemeTau(10.0);
+    np.set_currentMoment(0.0);
+    np.set_currentAMG_Error(0.5);
+    np.set_currentNewtonIterationCount(5);
+
+    np.update_currentMoment();
+
+    auto& log = np.TimestepLog();
+    REQUIRE(log.size() == 1);
+    CHECK(log[0].time == 0.0);
+    CHECK(log[0].dt == 10.0);
+    CHECK(log[0].newton_iters == 5);
+    CHECK(log[0].accepted == true);
+}
+
+TEST_CASE("NumericalParameters: TimestepLog records wasted trials",
+          "[unit][level2][reservoir][NumericalParameters]") {
+    NumericalParameters np;
+    np.set_initial_schemeTau(10.0);
+    np.set_currentMoment(0.0);
+    np.set_currentAMG_Error(0.5);
+    np.set_currentNewtonIterationCount(100);
+
+    np.decrease_schemeTau();
+
+    auto& log = np.TimestepLog();
+    REQUIRE(log.size() == 1);
+    CHECK(log[0].accepted == false);
+}
