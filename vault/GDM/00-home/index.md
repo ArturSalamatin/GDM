@@ -75,6 +75,7 @@ date: 2026-06-27
 - [[val-039 pi-controller-breakthrough]] — VAL-039: PI-контроллер через breakthrough (1D + five-spot)
 - [[debt-060 long-int-to-ptrdiff]] — DEBT-060: long int → ptrdiff_t в индексации сетки
 - [[debt-058 static-cast-cleanup]] — DEBT-058: устранить static_cast — исправить типы, чтобы касты стали ненужны
+- [[val-040 perf-regression-baseline]] — VAL-040: regression-тест на производительность (51×51×4, baseline + tolerance)
 
 ### 00-home — статус и навигация
 - [[текущие приоритеты]] — текущая фаза, приоритеты, snapshot метрик
