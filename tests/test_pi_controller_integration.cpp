@@ -6,6 +6,7 @@
 #include <filesystem>
 
 using Catch::Matchers::WithinAbs;
+using namespace reservoir_simulator;
 
 namespace {
 
@@ -108,4 +109,187 @@ TEST_CASE("PI controller: BL 1D through breakthrough",
              << ", dt_max_early=" << dt_max_early);
         CHECK(dt_min < dt_max_early * 0.5);
     }
+}
+
+TEST_CASE("PI controller: five-spot symmetry preserved",
+          "[pi-controller][integration][five-spot]") {
+    constexpr size_t Nx = 21, Ny = 21, Nz = 1;
+    constexpr double Lx = 500.0, Ly = 500.0, hz = 10.0;
+    constexpr double rho_w = 1000.0, rho_o = 800.0;
+    constexpr double Q_inj_vol = 50.0;
+    constexpr double Q_prod_vol = 12.5;
+    constexpr double T_end = 500.0;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, perm_mD, poro, P_init_atm, 0.999);
+    auto numPrm = test_helpers::default_num_params();
+
+    ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+    sim.RefPressure = P_init_atm * 101325.0;
+    sim.numPrm.set_initial_schemeTau(5.0);
+    sim.numPrm.set_currentMoment(0.0);
+    sim.numPrm.SetUsePIController(true);
+
+    double hx = Lx / Nx, hy = Ly / Ny;
+
+    test_helpers::add_simple_well(sim, horizon,
+        "INJ", 10.5 * hx, 10.5 * hy, 0.0, -Q_inj_vol * rho_w);
+    test_helpers::add_simple_well(sim, horizon,
+        "P1", 0.5 * hx, 0.5 * hy, Q_prod_vol * rho_o, 0.0);
+    test_helpers::add_simple_well(sim, horizon,
+        "P2", 0.5 * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_o, 0.0);
+    test_helpers::add_simple_well(sim, horizon,
+        "P3", (Nx - 0.5) * hx, 0.5 * hy, Q_prod_vol * rho_o, 0.0);
+    test_helpers::add_simple_well(sim, horizon,
+        "P4", (Nx - 0.5) * hx, (Ny - 0.5) * hy, Q_prod_vol * rho_o, 0.0);
+
+    std::vector<double> timeMoments = {0.0};
+    for (double t = 50.0; t <= T_end; t += 50.0)
+        timeMoments.push_back(t);
+
+    sim.Solve(timeMoments);
+
+    auto Sw = sim.GetWaterSaturationField();
+
+    SECTION("Quarter symmetry") {
+        for (size_t i = 0; i < Nx / 2; ++i) {
+            for (size_t j = 0; j < Ny / 2; ++j) {
+                double s00 = Sw[j * Nx + i];
+                double s10 = Sw[j * Nx + (Nx - 1 - i)];
+                double s01 = Sw[(Ny - 1 - j) * Nx + i];
+                double s11 = Sw[(Ny - 1 - j) * Nx + (Nx - 1 - i)];
+                REQUIRE_THAT(s00, WithinAbs(s10, 1e-6));
+                REQUIRE_THAT(s00, WithinAbs(s01, 1e-6));
+                REQUIRE_THAT(s00, WithinAbs(s11, 1e-6));
+            }
+        }
+    }
+
+    SECTION("Wasted trials bounded") {
+        CHECK(sim.numPrm.WastedTrialsCount() < 50);
+    }
+
+    SECTION("Saturation bounds") {
+        for (size_t i = 0; i < Sw.size(); ++i) {
+            CHECK(Sw[i] >= -1e-10);
+            CHECK(Sw[i] <= 1.0 + 1e-10);
+        }
+    }
+}
+
+TEST_CASE("PI controller: PI vs fixed-dt profile comparison",
+          "[pi-controller][integration][validation][.]") {
+    constexpr double T = 400.0;
+    constexpr double dt_fixed = 1.0;
+
+    auto run_sim = [](bool use_pi) {
+        auto horizon = test_helpers::make_uniform_horizon(
+            Nx_1d, 1, 1, Lx_1d, hy_1d, hz_1d, perm_mD, poro, P_init_atm, So_init);
+        auto numPrm = test_helpers::default_num_params();
+
+        ReservoirSimulator sim{
+            numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+        sim.RefPressure = P_init_atm * 101325.0;
+        sim.numPrm.set_initial_schemeTau(dt_fixed);
+        sim.numPrm.set_currentMoment(0.0);
+        if (use_pi)
+            sim.numPrm.SetUsePIController(true);
+
+        double hx = Lx_1d / Nx_1d;
+        test_helpers::add_simple_well(sim, horizon,
+            "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
+        test_helpers::add_simple_well(sim, horizon,
+            "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+
+        sim.Solve({0.0, T});
+        return sim.GetWaterSaturationField();
+    };
+
+    auto Sw_pi = run_sim(true);
+    auto Sw_fixed = run_sim(false);
+
+    REQUIRE(Sw_pi.size() == Sw_fixed.size());
+
+    SECTION("Pointwise difference bounded") {
+        double max_diff = 0.0;
+        for (size_t i = 0; i < Sw_pi.size(); ++i) {
+            double diff = std::abs(Sw_pi[i] - Sw_fixed[i]);
+            if (diff > max_diff) max_diff = diff;
+        }
+        INFO("max |Sw_PI - Sw_fixed| = " << max_diff);
+        CHECK(max_diff < 0.02);
+    }
+
+    SECTION("L2 norm of difference") {
+        double hx = Lx_1d / Nx_1d;
+        double sum_sq = 0.0;
+        for (size_t i = 0; i < Sw_pi.size(); ++i) {
+            double d = Sw_pi[i] - Sw_fixed[i];
+            sum_sq += d * d;
+        }
+        double L2 = std::sqrt(sum_sq * hx / Lx_1d);
+        INFO("L2(Sw_PI - Sw_fixed) = " << L2);
+        CHECK(L2 < 0.01);
+    }
+}
+
+TEST_CASE("PI controller: CSV export for visual verification",
+          "[pi-controller][validation][.export]") {
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx_1d, 1, 1, Lx_1d, hy_1d, hz_1d, perm_mD, poro, P_init_atm, So_init);
+    auto numPrm = test_helpers::default_num_params();
+
+    ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+    sim.RefPressure = P_init_atm * 101325.0;
+    sim.numPrm.set_initial_schemeTau(1.0);
+    sim.numPrm.set_currentMoment(0.0);
+    sim.numPrm.SetUsePIController(true);
+
+    double hx = Lx_1d / Nx_1d;
+    test_helpers::add_simple_well(sim, horizon,
+        "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
+    test_helpers::add_simple_well(sim, horizon,
+        "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+
+    sim.Solve({0.0, T_breakthrough});
+
+    std::filesystem::create_directories("results/validation");
+
+    {
+        std::ofstream csv("results/validation/pi_dt_history.csv");
+        csv << "t,dt,newton_iters,accepted\n";
+        for (auto& rec : sim.numPrm.TimestepLog())
+            csv << rec.time << "," << rec.dt << ","
+                << rec.newton_iters << "," << rec.accepted << "\n";
+    }
+
+    auto Sw_pi = sim.GetWaterSaturationField();
+    {
+        auto h2 = test_helpers::make_uniform_horizon(
+            Nx_1d, 1, 1, Lx_1d, hy_1d, hz_1d, perm_mD, poro, P_init_atm, So_init);
+        auto np2 = test_helpers::default_num_params();
+        ReservoirSimulator sim2{
+            np2, h2, h2.oil, h2.water, h2.other};
+        sim2.RefPressure = P_init_atm * 101325.0;
+        sim2.numPrm.set_initial_schemeTau(1.0);
+        sim2.numPrm.set_currentMoment(0.0);
+
+        test_helpers::add_simple_well(sim2, h2,
+            "INJ", hx * 0.5, hy_1d * 0.5, 0.0, Q_inj);
+        test_helpers::add_simple_well(sim2, h2,
+            "PROD", Lx_1d - hx * 0.5, hy_1d * 0.5, Q_prod, 0.0);
+
+        sim2.Solve({0.0, T_breakthrough});
+        auto Sw_fixed = sim2.GetWaterSaturationField();
+
+        std::ofstream csv("results/validation/pi_vs_fixed_sw_profile.csv");
+        csv << "x,Sw_PI,Sw_fixed\n";
+        for (size_t i = 0; i < Nx_1d; ++i)
+            csv << (i + 0.5) * hx << "," << Sw_pi[i] << "," << Sw_fixed[i] << "\n";
+    }
+
+    CHECK(std::filesystem::exists("results/validation/pi_dt_history.csv"));
+    CHECK(std::filesystem::exists("results/validation/pi_vs_fixed_sw_profile.csv"));
 }
