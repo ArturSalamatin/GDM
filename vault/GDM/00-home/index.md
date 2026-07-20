@@ -74,6 +74,7 @@ date: 2026-06-27
 - [[debt-039 amg-itercount-type]] — DEBT-039: double AMG_maxSolverIterCount → int + дробный аккумулятор
 - [[debt-037 override-specifiers]] — DEBT-037: добавить override ко всем переопределённым виртуальным методам
 - [[val-039 pi-controller-breakthrough]] — VAL-039: PI-контроллер через breakthrough (1D + five-spot)
+- [[debt-006 pi-controller-enable]] — DEBT-006: включить PI-контроллер адаптивного шага по умолчанию
 - [[debt-060 long-int-to-ptrdiff]] — DEBT-060: long int → ptrdiff_t в индексации сетки
 - [[debt-058 static-cast-cleanup]] — DEBT-058: устранить static_cast — исправить типы, чтобы касты стали ненужны
 - [[val-040 perf-regression-baseline]] — VAL-040: regression-тест на производительность (51×51×4, baseline + tolerance)

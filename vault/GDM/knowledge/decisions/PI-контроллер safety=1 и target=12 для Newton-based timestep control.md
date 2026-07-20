@@ -29,6 +29,8 @@ tau_{n+1} = tau_n * safety * (e_target / e_n)^alpha * (e_{n-1} / e_n)^beta
 
 target ≈ 1.7 * avg_newton = 12 -- эмпирический оптимум на benchmark.
 
+**GitHub issue:** [#44](https://github.com/ArturSalamatin/GDM/issues/44)
+
 ## Связанные заметки
 
 - [[prompt-оптимизация-07-adaptive-timestep]]
