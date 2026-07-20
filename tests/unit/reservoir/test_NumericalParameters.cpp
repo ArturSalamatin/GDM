@@ -83,7 +83,6 @@ TEST_CASE("NumericalParameters: PI controller increase_schemeTau path",
     NumericalParameters np;
     np.set_initial_schemeTau(10.0);
     np.set_currentAMG_Error(0.5);
-    np.SetUsePIController(true);
     np.set_currentNewtonIterationCount(3);
     double tau_before = np.CurrentSchemeTau();
     np.increase_schemeTau();
