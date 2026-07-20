@@ -136,7 +136,7 @@ namespace reservoir_simulator
 				cells_[l] = &(Grid[cellIdx]);
 			} else {
 				well_local_position[l] = 0;
-				cells_[l] = &(Grid[size_t{0}]);
+				cells_[l] = &(Grid[ptrdiff_t{0}]);
 			}
 		}
 
@@ -345,14 +345,14 @@ namespace reservoir_simulator
 	double ReservoirSimulator::OilTotal() const
 	{
 		double result = 0.0;
-		for (size_t l = 0; l < ActiveCellsNmbr; ++l)
+		for (ptrdiff_t l = 0; l < static_cast<ptrdiff_t>(ActiveCellsNmbr); ++l)
 			result += Grid[l].OilMass();
 		return result;
 	}
 	double ReservoirSimulator::WaterTotal() const
 	{
 		double result = 0.0;
-		for (size_t l = 0; l < ActiveCellsNmbr; ++l)
+		for (ptrdiff_t l = 0; l < static_cast<ptrdiff_t>(ActiveCellsNmbr); ++l)
 			result += Grid[l].WaterMass();
 		return result;
 	}

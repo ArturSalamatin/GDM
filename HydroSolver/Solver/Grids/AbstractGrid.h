@@ -91,16 +91,6 @@ namespace reservoir_simulator
 					return Cells[idx];
 			}
 
-			const ProcessCell& operator [] (size_t idx) const
-			{
-				return Cells[idx];
-			}
-
-			ProcessCell& operator [] (size_t idx)
-			{
-				return Cells[idx];
-			}
-
 			/*	const std::vector<ProcessCell>& GetActiveCells()
 				{
 					return Cells;

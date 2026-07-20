@@ -486,7 +486,7 @@ static void run_perturbed_jacobian_test(int nx, int ny, int nz, Layout layout)
         double dSw = 0.02 * (i - nx_grid / 2.0) / nx_grid;
         double dP = 1e5 * (i - nx_grid / 2.0) / nx_grid;
         double corr[] = {dSw, dP};
-        sim.Grid[l].UpdateState(corr);
+        sim.Grid[static_cast<ptrdiff_t>(l)].UpdateState(corr);
     }
 
     double tau = 86400.0;
@@ -587,7 +587,7 @@ static void run_jacobian_consistency_test(int nx, int ny, int nz, Layout layout)
         double dSw_base = 0.01 * (i + 1.0) / nx_grid;
         double dP_base  = 5e4 * (i + 1.0) / nx_grid;
         double corr[] = {dSw_base, dP_base};
-        sim.Grid[l].UpdateState(corr);
+        sim.Grid[static_cast<ptrdiff_t>(l)].UpdateState(corr);
     }
 
     // Assemble J and F₀ at x₀
@@ -605,7 +605,7 @@ static void run_jacobian_consistency_test(int nx, int ny, int nz, Layout layout)
         dx[crs.GlobalIndex(l, 0)] = dSw;
         dx[crs.GlobalIndex(l, 1)] = dP;
         double corr[] = {dSw, dP};
-        sim.Grid[l].UpdateState(corr);
+        sim.Grid[static_cast<ptrdiff_t>(l)].UpdateState(corr);
     }
 
     // Assemble F₁ = F(x₀ + δx)
@@ -692,7 +692,7 @@ TEST_CASE("JacobianAssembly: J*dx approx dF second order convergence",
             size_t i = l % nx_grid;
             double corr_base[] = {0.01 * (i + 1.0) / nx_grid,
                                   5e4 * (i + 1.0) / nx_grid};
-            sim.Grid[l].UpdateState(corr_base);
+            sim.Grid[static_cast<ptrdiff_t>(l)].UpdateState(corr_base);
         }
 
         sim.AssembleMyProblem(tau, tau);
@@ -705,7 +705,7 @@ TEST_CASE("JacobianAssembly: J*dx approx dF second order convergence",
             dx[crs.GlobalIndex(l, 0)] = dSw;
             dx[crs.GlobalIndex(l, 1)] = dP;
             double corr[] = {dSw, dP};
-            sim.Grid[l].UpdateState(corr);
+            sim.Grid[static_cast<ptrdiff_t>(l)].UpdateState(corr);
         }
 
         sim.AssembleMyProblem(tau, tau);

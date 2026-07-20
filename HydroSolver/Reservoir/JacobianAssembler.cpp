@@ -61,7 +61,7 @@ namespace reservoir_simulator
 		OilField& grid, LinearProblem& problem)
 	{
 		constexpr int blockSize = B * B;
-		const TwoPhaseFlowCell& cell = grid[l];
+		const TwoPhaseFlowCell& cell = grid[static_cast<ptrdiff_t>(l)];
 		const std::vector<TwoPhaseFlowCell*> neighbourCells = grid.GetNeighboursPointer(l);
 		const std::vector<double>& commonEdgeArea = grid.CommonEdgeArea(l);
 
