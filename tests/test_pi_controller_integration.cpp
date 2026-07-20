@@ -285,3 +285,19 @@ TEST_CASE("PI controller: CSV export for visual verification",
     CHECK(std::filesystem::exists("results/validation/pi_dt_history.csv"));
     CHECK(std::filesystem::exists("results/validation/pi_vs_fixed_sw_profile.csv"));
 }
+
+TEST_CASE("PI controller: timestep growth after easy step (VAL-032)",
+          "[unit][level2][reservoir][NumericalParameters][pi-controller][VAL-032]") {
+    NumericalParameters np;
+    np.set_initial_schemeTau(10.0);
+    np.set_currentMoment(0.0);
+    np.set_currentAMG_Error(0.5);
+    np.set_currentNewtonIterationCount(1);
+
+    double tau_before = np.CurrentSchemeTau();
+    np.increase_schemeTau();
+    double tau_after = np.CurrentSchemeTau();
+
+    CHECK(tau_after > tau_before);
+    CHECK(tau_after > tau_before * 1.5);
+}
