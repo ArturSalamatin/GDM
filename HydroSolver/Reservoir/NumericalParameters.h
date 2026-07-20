@@ -48,7 +48,7 @@ namespace reservoir_simulator
 		size_t wastedTrialsCount = 0;
 
 		PIController pi_controller_{PIControllerParams{.max_iters = 65}};
-		bool use_pi_controller_ = false;
+		bool use_pi_controller_ = true;
 
 		std::vector<TimestepRecord> timestep_log_;
 

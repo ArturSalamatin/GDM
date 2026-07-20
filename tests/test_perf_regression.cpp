@@ -95,7 +95,6 @@ PerfResult run_perf_regression()
     sim.RefPressure = sc.ref_pressure_Pa();
     sim.numPrm.set_initial_schemeTau(Pinit_tau);
     sim.numPrm.set_currentMoment(0.0);
-    sim.numPrm.SetUsePIController(true);
     sc.add_wells(sim, horizon);
 
     double oil_mass_0 = sim.OilTotal();

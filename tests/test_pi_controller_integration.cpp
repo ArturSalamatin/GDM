@@ -32,7 +32,6 @@ TEST_CASE("PI controller: BL 1D through breakthrough",
     sim.RefPressure = P_init_atm * 101325.0;
     sim.numPrm.set_initial_schemeTau(1.0);
     sim.numPrm.set_currentMoment(0.0);
-    sim.numPrm.SetUsePIController(true);
 
     test_helpers::add_simple_well(sim, horizon,
         "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
@@ -125,7 +124,6 @@ TEST_CASE("PI controller: five-spot symmetry preserved",
     sim.RefPressure = P_init_atm * 101325.0;
     sim.numPrm.set_initial_schemeTau(5.0);
     sim.numPrm.set_currentMoment(0.0);
-    sim.numPrm.SetUsePIController(true);
 
     double hx = Lx / Nx, hy = Ly / Ny;
 
@@ -189,8 +187,7 @@ TEST_CASE("PI controller: PI vs fixed-dt profile comparison",
         sim.RefPressure = P_init_atm * 101325.0;
         sim.numPrm.set_initial_schemeTau(dt_fixed);
         sim.numPrm.set_currentMoment(0.0);
-        if (use_pi)
-            sim.numPrm.SetUsePIController(true);
+        sim.numPrm.SetUsePIController(use_pi);
 
         test_helpers::add_simple_well(sim, horizon,
             "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
@@ -238,7 +235,6 @@ TEST_CASE("PI controller: CSV export for visual verification",
     sim.RefPressure = P_init_atm * 101325.0;
     sim.numPrm.set_initial_schemeTau(1.0);
     sim.numPrm.set_currentMoment(0.0);
-    sim.numPrm.SetUsePIController(true);
 
     test_helpers::add_simple_well(sim, horizon,
         "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
@@ -265,6 +261,7 @@ TEST_CASE("PI controller: CSV export for visual verification",
         sim2.RefPressure = P_init_atm * 101325.0;
         sim2.numPrm.set_initial_schemeTau(1.0);
         sim2.numPrm.set_currentMoment(0.0);
+        sim2.numPrm.SetUsePIController(false);
 
         test_helpers::add_simple_well(sim2, h2,
             "INJ", Lx_1d * 0.5, hy_1d * 0.5, 0.0, Q_inj);
@@ -287,4 +284,20 @@ TEST_CASE("PI controller: CSV export for visual verification",
 
     CHECK(std::filesystem::exists("results/validation/pi_dt_history.csv"));
     CHECK(std::filesystem::exists("results/validation/pi_vs_fixed_sw_profile.csv"));
+}
+
+TEST_CASE("PI controller: timestep growth after easy step (VAL-032)",
+          "[unit][level2][reservoir][NumericalParameters][pi-controller][VAL-032]") {
+    NumericalParameters np;
+    np.set_initial_schemeTau(10.0);
+    np.set_currentMoment(0.0);
+    np.set_currentAMG_Error(0.5);
+    np.set_currentNewtonIterationCount(1);
+
+    double tau_before = np.CurrentSchemeTau();
+    np.increase_schemeTau();
+    double tau_after = np.CurrentSchemeTau();
+
+    CHECK(tau_after > tau_before);
+    CHECK(tau_after > tau_before * 1.5);
 }

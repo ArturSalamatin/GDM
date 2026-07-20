@@ -53,9 +53,9 @@ TEST_CASE("NumericalParameters: decrease_schemeTau shrinks by factor",
 TEST_CASE("NumericalParameters: SetUsePIController toggles PI mode",
           "[unit][level2][reservoir][NumericalParameters]") {
     NumericalParameters np;
-    CHECK_FALSE(np.UsesPIController());
-    np.SetUsePIController(true);
     CHECK(np.UsesPIController());
+    np.SetUsePIController(false);
+    CHECK_FALSE(np.UsesPIController());
 }
 
 TEST_CASE("NumericalParameters: update_currentNewtonIterationCount increments",
@@ -83,7 +83,6 @@ TEST_CASE("NumericalParameters: PI controller increase_schemeTau path",
     NumericalParameters np;
     np.set_initial_schemeTau(10.0);
     np.set_currentAMG_Error(0.5);
-    np.SetUsePIController(true);
     np.set_currentNewtonIterationCount(3);
     double tau_before = np.CurrentSchemeTau();
     np.increase_schemeTau();
