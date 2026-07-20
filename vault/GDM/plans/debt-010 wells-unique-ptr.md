@@ -6,7 +6,7 @@ date: 2026-07-20
 issue: DEBT-010
 github: 43
 branch: refactor/debt-010/wells-unique-ptr
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-20
   repeat: 2026-07-20
