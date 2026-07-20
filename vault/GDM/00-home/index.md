@@ -66,6 +66,7 @@ date: 2026-06-27
 - [[debt-026 addoffdiagblock-const]] — DEBT-026: const-correctness для AddOffDiagBlock
 - [[debt-002 wstring-to-string]] — DEBT-002: wstring → string (UTF-8) в ядре
 - [[debt-009 remove-debug-dumps]] — DEBT-009: убрать отладочные дампы test_*.txt из production-кода
+- [[debt-010 wells-unique-ptr]] — DEBT-010: new/delete для скважин → unique_ptr
 - [[debt-021 int-size-t-warnings]] — DEBT-021: int переменные цикла итерируют по size_t границам (warnings C4267/C4297)
 - [[bug-022 mathroutines-nan-ub]] — BUG-022: return NAN из функции int — UB в LowerPointNonUniformMesh
 - [[debt-022 activecellsnmbr-size-t]] — DEBT-022: activeCellsNmbr int → size_t в AbstractGrid

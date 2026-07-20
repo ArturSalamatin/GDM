@@ -10,6 +10,8 @@ date: 2026-06-28
 
 ## CR-MEM-001: Ручной `new`/`delete` для скважин в `ReservoirSimulator`
 
+**GitHub issue:** [#43](https://github.com/ArturSalamatin/GDM/issues/43)
+
 **Файл:** `HydroSolver/Reservoir/ReservoirSimulator.cpp:145-156`
 
 ```cpp
