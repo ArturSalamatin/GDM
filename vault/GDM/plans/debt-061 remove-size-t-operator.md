@@ -6,7 +6,7 @@ date: 2026-07-20
 issue: DEBT-061
 github: 45
 branch: refactor/debt-061/remove-size-t-operator
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-20
   round: 4
