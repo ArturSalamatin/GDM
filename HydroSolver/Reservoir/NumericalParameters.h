@@ -108,7 +108,7 @@ namespace reservoir_simulator
 		void decrease_schemeTau();
 		void update_wastedTrialsCount() { wastedTrialsCount++; }
 		void update_overallCurIterCount(size_t increment) { overallSolverIterationCount += increment; }
-		void update_maxTauAllowed(double nextRefMoment, const std::map<WellName, wells::SomeWell*>& wells);
+		void update_maxTauAllowed(double nextRefMoment, const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells);
 		void update_currentMoment();
 		void update_currentIntegrationTau(double tau) {}
 		void update_currentNewtonIterationCount() { ++currentNewtonIterationCount; }

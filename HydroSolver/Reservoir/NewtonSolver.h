@@ -20,7 +20,7 @@ namespace reservoir_simulator
 			linear_problem::LinearProblem& problem,
 			NumericalParameters& numPrm,
 			double refPressure,
-			const std::map<WellName, wells::SomeWell*>& wells,
+			const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells,
 			SolverProfile& profile);
 
 		void SingleIteration(
@@ -29,7 +29,7 @@ namespace reservoir_simulator
 			linear_problem::LinearProblem& problem,
 			NumericalParameters& numPrm,
 			double refPressure,
-			const std::map<WellName, wells::SomeWell*>& wells,
+			const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells,
 			SolverProfile& profile);
 
 		bool UpdateGrid(

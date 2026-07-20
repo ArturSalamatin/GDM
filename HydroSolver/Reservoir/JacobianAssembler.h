@@ -17,7 +17,7 @@ namespace reservoir_simulator
 			grid::OilField& grid,
 			linear_problem::LinearProblem& problem,
 			double refPressure,
-			const std::map<WellName, wells::SomeWell*>& wells);
+			const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells);
 
 	private:
 		void fillMatrixBlockRow(size_t l, double loc_tau,

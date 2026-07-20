@@ -174,7 +174,7 @@ namespace reservoir_simulator
 
 	public:
 
-		Anomalies(const std::map<std::string, wells::SomeWell*>& wells, const std::string& anomalyPath);
+		Anomalies(const std::map<std::string, std::unique_ptr<wells::SomeWell>>& wells, const std::string& anomalyPath);
 
 		void instantiate(const std::vector<ModelHanlder::ReadModel::WellData>& well_data, double r, int count,
 			const std::pair<double, double>& overallInterval, double spread, float anomalyType = 2.0);
