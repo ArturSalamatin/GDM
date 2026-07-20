@@ -77,6 +77,7 @@ date: 2026-06-27
 - [[debt-006 pi-controller-enable]] — DEBT-006: включить PI-контроллер адаптивного шага по умолчанию
 - [[debt-060 long-int-to-ptrdiff]] — DEBT-060: long int → ptrdiff_t в индексации сетки
 - [[debt-058 static-cast-cleanup]] — DEBT-058: устранить static_cast — исправить типы, чтобы касты стали ненужны
+- [[debt-061 remove-size-t-operator]] — DEBT-061: удалить избыточные operator[](size_t) в SomeGrid
 - [[val-040 perf-regression-baseline]] — VAL-040: regression-тест на производительность (51×51×4, baseline + tolerance)
 
 ### 00-home — статус и навигация
