@@ -6,7 +6,7 @@ date: 2026-07-20
 issue: DEBT-006
 github: 44
 branch: refactor/debt-006/pi-controller-enable
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-20
   findings: 0 / 2 / 0
