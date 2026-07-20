@@ -163,6 +163,7 @@ double compute_BL_L2(size_t Nx,
     sim.RefPressure = P_init_atm * 101325.0;
     sim.numPrm.set_initial_schemeTau(0.01);
     sim.numPrm.set_currentMoment(0.0);
+    sim.numPrm.SetUsePIController(false);
 
     double hx = Lx / Nx;
     double r_app = std::max(0.2 * hx, 0.2);
@@ -238,6 +239,7 @@ double compute_qt_eff(size_t Nx,
     sim.RefPressure = P_init_atm * 101325.0;
     sim.numPrm.set_initial_schemeTau(0.01);
     sim.numPrm.set_currentMoment(0.0);
+    sim.numPrm.SetUsePIController(false);
 
     double hx = Lx / Nx;
     double r_app = std::max(0.2 * hx, 0.2);

@@ -53,9 +53,9 @@ TEST_CASE("NumericalParameters: decrease_schemeTau shrinks by factor",
 TEST_CASE("NumericalParameters: SetUsePIController toggles PI mode",
           "[unit][level2][reservoir][NumericalParameters]") {
     NumericalParameters np;
-    CHECK_FALSE(np.UsesPIController());
-    np.SetUsePIController(true);
     CHECK(np.UsesPIController());
+    np.SetUsePIController(false);
+    CHECK_FALSE(np.UsesPIController());
 }
 
 TEST_CASE("NumericalParameters: update_currentNewtonIterationCount increments",
