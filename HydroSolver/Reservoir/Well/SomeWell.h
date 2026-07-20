@@ -167,6 +167,8 @@ namespace reservoir_simulator
 				const std::vector<const cell::TwoPhaseFlowCell*>& cells_,
 				const std::vector<size_t>& itsLocalIDs, double itsAppWellRadius);
 
+			virtual ~SomeWell() = default;
+
 			void initialize_MER_data(
 				std::unique_ptr<const mer_descriptor::MER_Data>&& mer);
 

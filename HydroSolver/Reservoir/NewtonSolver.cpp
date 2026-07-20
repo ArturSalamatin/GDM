@@ -12,7 +12,7 @@ namespace reservoir_simulator
 		double loc_tau, double nextTimeMoment,
 		OilField& grid, LinearProblem& problem,
 		NumericalParameters& numPrm, double refPressure,
-		const std::map<WellName, wells::SomeWell*>& wells,
+		const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells,
 		SolverProfile& profile)
 	{
 		numPrm.set_currentNewtonIterationCount(0);
@@ -43,7 +43,7 @@ namespace reservoir_simulator
 		double loc_tau, double nextTimeMoment,
 		OilField& grid, LinearProblem& problem,
 		NumericalParameters& numPrm, double refPressure,
-		const std::map<WellName, wells::SomeWell*>& wells,
+		const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells,
 		SolverProfile& profile)
 	{
 		prof.tic("assemble");

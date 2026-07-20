@@ -69,7 +69,7 @@ namespace reservoir_simulator
 #endif // DEBUG_SALAMATIN
 	}
 
-	void NumericalParameters::update_maxTauAllowed(double nextRefMoment, const std::map<WellName, wells::SomeWell*>& wells)
+	void NumericalParameters::update_maxTauAllowed(double nextRefMoment, const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells)
 	{
 
 		//	if (abs(nextRefMoment - currentMoment) < 1E-12)

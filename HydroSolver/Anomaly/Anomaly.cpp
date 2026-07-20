@@ -215,10 +215,11 @@ namespace reservoir_simulator
 		return JSON::CreateJSON::CreateArray({ std::to_string(extTimeStart), std::to_string(extTimeEnd),
 			std::to_string(intTimeStart), std::to_string(intTimeEnd) });
 	}
-	 Anomalies::Anomalies(const std::map<std::string, SomeWell*>& wells, const std::string& anomalyPath)
+	 Anomalies::Anomalies(const std::map<std::string, std::unique_ptr<SomeWell>>& wells, const std::string& anomalyPath)
 	{
-		(*this).wells = wells;
-		(*this).anomalyData.Push(anomalyPath);
+		for (const auto& [name, ptr] : wells)
+			this->wells[name] = ptr.get();
+		this->anomalyData.Push(anomalyPath);
 	}
 	 void Anomalies::instantiate(const std::vector<ModelHanlder::ReadModel::WellData>& well_data, double r, int count, const std::pair<double, double>& overallInterval, double spread, float anomalyType)
 	{

@@ -20,7 +20,7 @@ namespace reservoir_simulator
 		double loc_tau, double nextTimeMoment,
 		OilField& grid, LinearProblem& problem,
 		double refPressure,
-		const std::map<WellName, wells::SomeWell*>& wells)
+		const std::map<WellName, std::unique_ptr<wells::SomeWell>>& wells)
 	{
 		prof.tic("reset");
 		problem.ResetProblem();

@@ -140,20 +140,16 @@ namespace reservoir_simulator
 			}
 		}
 
-		Wells.insert({ name,
-			new wells::WellFixedProduction(name, name, intersecCoords,
+		Wells.emplace(name,
+			std::make_unique<wells::WellFixedProduction>(name, name, intersecCoords,
 			std::make_unique<const mer_descriptor::MER_Data>(name, well_data),
 			perforationsOfWell.AccumulatePerforations(ActiveCells),
-			cells_, well_local_position, appRadiusWell) });
+			cells_, well_local_position, appRadiusWell));
 	}
 
-	ReservoirSimulator::~ReservoirSimulator()
-	{
-		for (auto [name, p] : Wells)
-			delete p;
-	}
+	ReservoirSimulator::~ReservoirSimulator() = default;
 	//////////// GETTERS
-	const std::map<WellName, wells::SomeWell*>& 
+	const std::map<WellName, std::unique_ptr<wells::SomeWell>>&
 		ReservoirSimulator::GetWells() const
 	{
 		return Wells;

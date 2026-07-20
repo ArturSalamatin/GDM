@@ -44,7 +44,7 @@ namespace reservoir_simulator
 	public:
 		NumericalParameters numPrm;
 
-		const std::map<WellName, wells::SomeWell*>& GetWells() const;
+		const std::map<WellName, std::unique_ptr<wells::SomeWell>>& GetWells() const;
 	public:
 //		double numSchemeTau;
 		double RefPressure = 100.0;
@@ -52,7 +52,7 @@ namespace reservoir_simulator
 		OilField Grid;
 		size_t ActiveCellsNmbr;
 		LinearProblem MyProblem;
-		std::map<WellName, wells::SomeWell*> Wells;
+		std::map<WellName, std::unique_ptr<wells::SomeWell>> Wells;
 
 		size_t nz() const;
 
