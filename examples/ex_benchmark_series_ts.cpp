@@ -122,8 +122,9 @@ BenchmarkResult run_benchmark(const std::string& config_name,
     sim.numPrm.set_initial_schemeTau(init_tau > 0 ? init_tau : sc.initial_tau());
     sim.numPrm.set_currentMoment(0.0);
     if (usePIController) {
-        sim.numPrm.SetUsePIController(true);
         sim.numPrm.SetPIControllerParams(piParams);
+    } else {
+        sim.numPrm.SetUsePIController(false);
     }
     sc.add_wells(sim, horizon);
 
