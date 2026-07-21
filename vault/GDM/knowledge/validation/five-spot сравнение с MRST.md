@@ -46,3 +46,5 @@ MATLAB-скрипт `MatLab/test_five_spot_mrst.m` подготовлен (ша�
 
 - [[таблица единиц GDM vs MRST]]
 - [[Newton divergence при закачке воды через скважину]]
+
+**GitHub issue (grid convergence):** [#47](https://github.com/ArturSalamatin/GDM/issues/47)
