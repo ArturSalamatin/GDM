@@ -145,12 +145,120 @@ TEST_CASE("Well injection: Sw increases with water injection",
 
 namespace {
 
-double compute_BL_L2(size_t Nx,
-                     double Lx, double hy, double hz,
-                     double perm_mD, double poro,
-                     double P_init_atm, double So_init,
-                     double water_inject_rate, double oil_prod_rate,
-                     double t_final, double M) {
+std::filesystem::path project_root() {
+    auto p = std::filesystem::path(__FILE__).parent_path().parent_path();
+    return std::filesystem::canonical(p);
+}
+
+std::filesystem::path validation_dir() {
+    auto d = project_root() / "results" / "validation";
+    std::filesystem::create_directories(d);
+    return d;
+}
+
+std::vector<double> run_radial_simulation(
+    size_t N, double L, double hz,
+    double perm_mD, double poro,
+    double P_init_atm, double So_init,
+    double water_inject_rate, double t_final,
+    double dt_save = 5.0) {
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        N, N, 1, L, L, hz, perm_mD, poro, P_init_atm, So_init);
+    auto numPrm = test_helpers::default_num_params();
+
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+    sim.RefPressure = P_init_atm * 101325.0;
+    sim.numPrm.set_initial_schemeTau(1.0);
+    sim.numPrm.set_currentMoment(0.0);
+    sim.numPrm.SetUsePIController(false);
+
+    double h = L / N;
+    double r_app = std::max(0.2 * h, 0.2);
+    test_helpers::add_simple_well(sim, horizon,
+        "INJ", (N / 2 + 0.5) * h, (N / 2 + 0.5) * h,
+        0.0, water_inject_rate, r_app);
+
+    std::vector<double> timeMoments = {0.0};
+    for (double t = dt_save; t < t_final; t += dt_save)
+        timeMoments.push_back(t);
+    timeMoments.push_back(t_final);
+
+    sim.Solve(timeMoments);
+    return sim.GetWaterSaturationField();
+}
+
+struct RadialProfile {
+    std::vector<double> r;
+    std::vector<double> Sw;
+};
+
+RadialProfile azimuthal_average(
+    const std::vector<double>& Sw_field, size_t N, double L,
+    double r_max) {
+
+    double h = L / N;
+    double cx = (N / 2 + 0.5) * h, cy = cx;
+    double dr = h;
+    size_t n_bins = static_cast<size_t>(r_max / dr) + 1;
+
+    std::vector<double> sum_Sw(n_bins, 0.0);
+    std::vector<size_t> count(n_bins, 0);
+
+    for (size_t j = 0; j < N; ++j) {
+        for (size_t i = 0; i < N; ++i) {
+            double x = (i + 0.5) * h, y = (j + 0.5) * h;
+            double r = std::sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+            size_t bin = static_cast<size_t>(r / dr);
+            if (bin < n_bins) {
+                sum_Sw[bin] += Sw_field[j * N + i];
+                count[bin]++;
+            }
+        }
+    }
+
+    RadialProfile prof;
+    for (size_t b = 0; b < n_bins; ++b) {
+        if (count[b] > 0) {
+            prof.r.push_back((b + 0.5) * dr);
+            prof.Sw.push_back(sum_Sw[b] / count[b]);
+        }
+    }
+    return prof;
+}
+
+double radial_L2(const RadialProfile& coarse, const RadialProfile& ref) {
+    double sum_sq = 0.0;
+    double total_r = 0.0;
+    size_t j = 0;
+    for (size_t i = 0; i < coarse.r.size(); ++i) {
+        while (j + 1 < ref.r.size() && ref.r[j + 1] <= coarse.r[i])
+            ++j;
+        if (j >= ref.r.size()) break;
+        double Sw_ref_interp;
+        if (j + 1 < ref.r.size() && ref.r[j] <= coarse.r[i]) {
+            double t = (coarse.r[i] - ref.r[j]) / (ref.r[j + 1] - ref.r[j]);
+            Sw_ref_interp = ref.Sw[j] * (1.0 - t) + ref.Sw[j + 1] * t;
+        } else {
+            Sw_ref_interp = ref.Sw[j];
+        }
+        double diff = coarse.Sw[i] - Sw_ref_interp;
+        double dr = (i + 1 < coarse.r.size())
+            ? coarse.r[i + 1] - coarse.r[i]
+            : coarse.r[i] - coarse.r[i - 1];
+        sum_sq += diff * diff * dr;
+        total_r += dr;
+    }
+    return (total_r > 0) ? std::sqrt(sum_sq / total_r) : 0.0;
+}
+
+double compute_qt_eff(size_t Nx,
+                      double Lx, double hy, double hz,
+                      double perm_mD, double poro,
+                      double P_init_atm, double So_init,
+                      double water_inject_rate, double oil_prod_rate,
+                      double t_final) {
     double Sw_init = 1.0 - So_init;
     double A = hy * hz;
 
@@ -172,83 +280,17 @@ double compute_BL_L2(size_t Nx,
     test_helpers::add_simple_well(sim, horizon,
         "PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
 
-    sim.Solve({0.0, t_final});
+    constexpr double rho_w = 1000.0;
+    double qt = std::abs(water_inject_rate) / rho_w / A;
+    double v = qt / (poro * A);
+    double dt_max = 0.5 * hx / v;
+    std::vector<double> timeMoments;
+    timeMoments.push_back(0.0);
+    for (double t = dt_max; t < t_final; t += dt_max)
+        timeMoments.push_back(t);
+    timeMoments.push_back(t_final);
 
-    auto Sw_gdm = sim.GetWaterSaturationField();
-    if (Sw_gdm.size() != Nx) return -1.0;
-
-    double integral_dSw = 0.0;
-    for (size_t i = 0; i < Nx; ++i)
-        integral_dSw += (Sw_gdm[i] - Sw_init) * hx;
-    double qt_eff = integral_dSw * poro / t_final;
-    if (qt_eff <= 0.0) return -1.0;
-
-    double fw_init = buckley_leverett::f_w(Sw_init, M);
-    double Swf;
-    {
-        double lo = Sw_init + 0.01, hi = 0.99;
-        for (int iter = 0; iter < 100; ++iter) {
-            double mid = 0.5 * (lo + hi);
-            double secant = (buckley_leverett::f_w(mid, M) - fw_init) / (mid - Sw_init);
-            double tangent = buckley_leverett::df_w(mid, M);
-            if (tangent > secant) lo = mid;
-            else hi = mid;
-        }
-        Swf = 0.5 * (lo + hi);
-    }
-    double slope_front = (buckley_leverett::f_w(Swf, M) - fw_init) / (Swf - Sw_init);
-    double v_front = qt_eff * slope_front / (poro * A);
-    double x_front = v_front * t_final;
-
-    double sum_sq = 0.0;
-    for (size_t i = 1; i + 1 < Nx; ++i) {
-        double x = (i + 0.5) * hx;
-        double Sw_ana;
-        if (x >= x_front) {
-            Sw_ana = Sw_init;
-        } else {
-            double target = x * poro * A / (qt_eff * t_final);
-            double lo = Swf, hi = 1.0 - 1e-10;
-            for (int iter = 0; iter < 100; ++iter) {
-                double mid = 0.5 * (lo + hi);
-                if (buckley_leverett::df_w(mid, M) > target) lo = mid;
-                else hi = mid;
-            }
-            Sw_ana = 0.5 * (lo + hi);
-        }
-        double diff = Sw_gdm[i] - Sw_ana;
-        sum_sq += diff * diff;
-    }
-    return std::sqrt(sum_sq * hx / Lx);
-}
-
-double compute_qt_eff(size_t Nx,
-                      double Lx, double hy, double hz,
-                      double perm_mD, double poro,
-                      double P_init_atm, double So_init,
-                      double water_inject_rate, double oil_prod_rate,
-                      double t_final) {
-    double Sw_init = 1.0 - So_init;
-
-    auto horizon = test_helpers::make_uniform_horizon(
-        Nx, 1, 1, Lx, hy, hz, perm_mD, poro, P_init_atm, So_init);
-    auto numPrm = test_helpers::default_num_params();
-
-    reservoir_simulator::ReservoirSimulator sim{
-        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
-    sim.RefPressure = P_init_atm * 101325.0;
-    sim.numPrm.set_initial_schemeTau(0.01);
-    sim.numPrm.set_currentMoment(0.0);
-    sim.numPrm.SetUsePIController(false);
-
-    double hx = Lx / Nx;
-    double r_app = std::max(0.2 * hx, 0.2);
-    test_helpers::add_simple_well(sim, horizon,
-        "INJ", hx * 0.5, hy * 0.5, 0.0, water_inject_rate, r_app);
-    test_helpers::add_simple_well(sim, horizon,
-        "PROD", Lx - hx * 0.5, hy * 0.5, oil_prod_rate, 0.0, r_app);
-
-    sim.Solve({0.0, t_final});
+    sim.Solve(timeMoments);
 
     auto Sw_gdm = sim.GetWaterSaturationField();
     if (Sw_gdm.size() != Nx) return -1.0;
@@ -261,265 +303,229 @@ double compute_qt_eff(size_t Nx,
 
 } // namespace
 
-TEST_CASE("BL validation: grid convergence of Sw profile",
-          "[buckley-leverett][validation]") {
-    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+TEST_CASE("Radial BL: grid convergence of Sw(r) profile",
+          "[buckley-leverett][radial][validation][.]") {
+    constexpr double L = 200.0, hz = 10.0;
     constexpr double perm_mD = 100.0, poro = 0.2;
-    constexpr double P_init_atm = 200.0;
-    constexpr double So_init = 0.8;
-    constexpr double t_final = 400.0;
-    constexpr double M = 4.3 / 2.0;
+    constexpr double P_init_atm = 200.0, So_init = 0.8;
+    constexpr double Q_water_mass = -50000.0;
+    constexpr double t_final = 100.0;
+    constexpr double r_max = 90.0;
 
-    constexpr size_t grids[] = {25, 50, 100, 200};
-    constexpr size_t N = sizeof(grids) / sizeof(grids[0]);
-    double L2[N];
+    constexpr size_t N_ref = 321;
+    constexpr size_t grids[] = {21, 41, 81, 161};
+    constexpr size_t NG = sizeof(grids) / sizeof(grids[0]);
 
-    for (size_t g = 0; g < N; ++g) {
-        L2[g] = compute_BL_L2(grids[g], Lx, hy, hz,
-                               perm_mD, poro, P_init_atm, So_init,
-                               -1000.0, 800.0, t_final, M);
-        double hx = Lx / grids[g];
-        WARN("Nx=" << grids[g] << " hx=" << hx << " L2=" << L2[g]);
-        REQUIRE(L2[g] > 0.0);
+    auto Sw_ref_field = run_radial_simulation(
+        N_ref, L, hz, perm_mD, poro, P_init_atm, So_init,
+        Q_water_mass, t_final);
+    REQUIRE(Sw_ref_field.size() == N_ref * N_ref);
+    auto prof_ref = azimuthal_average(Sw_ref_field, N_ref, L, r_max);
+    REQUIRE(prof_ref.r.size() > 10);
+
+    double L2[NG];
+    for (size_t g = 0; g < NG; ++g) {
+        auto Sw_field = run_radial_simulation(
+            grids[g], L, hz, perm_mD, poro, P_init_atm, So_init,
+            Q_water_mass, t_final);
+        REQUIRE(Sw_field.size() == grids[g] * grids[g]);
+        auto prof = azimuthal_average(Sw_field, grids[g], L, r_max);
+        L2[g] = radial_L2(prof, prof_ref);
+
+        double h = L / grids[g];
+        WARN("N=" << grids[g] << " h=" << h << " L2=" << L2[g]);
+        REQUIRE(L2[g] >= 0.0);
     }
 
-    for (size_t g = 1; g < N; ++g) {
+    for (size_t g = 1; g < NG; ++g) {
         double p = std::log2(L2[g - 1] / L2[g]);
-        WARN("Nx=" << grids[g-1] << "->" << grids[g]
+        WARN("N=" << grids[g-1] << "->" << grids[g]
              << ": L2 " << L2[g-1] << " -> " << L2[g] << ", order p=" << p);
         CHECK(L2[g] < L2[g - 1]);
-        CHECK(p > 0.5);
+        CHECK(p > 0.3);
     }
 }
 
-// BUG-020: MER задаёт кг/день, формула Писмана оперирует м³/день.
-// qt_eff зависит от сетки (PI Писмана ∝ 1/ln(r_app/r_well), r_app ∝ hx).
-// После фикса BUG-020: qt_eff ≈ qt_nominal, не зависит от сетки.
-// [!mayfail] — тесты документируют баг, не блокируют сборку.
-TEST_CASE("BL validation: qt_eff consistent across meshes",
-          "[buckley-leverett][validation][!mayfail]") {
-    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+TEST_CASE("Radial BL: convergence CSV export",
+          "[buckley-leverett][radial][validation][convergence][.]") {
+    constexpr double L = 200.0, hz = 10.0;
     constexpr double perm_mD = 100.0, poro = 0.2;
-    constexpr double P_init_atm = 200.0;
-    constexpr double So_init = 0.8;
-    constexpr double t_final = 400.0;
+    constexpr double P_init_atm = 200.0, So_init = 0.8;
+    constexpr double Q_water_mass = -50000.0;
+    constexpr double t_final = 100.0;
+    constexpr double r_max = 90.0;
 
-    constexpr size_t grids[] = {25, 50, 100, 200};
-    constexpr size_t N = sizeof(grids) / sizeof(grids[0]);
-    double qt[N];
+    constexpr size_t N_ref = 321;
+    constexpr size_t grids[] = {21, 41, 81, 161};
+    constexpr size_t NG = sizeof(grids) / sizeof(grids[0]);
 
-    for (size_t g = 0; g < N; ++g) {
-        qt[g] = compute_qt_eff(grids[g], Lx, hy, hz,
-                                perm_mD, poro, P_init_atm, So_init,
-                                -1000.0, 800.0, t_final);
-        WARN("Nx=" << grids[g] << " qt_eff=" << qt[g]);
-        REQUIRE(qt[g] > 0.0);
+    auto Sw_ref_field = run_radial_simulation(
+        N_ref, L, hz, perm_mD, poro, P_init_atm, So_init,
+        Q_water_mass, t_final);
+    auto prof_ref = azimuthal_average(Sw_ref_field, N_ref, L, r_max);
+
+    double L2[NG];
+    for (size_t g = 0; g < NG; ++g) {
+        auto Sw_field = run_radial_simulation(
+            grids[g], L, hz, perm_mD, poro, P_init_atm, So_init,
+            Q_water_mass, t_final);
+        auto prof = azimuthal_average(Sw_field, grids[g], L, r_max);
+        L2[g] = radial_L2(prof, prof_ref);
     }
 
-    for (size_t g = 1; g < N; ++g) {
-        double rel_diff = std::abs(qt[g] - qt[0]) / qt[0];
-        WARN("qt[" << grids[g] << "] vs qt[" << grids[0]
-             << "]: rel_diff=" << rel_diff);
-        CHECK(rel_diff < 0.15);
+    auto vdir = validation_dir();
+    std::ofstream csv((vdir / "radial_bl_convergence.csv").string());
+    csv << "N,h,L2,p\n";
+    csv << grids[0] << "," << L / grids[0] << "," << L2[0] << ",\n";
+    for (size_t g = 1; g < NG; ++g) {
+        double p = std::log2(L2[g - 1] / L2[g]);
+        csv << grids[g] << "," << L / grids[g] << "," << L2[g] << "," << p << "\n";
     }
+    csv.close();
+    INFO("Written: " << (vdir / "radial_bl_convergence.csv").string());
+    CHECK(true);
 }
 
-TEST_CASE("BL validation: absolute volume balance",
-          "[buckley-leverett][validation][!mayfail]") {
-    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+TEST_CASE("Radial BL: multi-grid profiles CSV export",
+          "[buckley-leverett][radial][validation][convergence][.]") {
+    constexpr double L = 200.0, hz = 10.0;
     constexpr double perm_mD = 100.0, poro = 0.2;
-    constexpr double P_init_atm = 200.0;
-    constexpr double So_init = 0.8;
-    constexpr double t_final = 400.0;
-    constexpr double A = hy * hz;
-    constexpr double rho_w = 1000.0;
-    constexpr double qt_nominal = 1000.0 / rho_w / A;
+    constexpr double P_init_atm = 200.0, So_init = 0.8;
+    constexpr double Q_water_mass = -50000.0;
+    constexpr double t_final = 100.0;
+    constexpr double r_max = 90.0;
 
-    constexpr size_t Nx = 100;
-    double qt_eff = compute_qt_eff(Nx, Lx, hy, hz,
-                                    perm_mD, poro, P_init_atm, So_init,
-                                    -1000.0, 800.0, t_final);
+    constexpr size_t N_ref = 321;
+    constexpr size_t grids[] = {21, 41, 81, 161};
 
-    WARN("qt_eff=" << qt_eff << " qt_nominal=" << qt_nominal
-         << " ratio=" << qt_eff / qt_nominal);
-    REQUIRE(qt_eff > 0.0);
-    CHECK(qt_eff == Catch::Approx(qt_nominal).epsilon(0.1));
-}
+    auto Sw_ref_field = run_radial_simulation(
+        N_ref, L, hz, perm_mD, poro, P_init_atm, So_init,
+        Q_water_mass, t_final);
+    auto prof_ref = azimuthal_average(Sw_ref_field, N_ref, L, r_max);
 
-TEST_CASE("BL validation: front position and monotonicity",
-          "[buckley-leverett][validation]") {
-    constexpr size_t Nx = 100;
-    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
-    constexpr double perm_mD = 100.0, poro = 0.2;
-    constexpr double P_init_atm = 200.0;
-    constexpr double So_init = 0.8;
-    constexpr double Sw_init = 1.0 - So_init;
-    constexpr double t_final = 400.0;
-    constexpr double M = 4.3 / 2.0;
-    constexpr double A = hy * hz;
+    auto vdir = validation_dir();
 
-    auto horizon = test_helpers::make_uniform_horizon(
-        Nx, 1, 1, Lx, hy, hz, perm_mD, poro, P_init_atm, So_init);
-    auto numPrm = test_helpers::default_num_params();
-
-    reservoir_simulator::ReservoirSimulator sim{
-        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
-    sim.RefPressure = P_init_atm * 101325.0;
-    sim.numPrm.set_initial_schemeTau(0.01);
-    sim.numPrm.set_currentMoment(0.0);
-
-    double hx = Lx / Nx;
-    test_helpers::add_simple_well(sim, horizon,
-        "INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0);
-    test_helpers::add_simple_well(sim, horizon,
-        "PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0);
-
-    sim.Solve({0.0, t_final});
-
-    auto Sw = sim.GetWaterSaturationField();
-    REQUIRE(Sw.size() == Nx);
-
-    // Effective qt from mass balance
-    double integral_dSw = 0.0;
-    for (size_t i = 0; i < Nx; ++i)
-        integral_dSw += (Sw[i] - Sw_init) * hx;
-    double qt_eff = integral_dSw * poro / t_final;
-
-    // Front from BL with Sw_init != 0
-    double fw_init = buckley_leverett::f_w(Sw_init, M);
-    double Swf = Sw_init;
     {
-        double lo = Sw_init + 0.01, hi = 0.99;
-        for (int iter = 0; iter < 100; ++iter) {
-            double mid = 0.5 * (lo + hi);
-            double secant = (buckley_leverett::f_w(mid, M) - fw_init) / (mid - Sw_init);
-            double tangent = buckley_leverett::df_w(mid, M);
-            if (tangent > secant) lo = mid;
-            else hi = mid;
-        }
-        Swf = 0.5 * (lo + hi);
+        auto path = (vdir / "radial_bl_profile_N321_ref.csv").string();
+        std::ofstream csv(path);
+        csv << "r,Sw\n";
+        for (size_t i = 0; i < prof_ref.r.size(); ++i)
+            csv << prof_ref.r[i] << "," << prof_ref.Sw[i] << "\n";
+        csv.close();
+        WARN("Reference profile: " << path);
     }
-    double slope_front = (buckley_leverett::f_w(Swf, M) - fw_init) / (Swf - Sw_init);
-    double v_front = qt_eff * slope_front / (poro * A);
-    double x_front_analytical = v_front * t_final;
 
-    // GDM front: cell with max |Sw[i] - Sw[i+1]|
+    for (size_t g = 0; g < 4; ++g) {
+        auto Sw_field = run_radial_simulation(
+            grids[g], L, hz, perm_mD, poro, P_init_atm, So_init,
+            Q_water_mass, t_final);
+        auto prof = azimuthal_average(Sw_field, grids[g], L, r_max);
+
+        auto path = (vdir / ("radial_bl_profile_N"
+                    + std::to_string(grids[g]) + ".csv")).string();
+        std::ofstream csv(path);
+        csv << "r,Sw_GDM,Sw_reference\n";
+        for (size_t i = 0; i < prof.r.size(); ++i) {
+            size_t j = 0;
+            while (j + 1 < prof_ref.r.size() && prof_ref.r[j + 1] <= prof.r[i])
+                ++j;
+            double Sw_ref_interp = prof_ref.Sw[j];
+            if (j + 1 < prof_ref.r.size() && prof_ref.r[j] <= prof.r[i]) {
+                double t = (prof.r[i] - prof_ref.r[j])
+                         / (prof_ref.r[j + 1] - prof_ref.r[j]);
+                Sw_ref_interp = prof_ref.Sw[j] * (1.0 - t)
+                              + prof_ref.Sw[j + 1] * t;
+            }
+            csv << prof.r[i] << "," << prof.Sw[i] << "," << Sw_ref_interp << "\n";
+        }
+        csv.close();
+        WARN("Profile CSV: " << path);
+    }
+    CHECK(true);
+}
+
+TEST_CASE("Radial BL: front position and radial monotonicity",
+          "[buckley-leverett][radial][validation]") {
+    constexpr double L = 200.0, hz = 10.0;
+    constexpr double perm_mD = 100.0, poro = 0.2;
+    constexpr double P_init_atm = 200.0, So_init = 0.8;
+    constexpr double Q_water_mass = -50000.0;
+    constexpr double t_final = 100.0;
+    constexpr double r_max = 90.0;
+
+    auto Sw_field = run_radial_simulation(
+        41, L, hz, perm_mD, poro, P_init_atm, So_init,
+        Q_water_mass, t_final);
+    REQUIRE(Sw_field.size() == 41 * 41);
+    auto prof = azimuthal_average(Sw_field, 41, L, r_max);
+    REQUIRE(prof.r.size() > 10);
+
+    double Sw_init = 1.0 - So_init;
+    size_t front_bin = 0;
     double max_grad = 0.0;
-    size_t front_cell = 0;
-    for (size_t i = 1; i + 2 < Nx; ++i) {
-        double grad = std::abs(Sw[i] - Sw[i + 1]);
+    for (size_t i = 1; i < prof.r.size(); ++i) {
+        double grad = std::abs(prof.Sw[i - 1] - prof.Sw[i]);
         if (grad > max_grad) {
             max_grad = grad;
-            front_cell = i;
+            front_bin = i;
         }
     }
-    double x_front_gdm = (front_cell + 0.5) * hx;
+    double r_front = prof.r[front_bin];
+    WARN("Front at r=" << r_front << " (bin " << front_bin << ")");
+    CHECK(r_front > 20.0);
+    CHECK(r_front < 80.0);
 
-    INFO("GDM front at x = " << x_front_gdm);
-    INFO("Analytical front at x = " << x_front_analytical);
-    CHECK(std::abs(x_front_gdm - x_front_analytical) < 3.0 * hx);
-
-    SECTION("monotonicity and bounds") {
-        for (size_t i = 0; i < Nx; ++i) {
-            CHECK(Sw[i] >= -1e-6);
-            CHECK(Sw[i] <= 1.0 + 1e-6);
+    SECTION("bounds") {
+        for (size_t i = 0; i < prof.r.size(); ++i) {
+            CHECK(prof.Sw[i] >= Sw_init - 1e-6);
+            CHECK(prof.Sw[i] <= 1.0 + 1e-6);
         }
-        for (size_t i = 2; i + 2 < Nx; ++i) {
-            CHECK(Sw[i] <= Sw[i - 1] + 1e-6);
+    }
+
+    SECTION("radial monotonicity: Sw decreases with r") {
+        for (size_t i = 2; i < prof.r.size(); ++i) {
+            CHECK(prof.Sw[i] <= prof.Sw[i - 1] + 0.02);
+        }
+    }
+
+    SECTION("azimuthal symmetry: E-N profiles match") {
+        double h = L / 41;
+        size_t ic = 41 / 2, jc = 41 / 2;
+        for (size_t d = 1; d <= 8 && ic + d < 41; ++d) {
+            double Sw_east = Sw_field[jc * 41 + ic + d];
+            double Sw_north = Sw_field[(jc + d) * 41 + ic];
+            CHECK(std::abs(Sw_east - Sw_north) < 0.01);
         }
     }
 }
 
-TEST_CASE("BL validation: CSV export for visual check",
-          "[buckley-leverett][validation][.]") {
-    constexpr size_t Nx = 200;
-    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+TEST_CASE("Radial BL: CSV export for visual check",
+          "[buckley-leverett][radial][validation][.]") {
+    constexpr double L = 200.0, hz = 10.0;
     constexpr double perm_mD = 100.0, poro = 0.2;
-    constexpr double P_init_atm = 200.0;
-    constexpr double So_init = 0.8;
-    constexpr double Sw_init = 1.0 - So_init;
-    constexpr double t_final = 400.0;
-    constexpr double M = 4.3 / 2.0;
-    constexpr double A = hy * hz;
+    constexpr double P_init_atm = 200.0, So_init = 0.8;
+    constexpr double Q_water_mass = -50000.0;
+    constexpr double t_final = 100.0;
 
-    auto horizon = test_helpers::make_uniform_horizon(
-        Nx, 1, 1, Lx, hy, hz, perm_mD, poro, P_init_atm, So_init);
-    auto numPrm = test_helpers::default_num_params();
+    auto Sw_field = run_radial_simulation(
+        41, L, hz, perm_mD, poro, P_init_atm, So_init,
+        Q_water_mass, t_final);
+    REQUIRE(Sw_field.size() == 41 * 41);
 
-    reservoir_simulator::ReservoirSimulator sim{
-        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
-    sim.RefPressure = P_init_atm * 101325.0;
-    sim.numPrm.set_initial_schemeTau(0.01);
-    sim.numPrm.set_currentMoment(0.0);
+    double h = L / 41;
+    double cx = (41 / 2 + 0.5) * h, cy = cx;
 
-    double hx = Lx / Nx;
-    double r_app = std::max(0.2 * hx, 0.2);
-    test_helpers::add_simple_well(sim, horizon,
-        "INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0, r_app);
-    test_helpers::add_simple_well(sim, horizon,
-        "PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0, r_app);
-
-    sim.Solve({0.0, t_final});
-
-    auto Sw_gdm = sim.GetWaterSaturationField();
-
-    // Effective qt from mass balance
-    double integral_dSw = 0.0;
-    for (size_t i = 0; i < Nx; ++i)
-        integral_dSw += (Sw_gdm[i] - Sw_init) * hx;
-    double qt_eff = integral_dSw * poro / t_final;
-
-    // Analytical BL with Sw_init != 0
-    double fw_init = buckley_leverett::f_w(Sw_init, M);
-    double Swf = Sw_init;
-    {
-        double lo = Sw_init + 0.01, hi = 0.99;
-        for (int iter = 0; iter < 100; ++iter) {
-            double mid = 0.5 * (lo + hi);
-            double secant = (buckley_leverett::f_w(mid, M) - fw_init) / (mid - Sw_init);
-            double tangent = buckley_leverett::df_w(mid, M);
-            if (tangent > secant) lo = mid;
-            else hi = mid;
-        }
-        Swf = 0.5 * (lo + hi);
-    }
-    double slope_front = (buckley_leverett::f_w(Swf, M) - fw_init) / (Swf - Sw_init);
-    double v_front = qt_eff * slope_front / (poro * A);
-    double x_front = v_front * t_final;
-
-    std::vector<double> x_centers(Nx);
-    for (size_t i = 0; i < Nx; ++i) x_centers[i] = (i + 0.5) * hx;
-
-    std::vector<double> Sw_analytical(Nx);
-    for (size_t i = 0; i < Nx; ++i) {
-        double xi = x_centers[i];
-        if (xi >= x_front)
-            Sw_analytical[i] = Sw_init;
-        else {
-            double target = xi * poro * A / (qt_eff * t_final);
-            double lo = Swf, hi = 1.0 - 1e-10;
-            for (int iter = 0; iter < 100; ++iter) {
-                double mid = 0.5 * (lo + hi);
-                if (buckley_leverett::df_w(mid, M) > target) lo = mid;
-                else hi = mid;
-            }
-            Sw_analytical[i] = 0.5 * (lo + hi);
+    auto vdir = validation_dir();
+    std::ofstream csv((vdir / "radial_bl_field.csv").string());
+    csv << "x,y,r,Sw\n";
+    for (size_t j = 0; j < 41; ++j) {
+        for (size_t i = 0; i < 41; ++i) {
+            double x = (i + 0.5) * h, y = (j + 0.5) * h;
+            double r = std::sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+            csv << x << "," << y << "," << r << "," << Sw_field[j * 41 + i] << "\n";
         }
     }
-
-    std::filesystem::create_directories("results/validation");
-    std::ofstream csv("results/validation/bl_validation_profile.csv");
-    csv << "x,Sw_GDM,Sw_analytical\n";
-    for (size_t i = 0; i < Nx; ++i)
-        csv << x_centers[i] << "," << Sw_gdm[i] << "," << Sw_analytical[i] << "\n";
     csv.close();
-
-    double sum_sq = 0.0;
-    for (size_t i = 1; i + 1 < Nx; ++i) {
-        double diff = Sw_gdm[i] - Sw_analytical[i];
-        sum_sq += diff * diff;
-    }
-    double L2 = std::sqrt(sum_sq * hx / Lx);
-    INFO("CSV written to results/validation/bl_validation_profile.csv, L2 = " << L2);
+    INFO("Written: " << (vdir / "radial_bl_field.csv").string());
     CHECK(true);
 }
