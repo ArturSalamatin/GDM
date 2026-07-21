@@ -1,5 +1,7 @@
 """Overlay plot: Sw(x) profiles for all grids + analytical (VAL-002)."""
 import csv
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 grids = [25, 50, 100, 200]
@@ -34,4 +36,4 @@ ax.legend(fontsize=10)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('results/validation/bl_profiles_overlay.png', dpi=150)
-plt.show()
+print('Saved results/validation/bl_profiles_overlay.png')

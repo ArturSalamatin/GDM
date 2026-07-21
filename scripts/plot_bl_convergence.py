@@ -1,5 +1,7 @@
 """Log-log convergence plot for BL grid refinement study (VAL-002)."""
 import csv
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -37,4 +39,4 @@ ax.legend(fontsize=11)
 ax.grid(True, which='both', alpha=0.3)
 plt.tight_layout()
 plt.savefig('results/validation/bl_convergence.png', dpi=150)
-plt.show()
+print('Saved results/validation/bl_convergence.png')
