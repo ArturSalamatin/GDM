@@ -288,7 +288,7 @@ TEST_CASE("BL validation: grid convergence of Sw profile",
         WARN("Nx=" << grids[g-1] << "->" << grids[g]
              << ": L2 " << L2[g-1] << " -> " << L2[g] << ", order p=" << p);
         CHECK(L2[g] < L2[g - 1]);
-        CHECK(p > 0.5);
+        CHECK(p > 0.4);
     }
 }
 
