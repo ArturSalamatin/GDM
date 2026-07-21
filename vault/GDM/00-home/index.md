@@ -47,6 +47,7 @@ date: 2026-06-27
 - [[bug-016 welldatahandler-memory-leak]] — BUG-016: утечка памяти new char[] без delete[] в WellDataHandler
 - [[bug-018 snprintf-size-t-format]] — BUG-018: snprintf с %u для size_t — UB на x64
 - [[val-001 buckley-leverett-1d]] — VAL-001: Buckley–Leverett 1D валидация профиля насыщенности
+- [[val-002 grid-convergence-1d]] — VAL-002: сходимость на сетке (1D Buckley–Leverett)
 - [[bug-020 debit-unit-conversion]] — BUG-020: несогласованность единиц массового и объёмного расхода
 - [[debt-048 well-jacobian-dpwell]] — DEBT-048: добавить ∂P_well/∂P_res в якобиан скважины
 - [[debt-008 eigen-remove-dead-include]] — DEBT-008: удалить мёртвый include Eigen
