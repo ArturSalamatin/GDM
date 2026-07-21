@@ -1,36 +1,42 @@
-"""Overlay plot: Sw(x) profiles for all grids + analytical (VAL-002).
-
-Each grid has its own qt_eff (due to Peaceman PI dependence on cell size,
-BUG-020), so each grid's analytical profile uses its own qt_eff.
-"""
+"""Overlay plot: Sw(r) radial profiles for all grids + reference N=321 (VAL-002)."""
 import csv
+import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-grids = [25, 50, 100, 200]
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+vdir = os.path.join(root, 'results', 'validation')
+
+grids = [21, 41, 81, 161]
 colors = ['#d62728', '#ff7f0e', '#2ca02c', '#1f77b4']
 
 fig, ax = plt.subplots(figsize=(10, 6))
 
-for Nx, color in zip(grids, colors):
-    x, sw_gdm, sw_ana = [], [], []
-    with open(f'results/validation/bl_profile_Nx{Nx}.csv') as f:
+r_ref, sw_ref = [], []
+with open(os.path.join(vdir, 'radial_bl_profile_N321_ref.csv')) as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        r_ref.append(float(row['r']))
+        sw_ref.append(float(row['Sw']))
+ax.plot(r_ref, sw_ref, 'k-', linewidth=2, label='Reference N=321', alpha=0.7)
+
+for N, color in zip(grids, colors):
+    r, sw_gdm = [], []
+    with open(os.path.join(vdir, f'radial_bl_profile_N{N}.csv')) as f:
         reader = csv.DictReader(f)
         for row in reader:
-            x.append(float(row['x']))
+            r.append(float(row['r']))
             sw_gdm.append(float(row['Sw_GDM']))
-            sw_ana.append(float(row['Sw_analytical']))
-    ax.plot(x, sw_gdm, '-', color=color, linewidth=1.5,
-            label=f'GDM Nx={Nx}', alpha=0.8)
-    ax.plot(x, sw_ana, '--', color=color, linewidth=1, alpha=0.5,
-            label=f'Analytical Nx={Nx}')
+    ax.plot(r, sw_gdm, '-', color=color, linewidth=1.5,
+            label=f'GDM N={N}', alpha=0.8)
 
-ax.set_xlabel('x (м)', fontsize=12)
+ax.set_xlabel('r (m)', fontsize=12)
 ax.set_ylabel('Sw', fontsize=12)
-ax.set_title('VAL-002: Sw profiles — grid refinement', fontsize=13)
+ax.set_title('VAL-002: Radial Sw(r) profiles — grid refinement', fontsize=13)
 ax.legend(fontsize=9, ncol=2)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig('results/validation/bl_profiles_overlay.png', dpi=150)
-print('Saved results/validation/bl_profiles_overlay.png')
+out = os.path.join(vdir, 'radial_bl_profiles_overlay.png')
+plt.savefig(out, dpi=150)
+print(f'Saved {out}')
