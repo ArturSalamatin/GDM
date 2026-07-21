@@ -292,6 +292,39 @@ TEST_CASE("BL validation: grid convergence of Sw profile",
     }
 }
 
+TEST_CASE("BL validation: convergence CSV export",
+          "[buckley-leverett][validation][convergence][.]") {
+    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+    constexpr double perm_mD = 100.0, poro = 0.2;
+    constexpr double P_init_atm = 200.0;
+    constexpr double So_init = 0.8;
+    constexpr double t_final = 400.0;
+    constexpr double M = 4.3 / 2.0;
+
+    constexpr size_t grids[] = {25, 50, 100, 200};
+    constexpr size_t N = sizeof(grids) / sizeof(grids[0]);
+    double L2[N];
+
+    for (size_t g = 0; g < N; ++g) {
+        L2[g] = compute_BL_L2(grids[g], Lx, hy, hz,
+                               perm_mD, poro, P_init_atm, So_init,
+                               -1000.0, 800.0, t_final, M);
+        REQUIRE(L2[g] > 0.0);
+    }
+
+    std::filesystem::create_directories("results/validation");
+    std::ofstream csv("results/validation/bl_convergence.csv");
+    csv << "Nx,hx,L2,p\n";
+    csv << grids[0] << "," << Lx / grids[0] << "," << L2[0] << ",\n";
+    for (size_t g = 1; g < N; ++g) {
+        double p = std::log2(L2[g - 1] / L2[g]);
+        csv << grids[g] << "," << Lx / grids[g] << "," << L2[g] << "," << p << "\n";
+    }
+    csv.close();
+    INFO("Convergence CSV written to results/validation/bl_convergence.csv");
+    CHECK(true);
+}
+
 // BUG-020: MER задаёт кг/день, формула Писмана оперирует м³/день.
 // qt_eff зависит от сетки (PI Писмана ∝ 1/ln(r_app/r_well), r_app ∝ hx).
 // После фикса BUG-020: qt_eff ≈ qt_nominal, не зависит от сетки.
