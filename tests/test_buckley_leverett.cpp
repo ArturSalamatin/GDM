@@ -325,6 +325,96 @@ TEST_CASE("BL validation: convergence CSV export",
     CHECK(true);
 }
 
+TEST_CASE("BL validation: multi-grid profiles CSV export",
+          "[buckley-leverett][validation][convergence][.]") {
+    constexpr double Lx = 100.0, hy = 1.0, hz = 1.0;
+    constexpr double perm_mD = 100.0, poro = 0.2;
+    constexpr double P_init_atm = 200.0;
+    constexpr double So_init = 0.8;
+    constexpr double Sw_init = 1.0 - So_init;
+    constexpr double t_final = 400.0;
+    constexpr double M = 4.3 / 2.0;
+    constexpr double A = hy * hz;
+
+    constexpr size_t grids[] = {25, 50, 100, 200};
+
+    std::filesystem::create_directories("results/validation");
+
+    for (size_t g = 0; g < 4; ++g) {
+        size_t Nx = grids[g];
+        double hx = Lx / Nx;
+        double r_app = std::max(0.2 * hx, 0.2);
+
+        auto horizon = test_helpers::make_uniform_horizon(
+            Nx, 1, 1, Lx, hy, hz, perm_mD, poro, P_init_atm, So_init);
+        auto numPrm = test_helpers::default_num_params();
+
+        reservoir_simulator::ReservoirSimulator sim{
+            numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+        sim.RefPressure = P_init_atm * 101325.0;
+        sim.numPrm.set_initial_schemeTau(0.01);
+        sim.numPrm.set_currentMoment(0.0);
+        sim.numPrm.SetUsePIController(false);
+
+        test_helpers::add_simple_well(sim, horizon,
+            "INJ", hx * 0.5, hy * 0.5, 0.0, -1000.0, r_app);
+        test_helpers::add_simple_well(sim, horizon,
+            "PROD", Lx - hx * 0.5, hy * 0.5, 800.0, 0.0, r_app);
+
+        sim.Solve({0.0, t_final});
+
+        auto Sw_gdm = sim.GetWaterSaturationField();
+        REQUIRE(Sw_gdm.size() == Nx);
+
+        double integral_dSw = 0.0;
+        for (size_t i = 0; i < Nx; ++i)
+            integral_dSw += (Sw_gdm[i] - Sw_init) * hx;
+        double qt_eff = integral_dSw * poro / t_final;
+
+        double fw_init = buckley_leverett::f_w(Sw_init, M);
+        double Swf;
+        {
+            double lo = Sw_init + 0.01, hi = 0.99;
+            for (int iter = 0; iter < 100; ++iter) {
+                double mid = 0.5 * (lo + hi);
+                double secant = (buckley_leverett::f_w(mid, M) - fw_init) / (mid - Sw_init);
+                double tangent = buckley_leverett::df_w(mid, M);
+                if (tangent > secant) lo = mid;
+                else hi = mid;
+            }
+            Swf = 0.5 * (lo + hi);
+        }
+        double slope_front = (buckley_leverett::f_w(Swf, M) - fw_init) / (Swf - Sw_init);
+        double v_front = qt_eff * slope_front / (poro * A);
+        double x_front = v_front * t_final;
+
+        std::string fname = "results/validation/bl_profile_Nx"
+                          + std::to_string(Nx) + ".csv";
+        std::ofstream csv(fname);
+        csv << "x,Sw_GDM,Sw_analytical\n";
+        for (size_t i = 0; i < Nx; ++i) {
+            double xi = (i + 0.5) * hx;
+            double Sw_ana;
+            if (xi >= x_front) {
+                Sw_ana = Sw_init;
+            } else {
+                double target = xi * poro * A / (qt_eff * t_final);
+                double lo = Swf, hi = 1.0 - 1e-10;
+                for (int iter = 0; iter < 100; ++iter) {
+                    double mid = 0.5 * (lo + hi);
+                    if (buckley_leverett::df_w(mid, M) > target) lo = mid;
+                    else hi = mid;
+                }
+                Sw_ana = 0.5 * (lo + hi);
+            }
+            csv << xi << "," << Sw_gdm[i] << "," << Sw_ana << "\n";
+        }
+        csv.close();
+        WARN("Profile CSV: " << fname);
+    }
+    CHECK(true);
+}
+
 // BUG-020: MER задаёт кг/день, формула Писмана оперирует м³/день.
 // qt_eff зависит от сетки (PI Писмана ∝ 1/ln(r_app/r_well), r_app ∝ hx).
 // После фикса BUG-020: qt_eff ≈ qt_nominal, не зависит от сетки.
