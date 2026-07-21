@@ -7,7 +7,7 @@ date: 2026-07-20
 issue: VAL-002
 github: 46
 branch: val/val-002/grid-convergence-1d
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-21
   round: 5
