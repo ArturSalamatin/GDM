@@ -1,4 +1,8 @@
-"""Overlay plot: Sw(x) profiles for all grids + analytical (VAL-002)."""
+"""Overlay plot: Sw(x) profiles for all grids + analytical (VAL-002).
+
+Each grid has its own qt_eff (due to Peaceman PI dependence on cell size,
+BUG-020), so each grid's analytical profile uses its own qt_eff.
+"""
 import csv
 import matplotlib
 matplotlib.use('Agg')
@@ -19,20 +23,13 @@ for Nx, color in zip(grids, colors):
             sw_ana.append(float(row['Sw_analytical']))
     ax.plot(x, sw_gdm, '-', color=color, linewidth=1.5,
             label=f'GDM Nx={Nx}', alpha=0.8)
-
-# Analytical from finest grid
-x_ana, sw_ana = [], []
-with open('results/validation/bl_profile_Nx200.csv') as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        x_ana.append(float(row['x']))
-        sw_ana.append(float(row['Sw_analytical']))
-ax.plot(x_ana, sw_ana, 'k--', linewidth=2, label='Analytical (BL)')
+    ax.plot(x, sw_ana, '--', color=color, linewidth=1, alpha=0.5,
+            label=f'Analytical Nx={Nx}')
 
 ax.set_xlabel('x (м)', fontsize=12)
 ax.set_ylabel('Sw', fontsize=12)
 ax.set_title('VAL-002: Sw profiles — grid refinement', fontsize=13)
-ax.legend(fontsize=10)
+ax.legend(fontsize=9, ncol=2)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('results/validation/bl_profiles_overlay.png', dpi=150)
