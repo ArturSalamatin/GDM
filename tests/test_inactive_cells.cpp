@@ -303,7 +303,7 @@ TEST_CASE("Barrier inactive cells - CSV export",
         "INJ", hx * 5.5, hy * 2.5,
         0.0, -1e6);
 
-    sim.Solve({0.0, 10.0});
+    sim.Solve({0.0, 30.0});
 
     std::filesystem::create_directories("results/val-008");
     std::ofstream ofs("results/val-008/barrier.csv");
