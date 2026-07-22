@@ -300,7 +300,7 @@ TEST_CASE("Barrier inactive cells - CSV export",
     double hx = Lx / Nx;
     double hy = Ly / Ny;
     test_helpers::add_simple_well(sim, horizon,
-        "INJ", hx * 5.5, hy * 2.5,
+        "INJ", hx * 8.5, hy * 2.5,
         0.0, -1e6);
 
     sim.Solve({0.0, 30.0});

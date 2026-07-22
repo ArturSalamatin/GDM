@@ -60,7 +60,7 @@ def main():
     ax.set_ylabel("j")
     plt.colorbar(im, ax=ax)
 
-    axes[2].plot(5, 2, "v", color="blue", markersize=10, label="INJ")
+    axes[2].plot(8, 2, "v", color="blue", markersize=10, label="INJ")
     axes[2].legend(loc="upper right")
 
     plt.suptitle("VAL-008: Barrier of inactive cells (T=30 days)", fontsize=14)
