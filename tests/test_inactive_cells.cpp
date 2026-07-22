@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <filesystem>
 #include "test_helpers.h"
 
 TEST_CASE("Well skips inactive cell layer",
@@ -169,4 +170,46 @@ TEST_CASE("Checkerboard inactive cells - active cells isolated",
             REQUIRE(P[l] == Approx(P_init_Pa).epsilon(1e-12));
         }
     }
+}
+
+TEST_CASE("Checkerboard inactive cells - CSV export",
+          "[.visual][inactive-cells][val-007]") {
+    size_t Nx = 5, Ny = 5, Nz = 1;
+    double Lx = 50.0, Ly = 50.0, hz = 10.0;
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, 200.0, 0.8);
+
+    std::vector<bool> is_inactive(Nx * Ny, false);
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i)
+            if ((i + j) % 2 == 0) {
+                horizon.active_cells[Nx * j + i] = false;
+                is_inactive[Nx * j + i] = true;
+            }
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    test_helpers::add_simple_well(sim, horizon, "PROD", 25.0, 15.0, 1.0, 0.0);
+
+    double dt = 0.1;
+    for (int step = 0; step < 5; ++step)
+        sim.SingleIteration(dt, dt);
+
+    std::filesystem::create_directories("results/val-007");
+    std::ofstream ofs("results/val-007/checkerboard.csv");
+    ofs << "i,j,active,P_atm,Sw\n";
+
+    auto P = sim.GetPressureField();
+    auto Sw = sim.GetWaterSaturationField();
+
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            ofs << i << "," << j << ","
+                << (is_inactive[l] ? 0 : 1) << ","
+                << std::setprecision(8) << P[l] / 101325.0 << ","
+                << Sw[l] << "\n";
+        }
 }
