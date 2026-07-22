@@ -7,7 +7,7 @@ date: 2026-07-22
 issue: VAL-007
 github: 48
 branch: val/val-007/checkerboard-inactive-cells
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-22
   findings: 0 / 0 / 0
