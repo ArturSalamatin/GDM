@@ -7,7 +7,7 @@ date: 2026-07-22
 issue: VAL-008
 github: 49
 branch: val/val-008/barrier-inactive-cells
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-22
   round: 3
