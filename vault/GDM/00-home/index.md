@@ -69,6 +69,7 @@ date: 2026-06-27
 - [[debt-002 wstring-to-string]] — DEBT-002: wstring → string (UTF-8) в ядре
 - [[val-007 checkerboard-inactive-cells]] — VAL-007: шахматная деактивация ячеек (Nz=1)
 - [[val-008 barrier-inactive-cells]] — VAL-008: барьер из неактивных ячеек между INJ и PROD
+- [[val-009 single-active-layer]] — VAL-009: один активный слой из 4 (Nz=4, k=2) — сравнение с 2D-эталоном
 - [[debt-009 remove-debug-dumps]] — DEBT-009: убрать отладочные дампы test_*.txt из production-кода
 - [[debt-010 wells-unique-ptr]] — DEBT-010: new/delete для скважин → unique_ptr
 - [[debt-021 int-size-t-warnings]] — DEBT-021: int переменные цикла итерируют по size_t границам (warnings C4267/C4297)
