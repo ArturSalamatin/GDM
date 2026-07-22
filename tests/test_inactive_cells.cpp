@@ -278,3 +278,46 @@ TEST_CASE("Y-direction barrier blocks transport",
         }
     REQUIRE(inj_has_water);
 }
+
+TEST_CASE("Barrier inactive cells - CSV export",
+          "[.visual][inactive-cells][val-008]") {
+    size_t Nx = 20, Ny = 5, Nz = 1;
+    double Lx = 200.0, Ly = 50.0, hz = 10.0;
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, 200.0, 0.8);
+
+    size_t barrier_i = 10;
+    std::vector<bool> is_inactive(Nx * Ny, false);
+    for (size_t j = 0; j < Ny; ++j) {
+        horizon.active_cells[Nx * j + barrier_i] = false;
+        is_inactive[Nx * j + barrier_i] = true;
+    }
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    double hx = Lx / Nx;
+    double hy = Ly / Ny;
+    test_helpers::add_simple_well(sim, horizon,
+        "INJ", hx * 0.5, hy * 2.5,
+        0.0, -1000.0);
+
+    sim.Solve({0.0, 2.0});
+
+    std::filesystem::create_directories("results/val-008");
+    std::ofstream ofs("results/val-008/barrier.csv");
+    ofs << "i,j,active,P_atm,Sw\n";
+
+    auto P = sim.GetPressureField();
+    auto Sw = sim.GetWaterSaturationField();
+
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            ofs << i << "," << j << ","
+                << (is_inactive[l] ? 0 : 1) << ","
+                << std::setprecision(8) << P[l] / 101325.0 << ","
+                << Sw[l] << "\n";
+        }
+}
