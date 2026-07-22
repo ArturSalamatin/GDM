@@ -63,7 +63,7 @@ def main():
     axes[2].plot(5, 2, "v", color="blue", markersize=10, label="INJ")
     axes[2].legend(loc="upper right")
 
-    plt.suptitle("VAL-008: Barrier of inactive cells", fontsize=14)
+    plt.suptitle("VAL-008: Barrier of inactive cells (T=30 days)", fontsize=14)
     plt.tight_layout()
     out = os.path.join(args.results_dir, "barrier.png")
     plt.savefig(out, dpi=150)
