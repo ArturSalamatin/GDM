@@ -321,3 +321,156 @@ TEST_CASE("Barrier inactive cells - CSV export",
                 << Sw[l] << "\n";
         }
 }
+
+TEST_CASE("Single active layer equals 2D",
+          "[integration][inactive-cells][val-009]") {
+    using Catch::Approx;
+
+    size_t Nx = 10, Ny = 5;
+    double Lx = 100.0, Ly = 50.0, hz = 10.0;
+    double P_init_atm = 200.0;
+    double oil_sat = 0.8;
+
+    // 2D reference (Nz=1)
+    auto horizon_2d = test_helpers::make_uniform_horizon(
+        Nx, Ny, 1, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim_2d{
+        numPrm, horizon_2d, horizon_2d.oil, horizon_2d.water, horizon_2d.other};
+
+    double hx = Lx / Nx;
+    double hy = Ly / Ny;
+    test_helpers::add_simple_well(sim_2d, horizon_2d,
+        "INJ", hx * 0.5, hy * 2.5,
+        0.0, -1000.0);
+
+    sim_2d.Solve({0.0, 2.0});
+
+    // 3D scenario (Nz=4, only k=2 active)
+    auto horizon_3d = test_helpers::make_uniform_horizon(
+        Nx, Ny, 4, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    for (size_t k = 0; k < 4; ++k)
+        if (k != 2)
+            for (size_t j = 0; j < Ny; ++j)
+                for (size_t i = 0; i < Nx; ++i)
+                    horizon_3d.active_cells[Nx * Ny * k + Nx * j + i] = false;
+
+    reservoir_simulator::ReservoirSimulator sim_3d{
+        numPrm, horizon_3d, horizon_3d.oil, horizon_3d.water, horizon_3d.other};
+
+    test_helpers::add_simple_well(sim_3d, horizon_3d,
+        "INJ", hx * 0.5, hy * 2.5,
+        0.0, -1000.0);
+
+    sim_3d.Solve({0.0, 2.0});
+
+    auto P_2d = sim_2d.GetPressureField();
+    auto Sw_2d = sim_2d.GetWaterSaturationField();
+    auto P_3d = sim_3d.GetPressureField();
+    auto Sw_3d = sim_3d.GetWaterSaturationField();
+
+    size_t layer2_offset = Nx * Ny * 2;
+    for (size_t l = 0; l < Nx * Ny; ++l) {
+        REQUIRE(P_3d[layer2_offset + l] == Approx(P_2d[l]).epsilon(1e-12));
+        REQUIRE(Sw_3d[layer2_offset + l] == Approx(Sw_2d[l]).epsilon(1e-12));
+    }
+
+    double P_init_Pa = P_init_atm * 101325.0;
+    double Sw_init = 1.0 - oil_sat;
+    for (size_t k : {size_t(0), size_t(1), size_t(3)})
+        for (size_t l = 0; l < Nx * Ny; ++l) {
+            size_t idx = Nx * Ny * k + l;
+            REQUIRE(P_3d[idx] == Approx(P_init_Pa).epsilon(1e-12));
+            REQUIRE(Sw_3d[idx] == Approx(Sw_init).epsilon(1e-12));
+        }
+
+    REQUIRE(sim_3d.OilTotal() == Approx(sim_2d.OilTotal()).epsilon(1e-12));
+    REQUIRE(sim_3d.WaterTotal() == Approx(sim_2d.WaterTotal()).epsilon(1e-12));
+
+    auto bal_2d = sim_2d.GetOverallBalance();
+    auto bal_3d = sim_3d.GetOverallBalance();
+    for (size_t i = 0; i < bal_2d.size(); ++i)
+        REQUIRE(bal_3d[i] == Approx(bal_2d[i]).epsilon(1e-12));
+}
+
+TEST_CASE("Single active layer - CSV export",
+          "[.visual][inactive-cells][val-009]") {
+    size_t Nx = 10, Ny = 5;
+    double Lx = 100.0, Ly = 50.0, hz = 10.0;
+    double P_init_atm = 200.0;
+    double oil_sat = 0.8;
+
+    auto horizon_2d = test_helpers::make_uniform_horizon(
+        Nx, Ny, 1, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim_2d{
+        numPrm, horizon_2d, horizon_2d.oil, horizon_2d.water, horizon_2d.other};
+
+    double hx = Lx / Nx;
+    double hy = Ly / Ny;
+    test_helpers::add_simple_well(sim_2d, horizon_2d,
+        "INJ", hx * 0.5, hy * 2.5,
+        0.0, -1e6);
+
+    sim_2d.Solve({0.0, 30.0});
+
+    auto horizon_3d = test_helpers::make_uniform_horizon(
+        Nx, Ny, 4, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    for (size_t k = 0; k < 4; ++k)
+        if (k != 2)
+            for (size_t j = 0; j < Ny; ++j)
+                for (size_t i = 0; i < Nx; ++i)
+                    horizon_3d.active_cells[Nx * Ny * k + Nx * j + i] = false;
+
+    reservoir_simulator::ReservoirSimulator sim_3d{
+        numPrm, horizon_3d, horizon_3d.oil, horizon_3d.water, horizon_3d.other};
+
+    test_helpers::add_simple_well(sim_3d, horizon_3d,
+        "INJ", hx * 0.5, hy * 2.5,
+        0.0, -1e6);
+
+    sim_3d.Solve({0.0, 30.0});
+
+    std::filesystem::create_directories("results/val-009");
+
+    auto P_2d = sim_2d.GetPressureField();
+    auto Sw_2d = sim_2d.GetWaterSaturationField();
+    auto P_3d = sim_3d.GetPressureField();
+    auto Sw_3d = sim_3d.GetWaterSaturationField();
+    size_t offset = Nx * Ny * 2;
+
+    std::ofstream ofs_2d("results/val-009/reference_2d.csv");
+    ofs_2d << "i,j,P_atm,Sw\n";
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            ofs_2d << i << "," << j << ","
+                   << std::setprecision(8) << P_2d[l] / 101325.0 << ","
+                   << Sw_2d[l] << "\n";
+        }
+
+    std::ofstream ofs_3d("results/val-009/layer2_3d.csv");
+    ofs_3d << "i,j,P_atm,Sw\n";
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            ofs_3d << i << "," << j << ","
+                   << std::setprecision(8) << P_3d[offset + l] / 101325.0 << ","
+                   << Sw_3d[offset + l] << "\n";
+        }
+
+    std::ofstream ofs_diff("results/val-009/difference.csv");
+    ofs_diff << "i,j,dP_atm,dSw\n";
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            ofs_diff << i << "," << j << ","
+                     << std::setprecision(12)
+                     << (P_3d[offset + l] - P_2d[l]) / 101325.0 << ","
+                     << (Sw_3d[offset + l] - Sw_2d[l]) << "\n";
+        }
+}
