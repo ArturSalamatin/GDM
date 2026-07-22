@@ -7,7 +7,7 @@ date: 2026-07-22
 issue: VAL-009
 github: 50
 branch: val/val-009/single-active-layer
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-22
   round: 3
