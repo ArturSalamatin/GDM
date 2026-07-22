@@ -657,3 +657,78 @@ TEST_CASE("All four corners inactive - graph integrity and state preserved",
         }
     }
 }
+
+TEST_CASE("Corner cell inactive - CSV export",
+          "[.visual][inactive-cells][val-010]") {
+    size_t Nx = 7, Ny = 7, Nz = 1;
+    double Lx = 70.0, Ly = 70.0, hz = 10.0;
+    double P_init_atm = 200.0;
+    double oil_sat = 0.8;
+
+    auto numPrm = test_helpers::default_num_params();
+    double hx = Lx / Nx;
+    double hy = Ly / Ny;
+
+    // Reference
+    auto horizon_ref = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+    reservoir_simulator::ReservoirSimulator sim_ref{
+        numPrm, horizon_ref, horizon_ref.oil, horizon_ref.water, horizon_ref.other};
+    test_helpers::add_simple_well(sim_ref, horizon_ref,
+        "INJ", hx * 3.5, hy * 3.5, 0.0, -1e6);
+    sim_ref.Solve({0.0, 30.0});
+
+    // Corner off
+    auto horizon_test = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+    horizon_test.active_cells[0] = false;
+    reservoir_simulator::ReservoirSimulator sim_test{
+        numPrm, horizon_test, horizon_test.oil, horizon_test.water, horizon_test.other};
+    test_helpers::add_simple_well(sim_test, horizon_test,
+        "INJ", hx * 3.5, hy * 3.5, 0.0, -1e6);
+    sim_test.Solve({0.0, 30.0});
+
+    std::filesystem::create_directories("results/val-010");
+
+    auto write_csv = [&](const std::string& fname,
+                         reservoir_simulator::ReservoirSimulator& sim,
+                         const std::vector<bool>& inactive) {
+        std::ofstream ofs(fname);
+        ofs << "i,j,active,P_atm,Sw\n";
+        auto P = sim.GetPressureField();
+        auto Sw = sim.GetWaterSaturationField();
+        for (size_t j = 0; j < Ny; ++j)
+            for (size_t i = 0; i < Nx; ++i) {
+                size_t l = Nx * j + i;
+                ofs << i << "," << j << ","
+                    << (inactive[l] ? 0 : 1) << ","
+                    << std::setprecision(8) << P[l] / 101325.0 << ","
+                    << Sw[l] << "\n";
+            }
+    };
+
+    std::vector<bool> all_active(Nx * Ny, false);
+    write_csv("results/val-010/reference_full.csv", sim_ref, all_active);
+
+    std::vector<bool> corner_off(Nx * Ny, false);
+    corner_off[0] = true;
+    write_csv("results/val-010/corner_off.csv", sim_test, corner_off);
+
+    // Difference
+    auto P_ref = sim_ref.GetPressureField();
+    auto Sw_ref = sim_ref.GetWaterSaturationField();
+    auto P_test = sim_test.GetPressureField();
+    auto Sw_test = sim_test.GetWaterSaturationField();
+
+    std::ofstream ofs_diff("results/val-010/difference.csv");
+    ofs_diff << "i,j,active,dP_atm,dSw\n";
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            ofs_diff << i << "," << j << ","
+                     << (l == 0 ? 0 : 1) << ","
+                     << std::setprecision(12)
+                     << (P_test[l] - P_ref[l]) / 101325.0 << ","
+                     << (Sw_test[l] - Sw_ref[l]) << "\n";
+        }
+}
