@@ -7,7 +7,7 @@ date: 2026-07-22
 issue: VAL-010
 github: 51
 branch: val/val-010/inactive-boundary-cell
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-22
   findings: 0 / 1 / 1
