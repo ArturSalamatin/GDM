@@ -228,3 +228,53 @@ TEST_CASE("Barrier of inactive cells blocks transport",
         }
     REQUIRE(inj_has_water);
 }
+
+TEST_CASE("Y-direction barrier blocks transport",
+          "[integration][inactive-cells][val-008]") {
+    using Catch::Approx;
+
+    size_t Nx = 5, Ny = 5, Nz = 1;
+    double Lx = 50.0, Ly = 50.0, hz = 10.0;
+    double P_init_atm = 200.0;
+    double oil_sat = 0.8;
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    double Sw_init = 1.0 - oil_sat;
+
+    size_t barrier_j = 2;
+    for (size_t i = 0; i < Nx; ++i)
+        horizon.active_cells[Nx * barrier_j + i] = false;
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    double hx = Lx / Nx;
+    double hy = Ly / Ny;
+
+    test_helpers::add_simple_well(sim, horizon,
+        "INJ", hx * 2.5, hy * 0.5,
+        0.0, -1000.0);
+
+    sim.Solve({0.0, 2.0});
+
+    REQUIRE(std::isfinite(sim.OilTotal()));
+
+    auto Sw = sim.GetWaterSaturationField();
+
+    for (size_t j = barrier_j + 1; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            REQUIRE(Sw[l] == Approx(Sw_init).epsilon(1e-12));
+        }
+
+    bool inj_has_water = false;
+    for (size_t j = 0; j < barrier_j; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            if (Sw[l] > Sw_init + 1e-10)
+                inj_has_water = true;
+        }
+    REQUIRE(inj_has_water);
+}
