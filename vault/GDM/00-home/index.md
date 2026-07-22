@@ -249,3 +249,4 @@ date: 2026-06-27
 - [[2026-07-13 feat-011-sw0-diagonal-regularization]]
 - [[2026-07-15 res-007-bicgstab-vs-lgmres]]
 - [[2026-07-15 debt-004-remove-db-factories]]
+- [[2026-07-22 val-007 checkerboard-inactive-cells]]
