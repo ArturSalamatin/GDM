@@ -181,6 +181,7 @@ date: 2026-06-27
 - [[five-spot сравнение с MRST]]
 - [[таблица единиц GDM vs MRST]]
 - [[val-010 неактивная граничная ячейка]] — self-consistency: деактивация угловых/бортовых ячеек
+- [[val-020 shutin restart close layer]] — self-consistency: shut-in + restart с закрытой перфорацией
 
 #### Литература (`knowledge/literature/`)
 - [[Wallis 1983 Incomplete Gaussian Elimination as Preconditioning for CPR]] — CPR-прекондиционер, True-IMPES decoupling weights
