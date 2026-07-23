@@ -683,3 +683,48 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
     size_t far_cell_k0 = Nx * 0 + (Nx - 1);
     CHECK(result.Sw[far_cell_k0] == Catch::Approx(Sw_init).margin(0.005));
 }
+
+TEST_CASE("3D completions: shut-in + restart - visual",
+          "[.visual][3d][completions][shutin-restart][val-020]")
+{
+    constexpr size_t Nz = 2;
+    constexpr size_t Nx_v = 21, Ny_v = 21;
+    constexpr double Lx_v = 500.0, Ly_v = 500.0;
+
+    simulation_cases::MultiLayerCase sc(
+        "val-020", Nx_v, Ny_v, Nz, Lx_v, Ly_v, hz,
+        300.0, 10.0,
+        [&](double, double) {
+            std::vector<test_helpers::WellScheduleBuilder> builders;
+
+            auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
+                .open_layer(0, 0.0).open_layer(1, 0.0)
+                .close_layer(0, 150.0);
+            builders.emplace_back("INJ", 125.0, 250.0);
+            builders.back()
+                .set_completions(c_inj)
+                .inject_water(30.0).for_days(100.0)
+                .shut_in().for_days(50.0)
+                .inject_water(30.0).for_days(150.0);
+
+            auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
+                .open_layer(0, 0.0).open_layer(1, 0.0)
+                .close_layer(0, 150.0);
+            builders.emplace_back("PROD", 375.0, 250.0);
+            builders.back()
+                .set_completions(c_prod)
+                .produce_oil(20.0).for_days(100.0)
+                .shut_in().for_days(50.0)
+                .produce_oil(20.0).for_days(150.0);
+
+            return builders;
+        },
+        {{"INJ",  "injector", 125.0, 250.0},
+         {"PROD", "producer", 375.0, 250.0}}
+    );
+
+    auto result = run_case_3d(sc, true);
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
+}
