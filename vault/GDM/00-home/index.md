@@ -178,6 +178,7 @@ date: 2026-06-27
 - [[одномерная задача требует плоского источника а не точечного]]
 - [[five-spot сравнение с MRST]]
 - [[таблица единиц GDM vs MRST]]
+- [[val-010 неактивная граничная ячейка]] — self-consistency: деактивация угловых/бортовых ячеек
 
 #### Литература (`knowledge/literature/`)
 - [[Wallis 1983 Incomplete Gaussian Elimination as Preconditioning for CPR]] — CPR-прекондиционер, True-IMPES decoupling weights
