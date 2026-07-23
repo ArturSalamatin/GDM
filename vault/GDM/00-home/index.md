@@ -72,6 +72,7 @@ date: 2026-06-27
 - [[val-009 single-active-layer]] — VAL-009: один активный слой из 4 (Nz=4, k=2) — сравнение с 2D-эталоном
 - [[val-010 inactive-boundary-cell]] — VAL-010: неактивная граничная (угловая) ячейка — self-consistency
 - [[val-019 inactive-layer-multizone-perf]] — VAL-019: неактивный средний слой + многопластовые перфорации (Nz=3, k=1 off)
+- [[val-020 shutin-restart-close-layer]] — VAL-020: закрытие перфорации + shut-in + restart (self-consistency)
 - [[debt-009 remove-debug-dumps]] — DEBT-009: убрать отладочные дампы test_*.txt из production-кода
 - [[debt-010 wells-unique-ptr]] — DEBT-010: new/delete для скважин → unique_ptr
 - [[debt-021 int-size-t-warnings]] — DEBT-021: int переменные цикла итерируют по size_t границам (warnings C4267/C4297)
