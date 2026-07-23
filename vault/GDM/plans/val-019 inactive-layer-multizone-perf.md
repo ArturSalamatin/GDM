@@ -7,7 +7,7 @@ date: 2026-07-23
 issue: VAL-019
 github: 52
 branch: val/val-019/inactive-layer-multizone-perf
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-23
   round: 2
