@@ -866,3 +866,88 @@ TEST_CASE("Inactive middle layer + multizone perf - CSV export",
             << (bal[1] + bal[2] - bal[3]) << ","
             << (bal[4] + bal[5] - bal[6]) << "\n";
 }
+
+TEST_CASE("Barrier isolates two independent reservoirs",
+          "[integration][inactive-cells][val-021]") {
+    using Catch::Approx;
+
+    constexpr size_t Nx = 21, Ny = 5, Nz = 1;
+    constexpr double Lx = 210.0, Ly = 50.0, hz = 10.0;
+    constexpr double P_init_atm = 200.0;
+    constexpr double oil_sat = 0.8;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    double Sw_init = 1.0 - oil_sat;
+    double P_init_Pa = P_init_atm * 101325.0;
+
+    constexpr size_t barrier_i = 10;
+    for (size_t j = 0; j < Ny; ++j)
+        horizon.active_cells[Nx * j + barrier_i] = false;
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    double hx = Lx / Nx;
+    double hy = Ly / Ny;
+
+    test_helpers::WellScheduleBuilder inj_l("INJ_L", hx * 1.5, hy * 2.5);
+    inj_l.inject_water(30.0).for_days(100.0);
+    inj_l.add_to_sim(sim, horizon);
+
+    test_helpers::WellScheduleBuilder prod_l("PROD_L", hx * 8.5, hy * 2.5);
+    prod_l.produce_oil(20.0).for_days(100.0);
+    prod_l.add_to_sim(sim, horizon);
+
+    test_helpers::WellScheduleBuilder inj_r("INJ_R", hx * 12.5, hy * 2.5);
+    inj_r.inject_water(30.0).for_days(100.0);
+    inj_r.add_to_sim(sim, horizon);
+
+    test_helpers::WellScheduleBuilder prod_r("PROD_R", hx * 19.5, hy * 2.5);
+    prod_r.produce_oil(20.0).for_days(100.0);
+    prod_r.add_to_sim(sim, horizon);
+
+    double oil_mass_0 = sim.OilTotal();
+    double water_mass_0 = sim.WaterTotal();
+
+    sim.Solve({0.0, 100.0});
+
+    REQUIRE(std::isfinite(sim.OilTotal()));
+    REQUIRE(std::isfinite(sim.WaterTotal()));
+
+    auto Sw = sim.GetWaterSaturationField();
+    auto P  = sim.GetPressureField();
+
+    for (size_t j = 0; j < Ny; ++j) {
+        size_t l = Nx * j + barrier_i;
+        REQUIRE(Sw[l] == Approx(Sw_init).epsilon(1e-12));
+        REQUIRE(P[l]  == Approx(P_init_Pa).epsilon(1e-12));
+    }
+
+    bool left_has_water = false;
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < barrier_i; ++i) {
+            size_t l = Nx * j + i;
+            if (Sw[l] > Sw_init + 1e-10)
+                left_has_water = true;
+        }
+    REQUIRE(left_has_water);
+
+    bool right_has_water = false;
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = barrier_i + 1; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            if (Sw[l] > Sw_init + 1e-10)
+                right_has_water = true;
+        }
+    REQUIRE(right_has_water);
+
+    auto bal = sim.GetOverallBalance();
+    double oil_residual   = bal[1] + bal[2] - bal[3];
+    double water_residual = bal[4] + bal[5] - bal[6];
+    REQUIRE(std::abs(oil_residual) / oil_mass_0 < 1e-3);
+    if (water_mass_0 > 0)
+        REQUIRE(std::abs(water_residual) / water_mass_0 < 1e-3);
+}
