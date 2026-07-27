@@ -7,7 +7,7 @@ date: 2026-07-23
 issue: VAL-020
 github: 53
 branch: val/val-020/shutin-restart-close-layer
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-23
   round: 5
