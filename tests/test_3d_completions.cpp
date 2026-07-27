@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/catch_approx.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "simulation_cases/MultiLayerCase.h"
 
 #include <fstream>
@@ -72,6 +72,7 @@ struct RunResult {
     std::vector<double> Sw;
     std::vector<double> P;
     reservoir_simulator::SolverProfile profile;
+    std::vector<std::vector<double>> Sw_history;
 };
 
 RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
@@ -121,11 +122,15 @@ RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
     double max_oil_rel = 0.0, max_water_rel = 0.0;
     size_t total_cells = sc.nx() * sc.ny() * sc.nz();
 
+    std::vector<std::vector<double>> sw_history;
+    sw_history.push_back(sim.GetWaterSaturationField());
+
     for (size_t step = 1; step < times.size(); ++step) {
         sim.Solve({times[step - 1], times[step]});
 
         auto Sw = sim.GetWaterSaturationField();
         auto P = sim.GetPressureField();
+        sw_history.push_back(Sw);
 
         if (export_snapshots) {
             for (size_t k = 0; k < sc.nz(); ++k) {
@@ -189,7 +194,8 @@ RunResult run_case_3d(const simulation_cases::MultiLayerCase& sc,
         sim.OilTotal(), sim.WaterTotal(),
         max_oil_rel, max_water_rel,
         sim.GetWaterSaturationField(), sim.GetPressureField(),
-        profile
+        profile,
+        std::move(sw_history)
     };
 }
 
@@ -643,7 +649,7 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
 
             auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 150.0);
+                .close_layer(0, 180.74);
             builders.emplace_back("INJ", 125.0, 250.0);
             builders.back()
                 .set_completions(c_inj)
@@ -653,7 +659,7 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
 
             auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 150.0);
+                .close_layer(0, 180.74);
             builders.emplace_back("PROD", 375.0, 250.0);
             builders.back()
                 .set_completions(c_prod)
@@ -668,20 +674,41 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
     );
 
     auto result = run_case_3d(sc, true);
+    const auto& h = result.Sw_history;
 
     CHECK(result.max_oil_balance_rel < 1e-3);
     CHECK(result.max_water_balance_rel < 1e-3);
 
     size_t inj_i = static_cast<size_t>(125.0 / (Lx / Nx));
     size_t inj_j = static_cast<size_t>(250.0 / (Ly / Ny));
-    size_t cell_k0 = Nx * inj_j + inj_i;
-    size_t cell_k1 = Nx * Ny + Nx * inj_j + inj_i;
+    size_t prod_i = static_cast<size_t>(375.0 / (Lx / Nx));
+    size_t prod_j = static_cast<size_t>(250.0 / (Ly / Ny));
 
-    CHECK(result.Sw[cell_k1] > result.Sw[cell_k0]);
+    size_t inj_k0  = Nx * inj_j + inj_i;
+    size_t inj_k1  = Nx * Ny + Nx * inj_j + inj_i;
+    size_t prod_k0 = Nx * prod_j + prod_i;
+    size_t prod_k1 = Nx * Ny + Nx * prod_j + prod_i;
 
-    constexpr double Sw_init = 1.0 - 0.8;
-    size_t far_cell_k0 = Nx * 0 + (Nx - 1);
-    CHECK(result.Sw[far_cell_k0] == Catch::Approx(Sw_init).margin(0.005));
+    // snapshot indices: 0=t0, 10=t100, 15=t150, 19=t190, 30=t300
+
+    // shut-in: Sw не меняется между t=100 и t=150 (round-off ~1e-11)
+    CHECK(h[15][inj_k0]  == Catch::Approx(h[10][inj_k0]).margin(1e-10));
+    CHECK(h[15][inj_k1]  == Catch::Approx(h[10][inj_k1]).margin(1e-10));
+    CHECK(h[15][prod_k0] == Catch::Approx(h[10][prod_k0]).margin(1e-10));
+    CHECK(h[15][prod_k1] == Catch::Approx(h[10][prod_k1]).margin(1e-10));
+
+    // close_layer: k=0 замораживается после t≈180.74 (snapshot 19+)
+    CHECK(h[30][inj_k0]  == Catch::Approx(h[19][inj_k0]).margin(1e-10));
+    CHECK(h[30][prod_k0] == Catch::Approx(h[19][prod_k0]).margin(1e-10));
+
+    // k=1 продолжает меняться после закрытия k=0
+    CHECK(h[30][inj_k1]  > h[19][inj_k1]);
+    CHECK(h[30][prod_k1] > h[19][prod_k1]);
+
+    // финальное: k=1 получила больше воды чем k=0 (INJ)
+    CHECK(result.Sw[inj_k1] > result.Sw[inj_k0]);
+    // финальное: вблизи PROD в k=1 больше воды чем в k=0
+    CHECK(result.Sw[prod_k1] > result.Sw[prod_k0]);
 }
 
 TEST_CASE("3D completions: shut-in + restart - visual",
@@ -699,7 +726,7 @@ TEST_CASE("3D completions: shut-in + restart - visual",
 
             auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 150.0);
+                .close_layer(0, 180.74);
             builders.emplace_back("INJ", 125.0, 250.0);
             builders.back()
                 .set_completions(c_inj)
@@ -709,7 +736,7 @@ TEST_CASE("3D completions: shut-in + restart - visual",
 
             auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 150.0);
+                .close_layer(0, 180.74);
             builders.emplace_back("PROD", 375.0, 250.0);
             builders.back()
                 .set_completions(c_prod)
