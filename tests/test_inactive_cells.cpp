@@ -951,3 +951,72 @@ TEST_CASE("Barrier isolates two independent reservoirs",
     if (water_mass_0 > 0)
         REQUIRE(std::abs(water_residual) / water_mass_0 < 1e-3);
 }
+
+TEST_CASE("Two independent reservoirs - CSV export",
+          "[.visual][inactive-cells][val-021]") {
+    constexpr size_t Nx = 21, Ny = 5, Nz = 1;
+    constexpr double Lx = 210.0, Ly = 50.0, hz = 10.0;
+    constexpr double P_init_atm = 200.0;
+    constexpr double oil_sat = 0.8;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    constexpr size_t barrier_i = 10;
+    std::vector<bool> is_inactive(Nx * Ny, false);
+    for (size_t j = 0; j < Ny; ++j) {
+        horizon.active_cells[Nx * j + barrier_i] = false;
+        is_inactive[Nx * j + barrier_i] = true;
+    }
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    double hx = Lx / Nx, hy = Ly / Ny;
+
+    test_helpers::WellScheduleBuilder inj_l("INJ_L", hx * 1.5, hy * 2.5);
+    inj_l.inject_water(30.0).for_days(100.0);
+    inj_l.add_to_sim(sim, horizon);
+
+    test_helpers::WellScheduleBuilder prod_l("PROD_L", hx * 8.5, hy * 2.5);
+    prod_l.produce_oil(20.0).for_days(100.0);
+    prod_l.add_to_sim(sim, horizon);
+
+    test_helpers::WellScheduleBuilder inj_r("INJ_R", hx * 12.5, hy * 2.5);
+    inj_r.inject_water(30.0).for_days(100.0);
+    inj_r.add_to_sim(sim, horizon);
+
+    test_helpers::WellScheduleBuilder prod_r("PROD_R", hx * 19.5, hy * 2.5);
+    prod_r.produce_oil(20.0).for_days(100.0);
+    prod_r.add_to_sim(sim, horizon);
+
+    sim.Solve({0.0, 100.0});
+
+    std::filesystem::create_directories("results/val-021");
+    std::ofstream ofs("results/val-021/two_reservoirs.csv");
+    ofs << "i,j,active,half,P_atm,Sw\n";
+
+    auto P  = sim.GetPressureField();
+    auto Sw = sim.GetWaterSaturationField();
+
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i) {
+            size_t l = Nx * j + i;
+            const char* half = (i < barrier_i) ? "left"
+                             : (i == barrier_i) ? "barrier"
+                             : "right";
+            ofs << i << "," << j << ","
+                << (is_inactive[l] ? 0 : 1) << ","
+                << half << ","
+                << std::setprecision(8) << P[l] / 101325.0 << ","
+                << Sw[l] << "\n";
+        }
+
+    auto bal = sim.GetOverallBalance();
+    std::ofstream bal_ofs("results/val-021/mass_balance.csv");
+    bal_ofs << "oil_total,water_total,oil_residual,water_residual\n";
+    bal_ofs << sim.OilTotal() << "," << sim.WaterTotal() << ","
+            << (bal[1] + bal[2] - bal[3]) << ","
+            << (bal[4] + bal[5] - bal[6]) << "\n";
+}
