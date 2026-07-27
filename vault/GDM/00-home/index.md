@@ -73,6 +73,7 @@ date: 2026-06-27
 - [[val-010 inactive-boundary-cell]] — VAL-010: неактивная граничная (угловая) ячейка — self-consistency
 - [[val-019 inactive-layer-multizone-perf]] — VAL-019: неактивный средний слой + многопластовые перфорации (Nz=3, k=1 off)
 - [[val-020 shutin-restart-close-layer]] — VAL-020: закрытие перфорации + shut-in + restart (self-consistency)
+- [[val-021 barrier-two-reservoirs]] — VAL-021: барьер из неактивных ячеек + два независимых резервуара (self-consistency)
 - [[debt-009 remove-debug-dumps]] — DEBT-009: убрать отладочные дампы test_*.txt из production-кода
 - [[debt-010 wells-unique-ptr]] — DEBT-010: new/delete для скважин → unique_ptr
 - [[debt-021 int-size-t-warnings]] — DEBT-021: int переменные цикла итерируют по size_t границам (warnings C4267/C4297)
@@ -182,6 +183,7 @@ date: 2026-06-27
 - [[таблица единиц GDM vs MRST]]
 - [[val-010 неактивная граничная ячейка]] — self-consistency: деактивация угловых/бортовых ячеек
 - [[val-020 shutin restart close layer]] — self-consistency: shut-in + restart с закрытой перфорацией
+- [[val-021 barrier two independent reservoirs]] — self-consistency: барьер + два независимых резервуара
 
 #### Литература (`knowledge/literature/`)
 - [[Wallis 1983 Incomplete Gaussian Elimination as Preconditioning for CPR]] — CPR-прекондиционер, True-IMPES decoupling weights
