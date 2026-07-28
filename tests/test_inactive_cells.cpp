@@ -1020,3 +1020,134 @@ TEST_CASE("Two independent reservoirs - CSV export",
             << (bal[1] + bal[2] - bal[3]) << ","
             << (bal[4] + bal[5] - bal[6]) << "\n";
 }
+
+TEST_CASE("Inactive top layer - perf in all layers filtered",
+          "[integration][inactive-cells][val-022]") {
+    using Catch::Approx;
+    constexpr size_t Nx = 5, Ny = 5, Nz = 3;
+    constexpr double Lx = 50.0, Ly = 50.0, hz = 10.0;
+    constexpr double P_init_atm = 200.0;
+    constexpr double oil_sat = 0.8;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i)
+            horizon.active_cells[Nx * j + i] = false;
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    double hx = Lx / Nx, hy = Ly / Ny;
+
+    auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
+        .open_layer(0, 0.0).open_layer(1, 0.0).open_layer(2, 0.0);
+    test_helpers::WellScheduleBuilder inj("INJ", hx * 0.5, hy * 2.5);
+    inj.set_completions(c_inj)
+       .inject_water(10.0).for_days(100.0);
+    inj.add_to_sim(sim, horizon);
+
+    auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
+        .open_layer(0, 0.0).open_layer(1, 0.0).open_layer(2, 0.0);
+    test_helpers::WellScheduleBuilder prod("PROD", hx * 4.5, hy * 2.5);
+    prod.set_completions(c_prod)
+        .produce_oil(8.0).for_days(100.0);
+    prod.add_to_sim(sim, horizon);
+
+    double oil_mass_0 = sim.OilTotal();
+    double water_mass_0 = sim.WaterTotal();
+
+    sim.Solve({0.0, 100.0});
+
+    auto P = sim.GetPressureField();
+    auto Sw = sim.GetWaterSaturationField();
+
+    double P_init_Pa = P_init_atm * 101325.0;
+    double Sw_init = 1.0 - oil_sat;
+
+    for (size_t l = 0; l < Nx * Ny; ++l) {
+        REQUIRE(P[l] == Approx(P_init_Pa).epsilon(1e-12));
+        REQUIRE(Sw[l] == Approx(Sw_init).epsilon(1e-12));
+    }
+
+    size_t inj_i = 0, inj_j = 2;
+    size_t inj_cell_k1 = Nx * Ny * 1 + Nx * inj_j + inj_i;
+    size_t inj_cell_k2 = Nx * Ny * 2 + Nx * inj_j + inj_i;
+    CHECK(Sw[inj_cell_k1] > Sw_init);
+    CHECK(Sw[inj_cell_k2] > Sw_init);
+
+    auto bal = sim.GetOverallBalance();
+    double oil_residual   = bal[1] + bal[2] - bal[3];
+    double water_residual = bal[4] + bal[5] - bal[6];
+    REQUIRE(std::abs(oil_residual) / oil_mass_0 < 1e-3);
+    if (water_mass_0 > 0)
+        REQUIRE(std::abs(water_residual) / water_mass_0 < 1e-3);
+
+    for (size_t i = 0; i < Nx * Ny * Nz; ++i) {
+        REQUIRE(Sw[i] >= 0.0);
+        REQUIRE(Sw[i] <= 1.0);
+        REQUIRE(P[i] > 0.0);
+    }
+}
+
+TEST_CASE("Inactive top layer perf filtered - CSV export",
+          "[.visual][inactive-cells][val-022]") {
+    constexpr size_t Nx = 5, Ny = 5, Nz = 3;
+    constexpr double Lx = 50.0, Ly = 50.0, hz = 10.0;
+    constexpr double P_init_atm = 200.0;
+    constexpr double oil_sat = 0.8;
+
+    auto horizon = test_helpers::make_uniform_horizon(
+        Nx, Ny, Nz, Lx, Ly, hz, 100.0, 0.2, P_init_atm, oil_sat);
+
+    for (size_t j = 0; j < Ny; ++j)
+        for (size_t i = 0; i < Nx; ++i)
+            horizon.active_cells[Nx * j + i] = false;
+
+    auto numPrm = test_helpers::default_num_params();
+    reservoir_simulator::ReservoirSimulator sim{
+        numPrm, horizon, horizon.oil, horizon.water, horizon.other};
+
+    double hx = Lx / Nx, hy = Ly / Ny;
+
+    auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
+        .open_layer(0, 0.0).open_layer(1, 0.0).open_layer(2, 0.0);
+    test_helpers::WellScheduleBuilder inj("INJ", hx * 0.5, hy * 2.5);
+    inj.set_completions(c_inj)
+       .inject_water(30.0).for_days(200.0);
+    inj.add_to_sim(sim, horizon);
+
+    auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
+        .open_layer(0, 0.0).open_layer(1, 0.0).open_layer(2, 0.0);
+    test_helpers::WellScheduleBuilder prod("PROD", hx * 4.5, hy * 2.5);
+    prod.set_completions(c_prod)
+        .produce_oil(20.0).for_days(200.0);
+    prod.add_to_sim(sim, horizon);
+
+    sim.Solve({0.0, 200.0});
+
+    std::filesystem::create_directories("results/val-022");
+    auto P = sim.GetPressureField();
+    auto Sw = sim.GetWaterSaturationField();
+
+    for (size_t k = 0; k < Nz; ++k) {
+        std::ofstream ofs("results/val-022/layer_" + std::to_string(k) + ".csv");
+        ofs << "i,j,Sw,P_atm\n";
+        for (size_t j = 0; j < Ny; ++j)
+            for (size_t i = 0; i < Nx; ++i) {
+                size_t idx = Nx * Ny * k + Nx * j + i;
+                ofs << i << "," << j << ","
+                    << std::setprecision(8) << Sw[idx] << ","
+                    << P[idx] / 101325.0 << "\n";
+            }
+    }
+
+    auto bal = sim.GetOverallBalance();
+    std::ofstream bal_ofs("results/val-022/mass_balance.csv");
+    bal_ofs << "oil_total,water_total,oil_residual,water_residual\n";
+    bal_ofs << sim.OilTotal() << "," << sim.WaterTotal() << ","
+            << (bal[1] + bal[2] - bal[3]) << ","
+            << (bal[4] + bal[5] - bal[6]) << "\n";
+}
