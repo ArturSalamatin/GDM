@@ -7,7 +7,7 @@ date: 2026-07-27
 issue: VAL-021
 github: 54
 branch: val/val-021/barrier-two-reservoirs
-status: готов к реализации
+status: реализован
 audit:
   date: 2026-07-27
   round: 4
