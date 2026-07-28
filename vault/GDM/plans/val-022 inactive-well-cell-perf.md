@@ -7,7 +7,7 @@ date: 2026-07-28
 issue: VAL-022
 github: 55
 branch: val/val-022/inactive-well-cell-perf
-status: в процессе
+status: реализован
 audit:
   date: 2026-07-28
   round: 2
