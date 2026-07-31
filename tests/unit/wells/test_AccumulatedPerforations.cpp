@@ -56,3 +56,27 @@ TEST_CASE("AccumulatedPerforations: AddNewJob at same time appends to same set",
     CHECK(ap.getPerforationsSet().size() == 2);
     CHECK(ap.getPerforations(100.0).TotalLength() == Approx(50.0));
 }
+
+TEST_CASE("AccumulatedPerforations: AveragePerforationsOut does not shift close-on-boundary to end",
+          "[unit][level2][wells][AccumulatedPerforations][bug-024]") {
+    AccumulatedPerforations ap;
+    ap.AddNewJob(WellJobTime(0.0, 100.0, true, 0.0));
+    ap.AddNewJob(WellJobTime(0.0, 100.0, false, 150.0));
+
+    CHECK(ap.getPerforationsSet().size() == 3);
+    CHECK(ap.getPerforations(150.0).TotalLength() == Approx(0.0));
+
+    std::vector<std::pair<size_t, std::pair<double, double>>> jobIntervals = {
+        {2, {150.0, 180.74}}
+    };
+
+    ap.AveragePerforationsOut(jobIntervals);
+
+    auto& perfs = ap.getPerforationsSet();
+    double closeDate = -1.0;
+    for (const auto& p : perfs)
+        if (p.TotalLength() == Approx(0.0) && p.curTime() > 0.0)
+            closeDate = p.curTime();
+
+    CHECK(closeDate == Approx(150.0));
+}
