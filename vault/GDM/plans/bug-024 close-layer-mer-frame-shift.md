@@ -6,7 +6,7 @@ date: 2026-07-31
 issue: BUG-024
 github: 56
 branch: fix/bug-024/close-layer-mer-shift
-status: готов к реализации
+status: в процессе
 audit:
   date: 2026-07-31
   pass: 3
