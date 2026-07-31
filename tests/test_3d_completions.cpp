@@ -711,6 +711,70 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
     CHECK(result.Sw[prod_k1] > result.Sw[prod_k0]);
 }
 
+TEST_CASE("3D completions: close_layer on MER boundary is not shifted",
+          "[3d][completions][close-on-boundary][bug-024]")
+{
+    constexpr size_t Nz = 2;
+
+    // Use inject_water(30).for_days(100).shut_in().for_days(50).inject_water(30).for_days(150)
+    // so that t=150.0 is a MER record date (exact float). With uniform for_days(300),
+    // MER dates are multiples of 30.74 stored as float, which differ from double.
+
+    simulation_cases::MultiLayerCase sc(
+        "3d_close_on_mer_boundary", Nx, Ny, Nz, Lx, Ly, hz,
+        300.0, 10.0,
+        [&](double, double) {
+            std::vector<test_helpers::WellScheduleBuilder> builders;
+
+            auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
+                .open_layer(0, 0.0).open_layer(1, 0.0)
+                .close_layer(0, 150.0);
+            builders.emplace_back("INJ", 125.0, 250.0);
+            builders.back()
+                .set_completions(c_inj)
+                .inject_water(30.0).for_days(100.0)
+                .shut_in().for_days(50.0)
+                .inject_water(30.0).for_days(150.0);
+
+            auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
+                .open_layer(0, 0.0).open_layer(1, 0.0)
+                .close_layer(0, 150.0);
+            builders.emplace_back("PROD", 375.0, 250.0);
+            builders.back()
+                .set_completions(c_prod)
+                .produce_oil(20.0).for_days(100.0)
+                .shut_in().for_days(50.0)
+                .produce_oil(20.0).for_days(150.0);
+
+            return builders;
+        },
+        {{"INJ",  "injector", 125.0, 250.0},
+         {"PROD", "producer", 375.0, 250.0}}
+    );
+
+    auto result = run_case_3d(sc, true);
+    const auto& h = result.Sw_history;
+
+    CHECK(result.max_oil_balance_rel < 1e-3);
+    CHECK(result.max_water_balance_rel < 1e-3);
+
+    size_t inj_i = static_cast<size_t>(125.0 / (Lx / Nx));
+    size_t inj_j = static_cast<size_t>(250.0 / (Ly / Ny));
+    size_t prod_i = static_cast<size_t>(375.0 / (Lx / Nx));
+    size_t prod_j = static_cast<size_t>(250.0 / (Ly / Ny));
+
+    size_t inj_k0  = Nx * inj_j + inj_i;
+    size_t prod_k0 = Nx * prod_j + prod_i;
+
+    // close_layer at t=150.0 (MER record date, exact float)
+    // snapshot 15 = t=150, snapshot 16 = t=160
+    // After close: Sw in k=0 frozen from snapshot 16 onward
+    CHECK(h[17][inj_k0]  == Catch::Approx(h[16][inj_k0]).margin(1e-10));
+    CHECK(h[17][prod_k0] == Catch::Approx(h[16][prod_k0]).margin(1e-10));
+    CHECK(h[30][inj_k0]  == Catch::Approx(h[16][inj_k0]).margin(1e-10));
+    CHECK(h[30][prod_k0] == Catch::Approx(h[16][prod_k0]).margin(1e-10));
+}
+
 TEST_CASE("3D completions: shut-in + restart - visual",
           "[.visual][3d][completions][shutin-restart][val-020]")
 {
