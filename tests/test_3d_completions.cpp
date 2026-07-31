@@ -649,7 +649,7 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
 
             auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 180.74);
+                .close_layer(0, 150.0);
             builders.emplace_back("INJ", 125.0, 250.0);
             builders.back()
                 .set_completions(c_inj)
@@ -659,7 +659,7 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
 
             auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 180.74);
+                .close_layer(0, 150.0);
             builders.emplace_back("PROD", 375.0, 250.0);
             builders.back()
                 .set_completions(c_prod)
@@ -697,9 +697,9 @@ TEST_CASE("3D completions: shut-in + restart with closed layer",
     CHECK(h[15][prod_k0] == Catch::Approx(h[10][prod_k0]).margin(1e-10));
     CHECK(h[15][prod_k1] == Catch::Approx(h[10][prod_k1]).margin(1e-10));
 
-    // close_layer: k=0 замораживается после t≈180.74 (snapshot 19+)
-    CHECK(h[30][inj_k0]  == Catch::Approx(h[19][inj_k0]).margin(1e-10));
-    CHECK(h[30][prod_k0] == Catch::Approx(h[19][prod_k0]).margin(1e-10));
+    // close_layer: k=0 замораживается после t=150 (snapshot 15+)
+    CHECK(h[30][inj_k0]  == Catch::Approx(h[15][inj_k0]).margin(1e-10));
+    CHECK(h[30][prod_k0] == Catch::Approx(h[15][prod_k0]).margin(1e-10));
 
     // k=1 продолжает меняться после закрытия k=0
     CHECK(h[30][inj_k1]  > h[19][inj_k1]);
@@ -790,7 +790,7 @@ TEST_CASE("3D completions: shut-in + restart - visual",
 
             auto c_inj = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 180.74);
+                .close_layer(0, 150.0);
             builders.emplace_back("INJ", 125.0, 250.0);
             builders.back()
                 .set_completions(c_inj)
@@ -800,7 +800,7 @@ TEST_CASE("3D completions: shut-in + restart - visual",
 
             auto c_prod = test_helpers::WellCompletionBuilder(Nz, hz)
                 .open_layer(0, 0.0).open_layer(1, 0.0)
-                .close_layer(0, 180.74);
+                .close_layer(0, 150.0);
             builders.emplace_back("PROD", 375.0, 250.0);
             builders.back()
                 .set_completions(c_prod)
