@@ -452,13 +452,23 @@ namespace set_of_points
 		for(const auto& [perf_id, interval]: jobIntervals)
 	//	for (size_t i = 0; i < jobIntervals.size(); ++i)
 			PerforationsInTime[perf_id].MoveDate(interval.first);
-		// bring operations that close the entire cell to the next time frame
+		// bring operations that close the entire cell to the next time frame,
+		// but only if the original date was strictly inside the MER frame
 		for (size_t i = 1; i < jobIntervals.size(); ++i)
-			if (PerforationsInTime[i-1].TotalLength() == 0.0) // the well becomes closed
-				if (PerforationsInTime[i-1].curTime() < PerforationsInTime[i].curTime())
-					PerforationsInTime[i-1].MoveDate(jobIntervals[i-1].second.second);
-		if (PerforationsInTime.back().TotalLength() == 0.0)
-			PerforationsInTime.back().MoveDate(jobIntervals.back().second.second);
+		{
+			const auto& [perf_id, interval] = jobIntervals[i - 1];
+			if (PerforationsInTime[perf_id].TotalLength() == 0.0)
+				if (PerforationsInTime[perf_id].curTime() < PerforationsInTime[jobIntervals[i].first].curTime())
+					if (RawPerorationsInTime[perf_id].curTime() != interval.first)
+						PerforationsInTime[perf_id].MoveDate(interval.second);
+		}
+		if (!jobIntervals.empty())
+		{
+			const auto& [perf_id, interval] = jobIntervals.back();
+			if (PerforationsInTime[perf_id].TotalLength() == 0.0)
+				if (RawPerorationsInTime[perf_id].curTime() != interval.first)
+					PerforationsInTime[perf_id].MoveDate(interval.second);
+		}
 
 		// merge all jobs from the same MER frame
 		size_t i = 0;
