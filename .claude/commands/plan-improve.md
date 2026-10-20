@@ -4,6 +4,14 @@
 
 Результат: подробный, самодостаточный план в `vault/GDM/plans/`, готовый к автономной реализации в отдельной сессии без контекста.
 
+Уровни прогона тестов (из корня, после `cmake --build build --config Release`; тесты строго последовательно, без `-j`):
+```
+ctest --test-dir build -C Release -R "^unit\." --output-on-failure   # быстрый уровень (unit.level0–4) – на каждом шаге плана
+ctest --test-dir build -C Release --output-on-failure                # полный прогон (+ integration., benchmark.) – на шагах «Регресс: полный» и в конце реализации
+ctest --test-dir build -C Release -N                                 # число тестов без прогона – baseline для аудита
+```
+Итоговый полный прогон Release + Debug делает `/implement` (§3.2).
+
 ---
 
 ## Фаза 1: Сбор контекста
@@ -192,8 +200,8 @@ ls vault/GDM/plans/<id-lowercase>*
 
 **Проверка после этого шага:**
 - Сборка: `cmake --build build --config Release`
-- Тесты: `ctest --test-dir build -C Release`
-- Все тесты должны остаться зелёными (поведение не изменилось)
+- Тест шага: `ctest --test-dir build -C Release -R "<name>"`
+- Регресс: быстрый | полный – <почему полный, если полный>; все тесты уровня зелёные (поведение не изменилось)
 
 **Подводные камни:**
 - <ссылки на чеклист 2.5>
@@ -204,6 +212,8 @@ ls vault/GDM/plans/<id-lowercase>*
 
 **Оценка:** ~N строк, ~M минут
 ```
+
+Поле «Регресс»: `быстрый` – unit-тесты (`-R "^unit\."`), по умолчанию. `полный` – все тесты: только если ошибку шага ловят лишь integration-тесты (`integration.*`) и искать её в конце дорого – шаг меняет то, что unit-тесты не покрывают (определи grep-ом по `tests/` и по `стратегия тестирования GDM.md`), или общую тестовую инфраструктуру (общие хелперы `tests/`, `CMakeLists.txt`). Ориентир – не больше одного-двух полных на план. Шаг, меняющий только документы (vault, `.md`), проверяется `ctest --test-dir build -C Release -N` – число тестов не изменилось. Итоговый полный прогон Release + Debug `/implement` делает сам (§3.2).
 
 ### 3.3. Тестовая стратегия
 
@@ -247,11 +257,11 @@ ls vault/GDM/plans/<id-lowercase>*
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки (ссылки ниже)
-3. Создай ветку: `git checkout -b <branch>`
+3. Ветку `<branch>` и worktree `.worktrees/<id-lowercase>` создаёт `/implement` (§1.5) – вручную не создавать
 4. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`
-5. Прогони тесты (baseline): `ctest --test-dir build -C Release`
+5. Baseline: `ctest --test-dir build -C Release -N` (число тестов) и быстрый уровень `ctest --test-dir build -C Release -R "^unit\." --output-on-failure`
 6. Запомни количество тестов и время — это baseline
-7. Начни с шага 1. После каждого шага: сборка + тесты
+7. Начни с шага 1. После каждого шага: сборка, тест шага и регресс по полю «Регресс»; полный прогон Release + Debug – в конце (`/implement` §3.2)
 ```
 
 ---
@@ -317,7 +327,11 @@ status: готов к реализации
 ### 5.2. Обновить связи
 
 1. В записи техдолга: `- **План:** [[<имя плана>]]`
-2. Если есть GitHub issue: `gh issue comment <N> --repo ArturSalamatin/GDM --body "План: vault/GDM/plans/<файл>. Ветка: <branch>. Шагов: <N>."`
+2. Если есть GitHub issue – сохрани комментарий в `vault/GDM/issues/<id-lowercase>/03-comment-plan.md` (папка проекта, не scratchpad – см. «Файлы для `gh --body-file`» в `/issue`) и добавь:
+   ```powershell
+   gh issue comment <N> --repo ArturSalamatin/GDM --body-file vault/GDM/issues/<id-lowercase>/03-comment-plan.md
+   ```
+   Формат: `План: vault/GDM/plans/<файл>. Ветка: <branch>. Шагов: <N>.`
 3. В `vault/GDM/00-home/index.md` — секция Plans
 
 ### 5.3. Зафиксировать новые проблемы
