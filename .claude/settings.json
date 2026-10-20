@@ -1,5 +1,5 @@
 {
-  "model": "claude-opus-4-6",
+  "model": "claude-opus-5-5[1M]",
   "effortLevel": "max",
   "env": {
   },
@@ -56,6 +56,10 @@
             "type": "command",
             "if": "PowerShell(git add -A*)",
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-git-add-all.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-ai-attribution.sh"
           }
         ]
       }
