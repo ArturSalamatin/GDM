@@ -18,7 +18,9 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-if echo "$COMMAND" | grep -qE '(^|\s|&&|\|\||;)git\s+add\s+(-A|\.)\s*($|;|&&|\|\|)'; then
+# `-C <путь>` / `-c <ключ=значение>` перед add допускаются: worktree-процесс (/implement, /merge)
+# работает через `git -C <каталог>`. `--all` – длинная форма `-A`.
+if echo "$COMMAND" | grep -qE '(^|\s|&&|\|\||;)git(\s+-[Cc]\s+\S+)*\s+add\s+(-A|--all|\.)\s*($|;|&&|\|\|)'; then
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"git add . / git add -A запрещены. Указывай файлы по имени."}}'
   exit 0
 fi
