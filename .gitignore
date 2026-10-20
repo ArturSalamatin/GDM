@@ -85,6 +85,21 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
+# MSVC artifacts and local files listed in CLAUDE.md «Что не коммитить»
+# (*.obj, *.ilk, *.log, *.cache also come from the global gitignore – kept here for other machines)
+*.obj
+*.ilk
+*.exp
+*.log
+*.cache
+build-vscode/
+.env
+.env.local
+
+# Claude Code: private settings; scratch files per CLAUDE.md «Сохранение результатов»
+.claude/settings.local.json
+_work/
+
 # Include vault/ with all contents (override global patterns)
 !vault/
 !vault/**
