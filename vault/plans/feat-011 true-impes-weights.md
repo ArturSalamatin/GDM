@@ -255,10 +255,10 @@ git add amgcl
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки:
-   - `vault/GDM/knowledge/debugging/zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане.md`
-   - `vault/GDM/knowledge/literature/Wallis 1983 Incomplete Gaussian Elimination as Preconditioning for CPR.md`
-   - `vault/GDM/knowledge/literature/Cao 2005 Parallel Scalable Unstructured CPR-Type Linear Solver.md`
-   - `vault/GDM/knowledge/decisions/переход с блочного AMG на скалярный CPR в production.md`
+   - `vault/knowledge/debugging/zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане.md`
+   - `vault/knowledge/literature/Wallis 1983 Incomplete Gaussian Elimination as Preconditioning for CPR.md`
+   - `vault/knowledge/literature/Cao 2005 Parallel Scalable Unstructured CPR-Type Linear Solver.md`
+   - `vault/knowledge/decisions/переход с блочного AMG на скалярный CPR в production.md`
 3. Прочитай текущий `amgcl/amgcl/preconditioner/cpr.hpp` — строки 44–45 (template), 78–112 (params), 515–548 (invert), 257 + 445 + 505 (call sites)
 4. Прочитай `HydroSolver/Solver/Math/SolverConfig.h` — три CPR using-а (строки 41, 49, 63)
 5. Создай ветку GDM: `git checkout -b feat/feat-011/true-impes-weights experimental`

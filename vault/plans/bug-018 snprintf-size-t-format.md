@@ -251,4 +251,4 @@ auto result = std::format("{};{};{};{}\n...", grid_size.Nx, grid_size.Ny, ...);
 - [ ] Vault обновлён: запись в [[известные баги]] → статус ✅
 - [ ] Заметка в `knowledge/debugging/` создана
 - [ ] GitHub issue #14 прокомментирован с результатом
-- [ ] `vault/GDM/00-home/index.md` обновлён
+- [ ] `vault/00-home/index.md` обновлён

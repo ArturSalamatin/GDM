@@ -22,8 +22,8 @@ audit:
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки:
-   - `vault/GDM/knowledge/validation/val-010 неактивная граничная ячейка.md` — паттерн проверки изоляции
-   - `vault/GDM/roadmap/стратегия тестирования GDM.md` — правила тестирования
+   - `vault/knowledge/validation/val-010 неактивная граничная ячейка.md` — паттерн проверки изоляции
+   - `vault/roadmap/стратегия тестирования GDM.md` — правила тестирования
 3. Создай ветку: `git checkout -b val/val-021/barrier-two-reservoirs`
 4. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`
 5. Прогони тесты (baseline): `ctest --test-dir build -C Release --output-on-failure`
@@ -407,13 +407,13 @@ plt.show()
 **Цель:** зафиксировать результат в vault — заметка, статус, ссылки.
 
 **Файлы:**
-- `vault/GDM/knowledge/validation/val-021 barrier two independent reservoirs.md` (новый)
-- `vault/GDM/roadmap/валидационные кейсы.md` (обновить статус)
-- `vault/GDM/00-home/index.md` (добавить ссылку)
+- `vault/knowledge/validation/val-021 barrier two independent reservoirs.md` (новый)
+- `vault/roadmap/валидационные кейсы.md` (обновить статус)
+- `vault/00-home/index.md` (добавить ссылку)
 
 **Что сделать:**
 
-1. Создать `vault/GDM/knowledge/validation/val-021 barrier two independent reservoirs.md`:
+1. Создать `vault/knowledge/validation/val-021 barrier two independent reservoirs.md`:
 
 ```markdown
 ---
@@ -452,7 +452,7 @@ date: <дата прогона>
    - Добавить `- **Подробности:** [[val-021 barrier two independent reservoirs]]`
    - (Поля **План**, **Ветка**, **GitHub** уже добавлены при создании плана)
 
-3. `vault/GDM/00-home/index.md` — ссылки на план и заметку уже добавлены при создании плана. Проверить, что ссылка на knowledge-заметку также присутствует.
+3. `vault/00-home/index.md` — ссылки на план и заметку уже добавлены при создании плана. Проверить, что ссылка на knowledge-заметку также присутствует.
 
 4. Прокомментировать GitHub issue #54: результат, ссылка на заметку.
 

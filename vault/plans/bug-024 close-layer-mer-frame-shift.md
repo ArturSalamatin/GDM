@@ -489,14 +489,14 @@ CHECK(h[30][prod_k0] == Catch::Approx(h[15][prod_k0]).margin(1e-10));
 **Цель:** зафиксировать результат в vault
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги.md`
-- `vault/GDM/knowledge/debugging/BUG-024 close-layer-mer-frame-shift.md` (новый)
+- `vault/roadmap/известные баги.md`
+- `vault/knowledge/debugging/BUG-024 close-layer-mer-frame-shift.md` (новый)
 
 **Что сделать:**
 
-1. В `vault/GDM/roadmap/известные баги.md`, запись BUG-024: обновить статус на `✅ исправлено <дата>`, добавить `- **План:** [[bug-024 close-layer-mer-frame-shift]]`
+1. В `vault/roadmap/известные баги.md`, запись BUG-024: обновить статус на `✅ исправлено <дата>`, добавить `- **План:** [[bug-024 close-layer-mer-frame-shift]]`
 
-2. Создать `vault/GDM/knowledge/debugging/BUG-024 close-layer-mer-frame-shift.md`:
+2. Создать `vault/knowledge/debugging/BUG-024 close-layer-mer-frame-shift.md`:
 ```yaml
 ---
 tags: [debugging, баг-исправлен]
@@ -505,7 +505,7 @@ date: <дата>
 ```
 Содержание: причина (сдвиг закрытия к endOfCurPeriod без проверки границы), фикс (проверка RawPerorationsInTime), связи с VAL-020.
 
-3. Перенести `vault/GDM/inbox/AveragePerforationsOut сдвигает close_layer.md` в debugging (или удалить, т.к. создаётся полноценная заметка).
+3. Перенести `vault/inbox/AveragePerforationsOut сдвигает close_layer.md` в debugging (или удалить, т.к. создаётся полноценная заметка).
 
 **Зависимости:**
 - Требует: шаги 2–4 (фикс и тесты прошли)

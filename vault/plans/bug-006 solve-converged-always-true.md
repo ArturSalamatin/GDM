@@ -526,9 +526,9 @@ TEST_CASE("LinearProblem::Solve converged=true when maxIter sufficient",
 **Цель:** Обновить документацию и закрыть issue.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md`
-- `vault/GDM/knowledge/debugging/code-review-2026-06-28-числовая-устойчивость.md`
-- `vault/GDM/00-home/текущие приоритеты.md`
+- `vault/roadmap/известные баги и технический долг.md`
+- `vault/knowledge/debugging/code-review-2026-06-28-числовая-устойчивость.md`
+- `vault/00-home/текущие приоритеты.md`
 
 **Что сделать:**
 

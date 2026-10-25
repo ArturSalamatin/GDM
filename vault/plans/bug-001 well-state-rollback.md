@@ -416,8 +416,8 @@ TEST_CASE("Well injection: basic well works without crash",
 **Цель:** зафиксировать результат в vault.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md` — BUG-001 статус, BUG-004 статус
-- `vault/GDM/knowledge/debugging/Newton divergence при закачке воды через скважину.md` — обновить причину
+- `vault/roadmap/известные баги и технический долг.md` — BUG-001 статус, BUG-004 статус
+- `vault/knowledge/debugging/Newton divergence при закачке воды через скважину.md` — обновить причину
 
 **Что сделать:**
 1. BUG-001: статус → `✅ ИСПРАВЛЕНО <дата>`

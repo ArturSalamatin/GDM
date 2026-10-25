@@ -638,9 +638,9 @@ ctest --test-dir build -C Release --output-on-failure
 **Цель:** обновить статус задачи, добавить коммент в GitHub issue
 
 **Файлы:**
-- `vault/GDM/roadmap/технический долг.md` — статус DEBT-053
-- `vault/GDM/00-home/текущие приоритеты.md` — отметить выполнение
-- `vault/GDM/00-home/index.md` — ссылка на план
+- `vault/roadmap/технический долг.md` — статус DEBT-053
+- `vault/00-home/текущие приоритеты.md` — отметить выполнение
+- `vault/00-home/index.md` — ссылка на план
 
 **Что сделать:**
 1. В `технический долг.md`: DEBT-053 статус → `✅ реализовано <дата>`

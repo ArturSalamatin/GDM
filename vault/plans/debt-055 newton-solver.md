@@ -630,9 +630,9 @@ void ReservoirSimulator::AssembleMyProblem(double loc_tau, double nextTimeMoment
 **Цель:** обновить статусы и ссылки
 
 **Файлы:**
-- ИЗМЕНИТЬ: `vault/GDM/roadmap/технический долг.md` — статус DEBT-055
-- ИЗМЕНИТЬ: `vault/GDM/00-home/текущие приоритеты.md`
-- ИЗМЕНИТЬ: `vault/GDM/00-home/index.md` — ссылка на план
+- ИЗМЕНИТЬ: `vault/roadmap/технический долг.md` — статус DEBT-055
+- ИЗМЕНИТЬ: `vault/00-home/текущие приоритеты.md`
+- ИЗМЕНИТЬ: `vault/00-home/index.md` — ссылка на план
 
 **Что сделать:**
 

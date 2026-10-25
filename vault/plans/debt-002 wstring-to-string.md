@@ -75,7 +75,7 @@ using SingleMERrecord = std::map<std::wstring, float>;  // строка 26
 ## Как начать работу по этому плану
 
 1. Прочитай этот файл целиком
-2. Прочитай `vault/GDM/roadmap/технический долг.md` — запись DEBT-002
+2. Прочитай `vault/roadmap/технический долг.md` — запись DEBT-002
 3. Прочитай GitHub issue: `gh issue view 29 --repo ArturSalamatin/GDM`
 4. Создай ветку: `git checkout -b refactor/debt-002/wstring-to-string experimental`
 5. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"`; `cmake --build build --config Release`

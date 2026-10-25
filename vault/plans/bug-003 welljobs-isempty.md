@@ -304,4 +304,4 @@ TEST_CASE("WellJobs: IsEmpty returns true when zero layers",
 - [ ] Vault обновлён: запись в [[известные баги]] → статус ✅
 - [ ] Заметка в `knowledge/debugging/` создана
 - [ ] GitHub issue #12 прокомментирован с результатом
-- [ ] `vault/GDM/00-home/index.md` обновлён
+- [ ] `vault/00-home/index.md` обновлён

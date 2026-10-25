@@ -255,4 +255,4 @@ RAII вместо raw `new`/`delete`. Удаляет закомментиров�
 - [ ] Vault обновлён: запись в [[известные баги]] → статус ✅
 - [ ] Заметка в `knowledge/debugging/` создана
 - [ ] GitHub issue #13 прокомментирован с результатом
-- [ ] `vault/GDM/00-home/index.md` обновлён
+- [ ] `vault/00-home/index.md` обновлён

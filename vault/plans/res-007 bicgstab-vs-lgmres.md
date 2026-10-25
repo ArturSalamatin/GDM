@@ -411,7 +411,7 @@ add_executable(gdm_benchmark
 **Цель:** сравнить результаты, сформулировать вывод, создать таблицу.
 
 **Файлы:**
-- `vault/GDM/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md` (новый)
+- `vault/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md` (новый)
 
 **Что сделать:**
 1. Составить сводную таблицу:
@@ -445,7 +445,7 @@ add_executable(gdm_benchmark
 
 4. Создать vault-заметку с результатами:
    ```
-   vault/GDM/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md
+   vault/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md
    ```
 
 5. Если гипотеза подтверждена — предложить:
@@ -453,9 +453,9 @@ add_executable(gdm_benchmark
    - Это будет отдельный коммит (не в рамках RES, а как DEBT или прямое изменение)
 
 6. Обновить vault:
-   - `vault/GDM/roadmap/исследования и эксперименты.md`: статус RES-007
-   - `vault/GDM/00-home/текущие приоритеты.md`: RES-007 результат
-   - `vault/GDM/00-home/index.md`: ссылка на новую заметку
+   - `vault/roadmap/исследования и эксперименты.md`: статус RES-007
+   - `vault/00-home/текущие приоритеты.md`: RES-007 результат
+   - `vault/00-home/index.md`: ссылка на новую заметку
 
 **Проверка после этого шага:**
 - Vault-заметка содержит таблицу, вывод, рекомендацию
@@ -531,8 +531,8 @@ add_executable(gdm_benchmark
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки:
-   - `vault/GDM/knowledge/decisions/переход с блочного AMG на скалярный CPR в production.md`
-   - `vault/GDM/knowledge/decisions/amgcl конфигурация lgmres ilu0 aggregation.md`
+   - `vault/knowledge/decisions/переход с блочного AMG на скалярный CPR в production.md`
+   - `vault/knowledge/decisions/amgcl конфигурация lgmres ilu0 aggregation.md`
 3. Посмотри существующий benchmark: `tests/test_amgcl_benchmark.cpp` (строки 145–303 — `BenchmarkResult`, `run_benchmark`)
 4. Посмотри SolverConfig: `HydroSolver/Solver/Math/SolverConfig.h` (CPR vs CPR_BICGSTAB switching)
 5. Создай ветку: `git checkout -b research/res-007/bicgstab-vs-lgmres experimental`

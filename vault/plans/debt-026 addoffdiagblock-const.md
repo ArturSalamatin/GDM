@@ -146,7 +146,7 @@ audit:
 **Цель:** зафиксировать завершение задачи.
 
 **Что сделать:**
-1. В `vault/GDM/roadmap/технический долг.md` — пометить DEBT-026 как завершённый
+1. В `vault/roadmap/технический долг.md` — пометить DEBT-026 как завершённый
 2. Прокомментировать GitHub issue #36: `gh issue comment 36 --repo ArturSalamatin/GDM --body "Исправлено в ветке refactor/debt-026/addoffdiagblock-const"`
 
 ## Тестовая стратегия

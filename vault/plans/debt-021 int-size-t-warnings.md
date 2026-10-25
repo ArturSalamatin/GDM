@@ -28,7 +28,7 @@ Warnings из amgcl и MSVC STL — вне скоупа (внешние библ
 
 **Ссылки:**
 - Issue: [#31](https://github.com/ArturSalamatin/GDM/issues/31)
-- Vault: `vault/GDM/roadmap/известные баги и технический долг.md` → DEBT-021, DEBT-022, DEBT-028
+- Vault: `vault/roadmap/известные баги и технический долг.md` → DEBT-021, DEBT-022, DEBT-028
 
 ## Связанные задачи
 
@@ -636,7 +636,7 @@ size_t CurrentAMG_maxSolverIterationCount() const { return (int)round(AMG_maxSol
 - [ ] Поведение не изменилось (regression tests)
 - [ ] Vault обновлён: DEBT-021 → ✅ исправлено
 - [ ] GitHub issue #31 прокомментирован
-- [ ] `vault/GDM/00-home/текущие приоритеты.md` обновлён
+- [ ] `vault/00-home/текущие приоритеты.md` обновлён
 
 ## Обнаруженные проблемы
 

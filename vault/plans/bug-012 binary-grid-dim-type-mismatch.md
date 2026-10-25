@@ -15,7 +15,7 @@ status: реализован
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки:
-   - `vault/GDM/knowledge/debugging/code-review-2026-06-28-баги-и-корректность.md` (секция CR-BUG-005)
+   - `vault/knowledge/debugging/code-review-2026-06-28-баги-и-корректность.md` (секция CR-BUG-005)
 3. Создай ветку: `git checkout -b fix/bug-012/binary-grid-dim-type-mismatch`
 4. Собери проект:
    ```powershell
@@ -469,12 +469,12 @@ TEST_CASE("Binary header round-trip: various grid sizes", "[binary-io]") {
 **Цель:** зафиксировать результат в vault и на GitHub.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md` (обновить статус BUG-012)
-- `vault/GDM/knowledge/debugging/code-review-2026-06-28-баги-и-корректность.md` (добавить ссылку на issue)
+- `vault/roadmap/известные баги и технический долг.md` (обновить статус BUG-012)
+- `vault/knowledge/debugging/code-review-2026-06-28-баги-и-корректность.md` (добавить ссылку на issue)
 
 **Что сделать:**
 
-1. В записи BUG-012 (`vault/GDM/roadmap/известные баги и технический долг.md`):
+1. В записи BUG-012 (`vault/roadmap/известные баги и технический долг.md`):
    - Изменить `**Статус:** 🔴 ОТКРЫТ` → `**Статус:** ✅ ИСПРАВЛЕН`
    - Добавить `**Ветка:** fix/bug-012/binary-grid-dim-type-mismatch`
 

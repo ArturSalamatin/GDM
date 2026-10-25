@@ -568,8 +568,8 @@ Grep-команда для поиска: `grep -n "test_" CMakeLists.txt | tail 
 **Цель:** зафиксировать результат в vault и на GitHub.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md`
-- `vault/GDM/knowledge/debugging/BUG-009 active cells filter.md` (новый)
+- `vault/roadmap/известные баги и технический долг.md`
+- `vault/knowledge/debugging/BUG-009 active cells filter.md` (новый)
 
 **Что сделать:**
 
@@ -577,7 +577,7 @@ Grep-команда для поиска: `grep -n "test_" CMakeLists.txt | tail 
    - BUG-009: изменить статус на `✅ исправлено <дата>`
    - BUG-011: изменить статус на `✅ исправлено <дата>` (закрыт вместе с BUG-009), добавить `- **GitHub:** [#8](https://github.com/ArturSalamatin/GDM/issues/8)`
 
-2. Создать заметку `vault/GDM/knowledge/debugging/BUG-009 active cells filter.md`:
+2. Создать заметку `vault/knowledge/debugging/BUG-009 active cells filter.md`:
    - Причина: `ConvertTriple2Local` возвращал `size_t` вместо `long int` → `cellIdx+1 > 0` тождественно истинно
    - Решение: тип `long int`, guard `cellIdx >= 0` перед доступом к Grid
    - Связь с BUG-011
@@ -587,7 +587,7 @@ Grep-команда для поиска: `grep -n "test_" CMakeLists.txt | tail 
    gh issue comment 8 --repo ArturSalamatin/GDM --body "Исправлено: ConvertTriple2Local → long int + guard cellIdx >= 0 в AddWell. 2 новых теста. BUG-011 закрыт вместе."
    ```
 
-4. Обновить `vault/GDM/00-home/index.md` — добавить ссылку на заметку debugging
+4. Обновить `vault/00-home/index.md` — добавить ссылку на заметку debugging
 
 **Зависимости:**
 - Требует: шаг 4

@@ -106,8 +106,8 @@ audit:
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные заметки:
-   - `vault/GDM/knowledge/debugging/BUG-009 active cells filter.md`
-   - `vault/GDM/knowledge/decisions/сетка 3D структурированная с линейной индексацией.md`
+   - `vault/knowledge/debugging/BUG-009 active cells filter.md`
+   - `vault/knowledge/decisions/сетка 3D структурированная с линейной индексацией.md`
 3. Создай ветку: `git checkout -b val/val-007/checkerboard-inactive-cells`
 4. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`
 5. Прогони тесты (baseline): `ctest --test-dir build -C Release --output-on-failure`
@@ -495,8 +495,8 @@ TEST_CASE("Checkerboard inactive cells - CSV export",
 **Цель:** зафиксировать результаты валидации в vault
 
 **Файлы:**
-- `vault/GDM/roadmap/валидационные кейсы.md` — статус VAL-007
-- `vault/GDM/00-home/index.md` — ссылка на план
+- `vault/roadmap/валидационные кейсы.md` — статус VAL-007
+- `vault/00-home/index.md` — ссылка на план
 
 **Что сделать:**
 
@@ -504,7 +504,7 @@ TEST_CASE("Checkerboard inactive cells - CSV export",
    - Изменить `**Статус:** ⬜ НЕ НАЧАТО` → `**Статус:** ✅ ПРОЙДЕН <дата>`
    - (Ссылки `**План:**` и `**GitHub:**` уже добавлены — не дублировать)
 
-2. (Ссылка в `vault/GDM/00-home/index.md` уже добавлена — не дублировать)
+2. (Ссылка в `vault/00-home/index.md` уже добавлена — не дублировать)
 
 3. Прокомментировать GitHub issue #48: `Тесты пройдены. 3 Catch2 теста ([val-007]), 1 visual-тест с CSV export. Python-скрипт визуализации: scripts/plot_checkerboard.py.`
 

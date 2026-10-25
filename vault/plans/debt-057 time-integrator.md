@@ -681,9 +681,9 @@ TEST_CASE("TimeIntegrator: bitwise match multi-step",
 **Цель:** Обновить документацию, статус задачи DEBT-057 и DEBT-003, прокомментировать issues.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md` — обновить статус DEBT-057 и DEBT-003
-- `vault/GDM/00-home/текущие приоритеты.md` — добавить строку DEBT-057 ✅, DEBT-003 ✅
-- `vault/GDM/00-home/index.md` — добавить ссылку на план
+- `vault/roadmap/известные баги и технический долг.md` — обновить статус DEBT-057 и DEBT-003
+- `vault/00-home/текущие приоритеты.md` — добавить строку DEBT-057 ✅, DEBT-003 ✅
+- `vault/00-home/index.md` — добавить ссылку на план
 
 **Что сделать:**
 

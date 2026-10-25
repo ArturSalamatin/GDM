@@ -260,10 +260,10 @@ void WellFixedProduction::SetRefWellPressure()
 2. `ctest --test-dir build -C Release` — все зелёные
 3. `ctest --test-dir build -C Debug` — все зелёные
 4. Обновить vault:
-   - `vault/GDM/roadmap/известные баги и технический долг.md`: BUG-008 → ✅ ИСПРАВЛЕН
-   - `vault/GDM/00-home/текущие приоритеты.md`: обновить snapshot если нужно
-   - Создать `vault/GDM/knowledge/debugging/BUG-008 well pressure zero mobility.md`
-   - Обновить `vault/GDM/00-home/index.md`
+   - `vault/roadmap/известные баги и технический долг.md`: BUG-008 → ✅ ИСПРАВЛЕН
+   - `vault/00-home/текущие приоритеты.md`: обновить snapshot если нужно
+   - Создать `vault/knowledge/debugging/BUG-008 well pressure zero mobility.md`
+   - Обновить `vault/00-home/index.md`
 5. Прокомментировать GitHub issue #7
 
 **Проверка:** все тесты зелёные (Release + Debug)

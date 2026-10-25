@@ -29,7 +29,7 @@ audit:
 ## Как начать работу по этому плану
 
 1. Прочитай этот файл целиком
-2. Прочитай запись DEBT-009 в `vault/GDM/roadmap/известные баги и технический долг.md`
+2. Прочитай запись DEBT-009 в `vault/roadmap/известные баги и технический долг.md`
 3. Прочитай GitHub issue: `gh issue view 30 --repo ArturSalamatin/GDM`
 4. Создай ветку: `git checkout -b refactor/debt-009/remove-debug-dumps experimental`
 5. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`

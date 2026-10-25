@@ -677,9 +677,9 @@ tests/test_pi_controller_integration.cpp
 **Цель:** обновить статус VAL-039 и документировать результаты.
 
 **Файлы:**
-- `vault/GDM/roadmap/валидационные кейсы.md` — статус ⬜ → 🟢
-- `vault/GDM/00-home/текущие приоритеты.md` — отметить выполнение
-- `vault/GDM/00-home/index.md` — добавить ссылку на план
+- `vault/roadmap/валидационные кейсы.md` — статус ⬜ → 🟢
+- `vault/00-home/текущие приоритеты.md` — отметить выполнение
+- `vault/00-home/index.md` — добавить ссылку на план
 
 **Что сделать:**
 
@@ -708,7 +708,7 @@ tests/test_pi_controller_integration.cpp
 ## Как начать работу по этому плану
 
 1. Прочитай этот файл целиком
-2. Прочитай: `vault/GDM/knowledge/decisions/PI-контроллер safety=1 и target=12 для Newton-based timestep control.md`
+2. Прочитай: `vault/knowledge/decisions/PI-контроллер safety=1 и target=12 для Newton-based timestep control.md`
 3. Создай ветку: `git checkout -b val/val-039/pi-controller-breakthrough`
 4. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`
 5. Прогони baseline: `ctest --test-dir build -C Release --output-on-failure`

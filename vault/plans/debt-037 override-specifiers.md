@@ -674,7 +674,7 @@ target_compile_options(gdm_core PRIVATE /w34263)
 
 **Цель:** зарегистрировать обнаруженную проблему с hiding как отдельную задачу.
 
-**Файлы:** `vault/GDM/roadmap/технический долг.md`
+**Файлы:** `vault/roadmap/технический долг.md`
 
 **Контекст:**
 В ходе анализа DEBT-037 обнаружено, что `Config_JSON.h` содержит 14 методов, которые скрывают (hiding) не-виртуальные методы из базовых классов `SchemeParamaters`, `AnomalyDetectionProperties` и `Config`. Текущая ситуация:
@@ -684,7 +684,7 @@ target_compile_options(gdm_core PRIVATE /w34263)
 
 **Что сделать:**
 
-Добавить запись в `vault/GDM/roadmap/технический долг.md`:
+Добавить запись в `vault/roadmap/технический долг.md`:
 
 ```markdown
 ### DEBT-059: Config_JSON hiding — 14 методов скрывают не-виртуальные базовые
@@ -706,8 +706,8 @@ target_compile_options(gdm_core PRIVATE /w34263)
 **Цель:** обновить статус DEBT-037 и связанные заметки.
 
 **Файлы:**
-- `vault/GDM/roadmap/технический долг.md`
-- `vault/GDM/00-home/index.md`
+- `vault/roadmap/технический долг.md`
+- `vault/00-home/index.md`
 
 **Что сделать:**
 

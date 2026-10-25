@@ -509,17 +509,17 @@ void ReservoirSimulator::AssembleMyProblem(double loc_tau, double nextTimeMoment
 **Цель:** финализировать задачу, обновить документацию
 
 **Файлы:**
-- ИЗМЕНИТЬ: `vault/GDM/roadmap/технический долг.md` — статус DEBT-054
-- ИЗМЕНИТЬ: `vault/GDM/00-home/index.md` — ссылка на план
-- ИЗМЕНИТЬ: `vault/GDM/00-home/текущие приоритеты.md` — обновить статус
+- ИЗМЕНИТЬ: `vault/roadmap/технический долг.md` — статус DEBT-054
+- ИЗМЕНИТЬ: `vault/00-home/index.md` — ссылка на план
+- ИЗМЕНИТЬ: `vault/00-home/текущие приоритеты.md` — обновить статус
 
 **Что сделать:**
 
-1. В `vault/GDM/roadmap/технический долг.md`:
+1. В `vault/roadmap/технический долг.md`:
    - DEBT-054: статус `🔴 ОТКРЫТ` → `✅ реализовано YYYY-MM-DD`
    - DEBT-003: обновить «DEBT-054 — ✅»
 
-2. В `vault/GDM/00-home/index.md`:
+2. В `vault/00-home/index.md`:
    - Добавить `[[debt-054 jacobian-assembler]]` в секцию Plans
 
 3. Прокомментировать GitHub issue #23:

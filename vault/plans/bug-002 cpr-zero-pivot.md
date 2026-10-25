@@ -295,8 +295,8 @@ if (math::is_zero(d)) d = static_cast<scalar_type>(1);
 **Цель:** зафиксировать результат фикса в vault.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md` — BUG-002 статус, DEBT-007 обновить
-- `vault/GDM/knowledge/debugging/zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане.md` — добавить решение
+- `vault/roadmap/известные баги и технический долг.md` — BUG-002 статус, DEBT-007 обновить
+- `vault/knowledge/debugging/zero pivot в ILU0 при скалярном CPR на двухфазном Якобиане.md` — добавить решение
 
 **Что сделать:**
 1. BUG-002: статус → `✅ ИСПРАВЛЕНО <дата>` (все три проявления покрыты)

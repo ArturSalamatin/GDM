@@ -402,10 +402,10 @@ TEST_CASE("TwoPhaseFlowCell: zero permeability gives finite properties",
 2. `ctest --test-dir build -C Release` — все зелёные
 3. `ctest --test-dir build -C Debug` — все зелёные
 4. Обновить vault:
-   - `vault/GDM/roadmap/известные баги и технический долг.md`: BUG-007 → ✅ ИСПРАВЛЕН
-   - `vault/GDM/00-home/текущие приоритеты.md`: обновить snapshot
-   - Создать `vault/GDM/knowledge/debugging/BUG-007 harmonic mean zero division.md`
-   - Обновить `vault/GDM/00-home/index.md`
+   - `vault/roadmap/известные баги и технический долг.md`: BUG-007 → ✅ ИСПРАВЛЕН
+   - `vault/00-home/текущие приоритеты.md`: обновить snapshot
+   - Создать `vault/knowledge/debugging/BUG-007 harmonic mean zero division.md`
+   - Обновить `vault/00-home/index.md`
 5. Прокомментировать GitHub issue #6
 6. Закрыть issue #6
 

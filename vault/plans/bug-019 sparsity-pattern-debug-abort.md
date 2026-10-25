@@ -400,8 +400,8 @@ SparsityPattern конструктор                                        [S
 **Цель:** зафиксировать результат в системе знаний.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md`
-- `vault/GDM/knowledge/debugging/SparsityPattern abort в Debug при пустых массивах.md`
+- `vault/roadmap/известные баги и технический долг.md`
+- `vault/knowledge/debugging/SparsityPattern abort в Debug при пустых массивах.md`
 
 **Что сделать:**
 

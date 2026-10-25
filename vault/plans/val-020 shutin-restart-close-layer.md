@@ -446,12 +446,12 @@ if __name__ == "__main__":
 **Цель:** обновить vault и issue с результатами валидации
 
 **Файлы:**
-- `vault/GDM/roadmap/валидационные кейсы.md` — обновить статус VAL-020
-- `vault/GDM/knowledge/validation/val-020 shutin restart close layer.md` — новая заметка с результатами
+- `vault/roadmap/валидационные кейсы.md` — обновить статус VAL-020
+- `vault/knowledge/validation/val-020 shutin restart close layer.md` — новая заметка с результатами
 
 **Что сделать:**
 
-1. Создать заметку `vault/GDM/knowledge/validation/val-020 shutin restart close layer.md`:
+1. Создать заметку `vault/knowledge/validation/val-020 shutin restart close layer.md`:
 
 ```markdown
 ---
@@ -496,7 +496,7 @@ Nz=2, INJ+PROD с перфорациями в обоих слоях. Три фа
 
 4. Прокомментировать issue #53: `gh issue comment 53 --repo ArturSalamatin/GDM --body "Результат: ..."` (с метриками и ссылкой на скриншоты)
 
-5. Обновить `vault/GDM/00-home/index.md` — добавить ссылку на новую заметку
+5. Обновить `vault/00-home/index.md` — добавить ссылку на новую заметку
 
 **Проверка после этого шага:**
 - Заметка создана

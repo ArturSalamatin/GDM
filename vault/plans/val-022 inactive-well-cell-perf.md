@@ -379,13 +379,13 @@ Catch2 assert проверяет числа, но не показывает пр
 **Цель:** зафиксировать результат валидации
 
 **Файлы:**
-- `vault/GDM/roadmap/валидационные кейсы.md` — обновить статус VAL-022
-- `vault/GDM/knowledge/validation/val-022 inactive well cell perf.md` — создать заметку с результатами
+- `vault/roadmap/валидационные кейсы.md` — обновить статус VAL-022
+- `vault/knowledge/validation/val-022 inactive well cell perf.md` — создать заметку с результатами
 - GitHub issue #55 — прокомментировать результатом
 
 **Что сделать:**
 
-1. Создать заметку `vault/GDM/knowledge/validation/val-022 inactive well cell perf.md`:
+1. Создать заметку `vault/knowledge/validation/val-022 inactive well cell perf.md`:
    ```markdown
    ---
    tags:
@@ -427,7 +427,7 @@ Catch2 assert проверяет числа, но не показывает пр
    gh issue comment 55 --repo ArturSalamatin/GDM --body "VAL-022 пройден. Тесты: Inactive top layer - perf in all layers filtered ([integration], [.visual]). Метрики: неактивный слой P/Sw не изменился (epsilon 1e-12), рабочие слои k=1/k=2 дают ненулевой Sw вблизи INJ, баланс масс < 1e-3. Визуализация: results/val-022/"
    ```
 
-4. Обновить `vault/GDM/00-home/index.md` — добавить ссылку на новую заметку в секцию validation
+4. Обновить `vault/00-home/index.md` — добавить ссылку на новую заметку в секцию validation
 
 **Проверка после этого шага:**
 - Статус обновлён

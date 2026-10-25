@@ -317,21 +317,21 @@ TEST_CASE("SparsityPattern: 3-arg ctor single cell eqNmbr 1",
 **Цель:** Обновить vault-записи и прокомментировать GitHub issue.
 
 **Файлы:**
-- `vault/GDM/roadmap/известные баги и технический долг.md`
-- `vault/GDM/knowledge/debugging/BUG-013 sparsity pattern args order.md` (новый)
-- `vault/GDM/00-home/index.md`
+- `vault/roadmap/известные баги и технический долг.md`
+- `vault/knowledge/debugging/BUG-013 sparsity pattern args order.md` (новый)
+- `vault/00-home/index.md`
 
 **Что сделать:**
 
-1. Обновить статус BUG-013 в `vault/GDM/roadmap/известные баги и технический долг.md`:
+1. Обновить статус BUG-013 в `vault/roadmap/известные баги и технический долг.md`:
    - Статус: ✅ исправлено YYYY-MM-DD
    - (Поля **План:** и **Ветка:** уже добавлены — не дублировать)
 
-2. Создать заметку `vault/GDM/knowledge/debugging/BUG-013 sparsity pattern args order.md`:
+2. Создать заметку `vault/knowledge/debugging/BUG-013 sparsity pattern args order.md`:
    - Симптом, причина, решение
    - Ссылки на связанные заметки
 
-3. Обновить `vault/GDM/00-home/index.md` — добавить заметку в секцию Debugging
+3. Обновить `vault/00-home/index.md` — добавить заметку в секцию Debugging
 
 4. Прокомментировать GitHub issue #9:
    ```powershell
