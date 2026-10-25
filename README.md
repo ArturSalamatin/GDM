@@ -75,7 +75,7 @@ cmake -B build -DGDM_SOLVER=CPR
 cmake --build build --config Release
 ```
 
-Configuration is in `HydroSolver/Solver/Math/SolverConfig.h`. See `vault/GDM/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md` for the comparison study.
+Configuration is in `HydroSolver/Solver/Math/SolverConfig.h`. See `vault/knowledge/numerics/RES-007 результаты bicgstab vs lgmres.md` for the comparison study.
 
 ## Slash Commands (Claude Code)
 
@@ -100,7 +100,7 @@ Build a detailed implementation plan for a bug fix.
 - Bug-specific stages: reproduce → minimal fix → tests → architectural fix → verification → cleanup
 - Each step: goal, files, context, old→new code, checks, pitfalls, dependencies, estimate
 - Test strategy: reproducer + boundary + invariant + regression + visual
-- Output: `vault/GDM/plans/<id> <slug>.md` — self-contained, ready for autonomous execution
+- Output: `vault/plans/<id> <slug>.md` — self-contained, ready for autonomous execution
 
 ### `/plan-improve <DEBT-NNN>`
 
@@ -110,7 +110,7 @@ Build a detailed implementation plan for refactoring, migration, or cleanup.
 - Key invariant: after every step, project compiles and all tests green
 - Baseline/target state comparison, 2+ solution variants
 - 10-point pitfall checklist focused on call sites, API compatibility, dead code
-- Output: `vault/GDM/plans/<id> <slug>.md`
+- Output: `vault/plans/<id> <slug>.md`
 
 ### `/plan-feature <FEAT-NNN>`
 
@@ -120,7 +120,7 @@ Build a detailed implementation plan for a new feature.
 - Backward compatibility: at disabled/zero parameters, behavior matches current model
 - Mathematical/physical grounding: equations, references, dimensional analysis
 - Test strategy: unit + integration + analytical comparison + visual
-- Output: `vault/GDM/plans/<id> <slug>.md`
+- Output: `vault/plans/<id> <slug>.md`
 
 ### `/plan-validate <VAL-NNN>`
 
@@ -130,7 +130,7 @@ Build a detailed plan for a validation case.
 - Reference solution fully described: formulas, Python code, or tables
 - Quantitative metrics with tolerance (L2, relative error, convergence order)
 - Visual verification mandatory: overlay plots, difference maps, convergence curves
-- Output: `vault/GDM/plans/<id> <slug>.md`
+- Output: `vault/plans/<id> <slug>.md`
 
 ### `/plan-research <RES-NNN>`
 
@@ -140,7 +140,7 @@ Build a detailed plan for a numerical experiment.
 - Experiment design: baseline, varied parameters, number of runs
 - Result is a **conclusion** (confirm/reject), not necessarily code in main
 - If confirmed → create FEAT or VAL; if rejected → close with explanation
-- Output: `vault/GDM/plans/<id> <slug>.md`
+- Output: `vault/plans/<id> <slug>.md`
 
 ### `/implement <ID | path>`
 
@@ -150,7 +150,7 @@ Execute a plan from vault step by step.
 - Each step: code → build (Release, zero warnings) → tests → commit
 - Warnings treated as errors — fixed at root cause, never suppressed
 - Final verification: Release + Debug build, test comparison with baseline
-- New problems discovered mid-work → `vault/GDM/inbox/`, not fixed in-scope
+- New problems discovered mid-work → `vault/inbox/`, not fixed in-scope
 - Rollback protocol if blocked: `git stash`, document blocker, notify user
 - Issues not closed — commented "ready to merge"; user merges manually
 
@@ -158,14 +158,14 @@ Execute a plan from vault step by step.
 
 ```
 /issue BUG-001  →  GitHub issue + vault entry + branch name
-/plan-fix BUG-001  →  detailed plan in vault/GDM/plans/
+/plan-fix BUG-001  →  detailed plan in vault/plans/
 /implement BUG-001  →  code + tests + vault updates + commits
 user: merge → experimental → dev → main
 ```
 
 ## Knowledge Vault
 
-The `vault/GDM/` directory is an Obsidian vault containing project knowledge: architecture decisions, debugging logs, validation results, session logs, and roadmap. See `vault/GDM/00-home/index.md` for navigation.
+The `vault/` directory is an Obsidian vault containing project knowledge: architecture decisions, debugging logs, validation results, session logs, and roadmap. See `vault/00-home/index.md` for navigation.
 
 ## License
 

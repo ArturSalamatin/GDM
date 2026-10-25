@@ -88,10 +88,10 @@
       "build-vscode/",
       "out/",
       ".vs/",
-      "vault/GDM/.obsidian/",
+      "vault/.obsidian/",
       "example_files/",
       "HydroSolver/AMGSolver/amgcl/",
-      "vault/GDM/sessions/"
+      "vault/sessions/"
     ]
   }
 }

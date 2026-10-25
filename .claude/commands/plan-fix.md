@@ -2,7 +2,7 @@
 
 Аргумент: `$ARGUMENTS` – идентификатор бага (например `BUG-001`, `BUG-002`) или номер GitHub issue (например `#1`).
 
-Результат: подробный, самодостаточный план в `vault/GDM/plans/`, готовый к автономной реализации в отдельной сессии без контекста.
+Результат: подробный, самодостаточный план в `vault/plans/`, готовый к автономной реализации в отдельной сессии без контекста.
 
 Уровни прогона тестов (из корня, после `cmake --build build --config Release`; тесты строго последовательно, без `-j`):
 ```
@@ -20,7 +20,7 @@ ctest --test-dir build -C Release -N                                 # числ�
 
 Проверь, есть ли уже план для этого ID:
 ```
-ls vault/GDM/plans/<id-lowercase>*
+ls vault/plans/<id-lowercase>*
 ```
 Если план уже существует – сообщи пользователю путь и спроси: обновить существующий или создать новый.
 
@@ -30,7 +30,7 @@ ls vault/GDM/plans/<id-lowercase>*
 1. `gh issue view <N> --repo ArturSalamatin/GDM` → из title извлеки ID (формат: `BUG-NNN: описание`)
 2. Далее работай с извлечённым ID
 
-1. Найди запись в `vault/GDM/roadmap/известные баги и технический долг.md` по ID
+1. Найди запись в `vault/roadmap/известные баги и технический долг.md` по ID
 2. Если есть поле **GitHub:** – прочитай issue через `gh issue view <N> --repo ArturSalamatin/GDM` (там детальный анализ, варианты решения, комментарии)
 3. Прочитай подробную заметку из `knowledge/debugging/` (поле **Подробности**)
 4. Если задачи нет в vault – предложи сначала `/issue $ARGUMENTS`
@@ -48,8 +48,8 @@ ls vault/GDM/plans/<id-lowercase>*
 1. Из подробной заметки найди все wiki-ссылки `[[...]]`
 2. Прочитай каждую связанную заметку (physics, numerics, decisions)
 3. Проверь, есть ли связанные BUG/DEBT/FEAT/VAL/RES – прочитай их тоже (один баг часто связан с другим)
-4. Прочитай `vault/GDM/roadmap/стратегия тестирования GDM.md` – паттерны тестов
-5. Прочитай `vault/GDM/roadmap/инвентаризация кодовой базы*.md` – какие модули затронуты
+4. Прочитай `vault/roadmap/стратегия тестирования GDM.md` – паттерны тестов
+5. Прочитай `vault/roadmap/инвентаризация кодовой базы*.md` – какие модули затронуты
 
 ### 1.5. Исследовать код
 
@@ -291,7 +291,7 @@ ls vault/GDM/plans/<id-lowercase>*
 
 ### 5.1. Создать файл плана
 
-Путь: `vault/GDM/plans/<id-lowercase> <slug>.md`
+Путь: `vault/plans/<id-lowercase> <slug>.md`
 
 Frontmatter:
 ```yaml
@@ -310,12 +310,12 @@ status: готов к реализации
 ### 5.2. Обновить связи
 
 1. В записи бага (`известные баги и технический долг.md`): `- **План:** [[<имя плана>]]`
-2. Если есть GitHub issue – сохрани комментарий в `vault/GDM/issues/<id-lowercase>/03-comment-plan.md` (папка проекта, не scratchpad – см. «Файлы для `gh --body-file`» в `/issue`) и добавь:
+2. Если есть GitHub issue – сохрани комментарий в `vault/issues/<id-lowercase>/03-comment-plan.md` (папка проекта, не scratchpad – см. «Файлы для `gh --body-file`» в `/issue`) и добавь:
    ```powershell
-   gh issue comment <N> --repo ArturSalamatin/GDM --body-file vault/GDM/issues/<id-lowercase>/03-comment-plan.md
+   gh issue comment <N> --repo ArturSalamatin/GDM --body-file vault/issues/<id-lowercase>/03-comment-plan.md
    ```
-   Формат: `План: vault/GDM/plans/<файл>. Ветка: <branch>. Шагов: <N>.`
-3. В `vault/GDM/00-home/index.md` – добавь план в секцию Plans
+   Формат: `План: vault/plans/<файл>. Ветка: <branch>. Шагов: <N>.`
+3. В `vault/00-home/index.md` – добавь план в секцию Plans
 
 ### 5.3. Зафиксировать новые проблемы
 

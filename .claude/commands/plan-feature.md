@@ -2,7 +2,7 @@
 
 Аргумент: `$ARGUMENTS` – идентификатор фичи (например `FEAT-001`, `FEAT-004`) или номер GitHub issue.
 
-Результат: подробный, самодостаточный план в `vault/GDM/plans/`, готовый к автономной реализации в отдельной сессии без контекста.
+Результат: подробный, самодостаточный план в `vault/plans/`, готовый к автономной реализации в отдельной сессии без контекста.
 
 Уровни прогона тестов (из корня, после `cmake --build build --config Release`; тесты строго последовательно, без `-j`):
 ```
@@ -19,7 +19,7 @@ ctest --test-dir build -C Release -N                                 # числ�
 ### 1.1. Проверить существующий план
 
 ```
-ls vault/GDM/plans/<id-lowercase>*
+ls vault/plans/<id-lowercase>*
 ```
 Если план уже существует – сообщи пользователю и спроси: обновить или создать новый.
 
@@ -29,7 +29,7 @@ ls vault/GDM/plans/<id-lowercase>*
 1. `gh issue view <N> --repo ArturSalamatin/GDM` → из title извлеки ID (формат: `FEAT-NNN: описание`)
 2. Далее работай с извлечённым ID
 
-1. Найди запись в `vault/GDM/roadmap/планируемые фичи.md` по ID
+1. Найди запись в `vault/roadmap/планируемые фичи.md` по ID
 2. Если есть поле **GitHub:** – прочитай issue через `gh issue view <N> --repo ArturSalamatin/GDM`
 3. Прочитай связанные заметки из `knowledge/` (поле **Подробности**)
 4. Найди фазу в [[roadmap долгосрочный план развития GDM]] – прочитай критерии завершения фазы
@@ -57,10 +57,10 @@ ls vault/GDM/plans/<id-lowercase>*
 
 1. Wiki-ссылки из записи – прочитать каждую
 2. Зависимости: фича может зависеть от BUG/DEBT/FEAT/VAL/RES
-3. `vault/GDM/roadmap/стратегия тестирования GDM.md` – паттерны тестов
-4. `vault/GDM/roadmap/инвентаризация кодовой базы*.md` – какие модули затронуты
-5. `vault/GDM/atlas/математическая модель двухфазной фильтрации.md` – текущая мат. модель
-6. `vault/GDM/knowledge/physics/` – связанные физические заметки
+3. `vault/roadmap/стратегия тестирования GDM.md` – паттерны тестов
+4. `vault/roadmap/инвентаризация кодовой базы*.md` – какие модули затронуты
+5. `vault/atlas/математическая модель двухфазной фильтрации.md` – текущая мат. модель
+6. `vault/knowledge/physics/` – связанные физические заметки
 
 ### 1.6. Исследовать код
 
@@ -283,7 +283,7 @@ ls vault/GDM/plans/<id-lowercase>*
 
 1. Прочитай этот файл целиком
 2. Прочитай связанные vault-заметки (ссылки ниже)
-3. Прочитай математическую модель: vault/GDM/atlas/математическая модель двухфазной фильтрации.md
+3. Прочитай математическую модель: vault/atlas/математическая модель двухфазной фильтрации.md
 4. Ветку `<branch>` и worktree `.worktrees/<id-lowercase>` создаёт `/implement` (§1.5) – вручную не создавать
 5. Собери: `cmake -B build -S . -G "Visual Studio 17 2022"; if ($?) { cmake --build build --config Release }`
 6. Baseline: `ctest --test-dir build -C Release -N` (число тестов) и быстрый уровень `ctest --test-dir build -C Release -R "^unit\." --output-on-failure`
@@ -338,7 +338,7 @@ ls vault/GDM/plans/<id-lowercase>*
 
 ### 5.1. Файл плана
 
-Путь: `vault/GDM/plans/<id-lowercase> <slug>.md`
+Путь: `vault/plans/<id-lowercase> <slug>.md`
 
 Frontmatter:
 ```yaml
@@ -359,12 +359,12 @@ status: готов к реализации
 ### 5.2. Обновить связи
 
 1. В записи фичи (`планируемые фичи.md`): `- **План:** [[<имя плана>]]`
-2. Если есть GitHub issue – сохрани комментарий в `vault/GDM/issues/<id-lowercase>/03-comment-plan.md` (папка проекта, не scratchpad – см. «Файлы для `gh --body-file`» в `/issue`) и добавь:
+2. Если есть GitHub issue – сохрани комментарий в `vault/issues/<id-lowercase>/03-comment-plan.md` (папка проекта, не scratchpad – см. «Файлы для `gh --body-file`» в `/issue`) и добавь:
    ```powershell
-   gh issue comment <N> --repo ArturSalamatin/GDM --body-file vault/GDM/issues/<id-lowercase>/03-comment-plan.md
+   gh issue comment <N> --repo ArturSalamatin/GDM --body-file vault/issues/<id-lowercase>/03-comment-plan.md
    ```
-   Формат: `План: vault/GDM/plans/<файл>. Ветка: <branch>. Шагов: <N>.`
-3. В `vault/GDM/00-home/index.md` – секция Plans
+   Формат: `План: vault/plans/<файл>. Ветка: <branch>. Шагов: <N>.`
+3. В `vault/00-home/index.md` – секция Plans
 
 ### 5.3. Зафиксировать новые проблемы
 

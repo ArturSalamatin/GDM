@@ -103,5 +103,5 @@ _work/
 # Include vault/ with all contents (override global patterns)
 !vault/
 !vault/**
-vault/GDM/.obsidian/
+vault/.obsidian/
 

@@ -25,10 +25,10 @@ gh issue list --repo ArturSalamatin/GDM --search "<ID>" --state all
 ### 2. Найти запись в vault
 
 1. Открой реестр по префиксу ID:
-   - `BUG-` или `DEBT-` → `vault/GDM/roadmap/известные баги и технический долг.md`
-   - `FEAT-` → `vault/GDM/roadmap/планируемые фичи.md`
-   - `VAL-` → `vault/GDM/roadmap/валидационные кейсы.md`
-   - `RES-` → `vault/GDM/roadmap/исследования и эксперименты.md`
+   - `BUG-` или `DEBT-` → `vault/roadmap/известные баги и технический долг.md`
+   - `FEAT-` → `vault/roadmap/планируемые фичи.md`
+   - `VAL-` → `vault/roadmap/валидационные кейсы.md`
+   - `RES-` → `vault/roadmap/исследования и эксперименты.md`
 2. Найди секцию с указанным ID (`$ARGUMENTS`)
 3. Если запись не найдена – сообщи пользователю и выведи все доступные ID (grep по `### BUG-`, `### DEBT-`, `### FEAT-`, `### VAL-`, `### RES-`)
 
@@ -142,7 +142,7 @@ gh issue list --repo ArturSalamatin/GDM --search "<ID>" --state all
 
 **В dry-run режиме:** вывести preview (title, абзац «О чём задача» по правилам шага 13, labels, имя ветки, первые 20 строк body) и остановиться. Не создавать issue, не менять vault.
 
-Сформируй тело issue в формате markdown и сохрани в `vault/GDM/issues/<id-lowercase>/01-issue-body.md` (создай каталог, если его нет). Файл в проекте, не во временном каталоге – см. «Файлы для `gh --body-file`» в примечаниях.
+Сформируй тело issue в формате markdown и сохрани в `vault/issues/<id-lowercase>/01-issue-body.md` (создай каталог, если его нет). Файл в проекте, не во временном каталоге – см. «Файлы для `gh --body-file`» в примечаниях.
 
 Структура issue зависит от типа задачи:
 
@@ -313,7 +313,7 @@ gh issue list --repo ArturSalamatin/GDM --search "<ID>" --state all
 ```
 gh issue create --repo ArturSalamatin/GDM \
   --title "<ID>: <краткое описание>" \
-  --body-file vault/GDM/issues/<id-lowercase>/01-issue-body.md \
+  --body-file vault/issues/<id-lowercase>/01-issue-body.md \
   --label "<labels>" \
   --assignee "@me"
 ```
@@ -379,9 +379,9 @@ gh issue create --repo ArturSalamatin/GDM \
 - **Блокирующие зависимости:** <список ID или "нет">
 ```
 
-Сохрани текст комментария в `vault/GDM/issues/<id-lowercase>/02-comment-open.md` и добавь через:
+Сохрани текст комментария в `vault/issues/<id-lowercase>/02-comment-open.md` и добавь через:
 ```
-gh issue comment <номер> --repo ArturSalamatin/GDM --body-file vault/GDM/issues/<id-lowercase>/02-comment-open.md
+gh issue comment <номер> --repo ArturSalamatin/GDM --body-file vault/issues/<id-lowercase>/02-comment-open.md
 ```
 
 ### 12. Обратная связь в vault
@@ -484,7 +484,7 @@ gh issue comment <номер> --repo ArturSalamatin/GDM --body-file vault/GDM/is
    - FEAT → `knowledge/physics/` или `knowledge/decisions/`
    - VAL → `knowledge/validation/`
    - RES → `knowledge/numerics/` или `knowledge/physics/`
-3. Обнови `vault/GDM/00-home/index.md` если создана новая заметка
+3. Обнови `vault/00-home/index.md` если создана новая заметка
 
 ### 5. Создать GitHub issue
 
@@ -498,7 +498,7 @@ gh issue comment <номер> --repo ArturSalamatin/GDM --body-file vault/GDM/is
 - Не используй спецсимволы PowerShell в теле issue – пиши в файл, передавай через `--body-file`
 - Язык issue и vault-записей: русский
 - Не создавай коммитов – только issue, комментарий и vault-записи. Пользователь коммитит сам
-- **Файлы для `gh --body-file`.** `gh` принимает многострочный markdown только файлом: в PowerShell спецсимволы и кириллица в аргументе ломаются. Эти файлы – в папке проекта, `vault/GDM/issues/<id-lowercase>/`, с нумерацией по порядку публикации:
+- **Файлы для `gh --body-file`.** `gh` принимает многострочный markdown только файлом: в PowerShell спецсимволы и кириллица в аргументе ломаются. Эти файлы – в папке проекта, `vault/issues/<id-lowercase>/`, с нумерацией по порядку публикации:
 
   | Файл | Назначение | Команда |
   |---|---|---|
